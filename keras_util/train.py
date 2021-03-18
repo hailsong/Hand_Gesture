@@ -21,6 +21,7 @@ test = df[test_num:]
 
 train_x = train[['FA1', 'FA2', 'FA3', 'FA4', 'FA5', 'FD1', 'FD2', 'FD3', 'FD4', 'FD5', 'HA1', 'HA2', 'HA3', 'HA4', 'HA5']].to_numpy()
 train_y = train['real'].to_numpy()
+
 # print(train_x)
 # print(train_y)
 # print(train_x.shape)

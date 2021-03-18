@@ -8,7 +8,7 @@ parser.add_argument('--webcam_mode', required=False, default=False, help='환경
 args = parser.parse_args()
 
 print(args.target)
-print(args.webcam_mode)
+#print(args.webcam_mode)
 
 
 import cv2
@@ -53,26 +53,22 @@ def keyboard_check(finger_state, name, LR_idx):
     global experiment_df
     # local_list = []
     #print(finger_state[0].to_list())
-    try:
-        # for key in key_list:
-        #     if keyboard.is_pressed(key):
-        _list = [[name+1, True, LR_idx[0], True]]
 
-        for mark_p in finger_state[:-1]:
-            _xyz = mark_p.to_list()
-            for xyz in _xyz:
-                _list[0].append(xyz)
-        #print(_list)
-        # for data in finger_state:
-        #     for i in range(5):
-        #         _list[0].append(data[i])
-        local_df = pd.DataFrame.from_records(_list, columns = column_name)
-        #print(local_df)
-        experiment_df = experiment_df.append(local_df, ignore_index=True)
-        #print(experiment_df)
+    # for key in key_list:
+    #     if keyboard.is_pressed(key):
+    _list = [[int(name), 'build', LR_idx[0], True]]
 
-    except:
-        pass
+    for mark_p in finger_state[:-1]:
+        _xyz = mark_p.to_list()
+        for xyz in _xyz:
+            _list[0].append(xyz)
+    #print(_list)
+    # for data in finger_state:
+    #     for i in range(5):
+    #         _list[0].append(data[i])
+    local_df = pd.DataFrame.from_records(_list, columns = column_name)
+    #print(local_df)
+    experiment_df = experiment_df.append(local_df, ignore_index=True)
 
 '''
 mark_pixel : 각각의 랜드마크
@@ -282,8 +278,17 @@ if __name__ == "__main__":
             #print("Ignoring empty camera frame.")
             # If loading a video, use 'break' instead of 'continue'.
             experiment_df = experiment_df.drop(experiment_df.index[0])
-            experiment_df.to_csv('video_output/' + name + '.csv', encoding='utf-8-sig')
-            print('Saved dataframe to : ', 'experiment1_' + name + '.csv')
+
+            # experiment_df.to_csv('video_output/' + name + '.csv', encoding='utf-8-sig')
+
+            # exit()
+
+            df_sum = pd.read_csv('video_output/output.csv')
+            #print(df_sum)
+            #print(experiment_df)
+            df_sum = pd.concat([df_sum, experiment_df])
+            df_sum.to_csv('video_output/output.csv')
+            print('Saved dataframe to : ', 'video_output/output.csv')
             exit()
 
         # Flip the image horizontally for a later selfie-view display, and convert
@@ -337,10 +342,9 @@ if __name__ == "__main__":
                 #정지 제스쳐 확인
                 static_gesture_name = static_gesture_detect(finger_open_, mark_p[-1])
 
-                try:
-                    keyboard_check(HM.p_list, name, LR_idx)
-                except:
-                    pass
+
+                keyboard_check(HM.p_list, name, LR_idx)
+
                 mark_p0 = mark_p[0].to_pixel()
                 mark_p5 = mark_p[5].to_pixel()
 
