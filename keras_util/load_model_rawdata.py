@@ -23,7 +23,7 @@ test_num = int(size - size * test_ratio)
 train = df[:test_num]
 test = df[test_num:]
 
-col_name = [str(i) for i in range(1, 63)]
+col_name = [str(i) for i in range(0, 63)]
 
 train_x = train[col_name].to_numpy()
 train_y = train['FILENAME'].to_numpy()
@@ -32,5 +32,6 @@ test_x = test[col_name].to_numpy()
 test_y = test['FILENAME'].to_numpy()
 
 prediction = model.predict(test_x[[5]])
+print(len(test_x[[5]][0]))
 print(prediction[0])
 print(test_y[5])

@@ -20,7 +20,7 @@ test_num = int(size - size * test_ratio)
 train = df[:test_num]
 test = df[test_num:]
 
-col_name = [str(i) for i in range(0, 63)]
+col_name = [str(i) for i in range(0, 18)]
 print(col_name)
 
 print(train['FILENAME'].to_numpy())
@@ -41,7 +41,7 @@ test_y = test_y.astype(np.int64)
 print(len(train_y), len(test_y)) #1에서 14사이 정수 label
 
 model = keras.Sequential([
-    keras.layers.Dense(63, activation = 'relu'),
+    keras.layers.Dense(18, activation = 'relu'),
     keras.layers.Dense(100, activation = 'relu'),
     keras.layers.Dense(40, activation='relu'),
     #keras.layers.Dense(30, activation = 'relu'),

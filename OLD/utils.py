@@ -281,6 +281,6 @@ def get_distance(p1, p2):
 if __name__ == '__main__':
     print("This is util set program, it works well... maybe... XD")
 
-    print('Running main.py...')
+    print('Running main_63input.py...')
     from os import system
-    system('python main.py')
+    system('python main_63input.py')

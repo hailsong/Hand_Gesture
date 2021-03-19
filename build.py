@@ -18,7 +18,7 @@ for i in range(1, MAX_RANGE+1):
     filename = str(i)+'.mp4'
     progress = round((i - 1)*100/MAX_RANGE, 2)
     print('PROCESSING VIDEO : {},    PROGRESS : {}%'.format(filename, progress))
-    os.system('python convert_video2csv.py --target={}'.format(filename))
+    os.system('python convert_video2csv_18.py --target={}'.format(filename))
 
 
 

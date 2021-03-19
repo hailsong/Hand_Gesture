@@ -41,6 +41,14 @@ class Handmark():
     def p_list(self, new_p):
         self._p_list = new_p
 
+    def return_flatten_p_list(self):
+        output = []
+        for local_mark_p in self._p_list[:-1]:
+            #print('type', type(local_mark_p))
+            output.extend(local_mark_p.to_list())
+        return output
+
+
     #엄지 제외
     def get_finger_angle(self, finger): #finger는 self에서 정의된 손가락들, 4크기 배열
         l1 = finger[0] - finger[1]
@@ -270,6 +278,6 @@ def get_distance(p1, p2):
 if __name__ == '__main__':
     print("This is util set program, it works well... maybe... XD")
 
-    print('Running main.py...')
+    print('Running main_63input.py...')
     from os import system
-    system('python main.py')
+    system('python main_63input.py')
