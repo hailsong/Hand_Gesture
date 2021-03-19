@@ -28,7 +28,7 @@ Gesture : 손의 제스처를 판단하기 위한 랜드마크들의 Queue
 '''
 
 #TODO 손가락 굽힘 판단, 손바닥 상태, 오른손 왼손 확인
-class handmark():
+class Handmark():
     def __init__(self, mark_p):
         self._p_list = mark_p
         self.finger_state = [0 for _ in range(5)]

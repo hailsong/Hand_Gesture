@@ -42,8 +42,8 @@ print(len(train_y), len(test_y)) #1에서 14사이 정수 label
 
 model = keras.Sequential([
     keras.layers.Dense(62, activation = 'relu'),
-    keras.layers.Dense(130, activation = 'relu'),
-    keras.layers.Dense(50, activation='relu'),
+    keras.layers.Dense(50, activation = 'relu'),
+    keras.layers.Dense(40, activation='relu'),
     #keras.layers.Dense(30, activation = 'relu'),
     keras.layers.Dense(15, activation='softmax')
 ])

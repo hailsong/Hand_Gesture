@@ -5,7 +5,7 @@ import math
 import win32api, win32con, time
 import numpy as np
 from PIL import ImageFont, ImageDraw, Image
-from utils import vector_magnitude, norm, get_distance, handmark, Gesture
+from utils import vector_magnitude, norm, get_distance, Handmark, Gesture
 from numpy.core._multiarray_umath import ndarray
 
 from mediapipe.framework.formats import location_data_pb2
@@ -21,7 +21,7 @@ use_tensorflow = True
 
 
 #TODO landmark를 대응 인스턴스로 저장
-class mark_pixel():
+class Mark_pixel():
     def __init__(self, x, y, z = 0, LR = 0):
         self.x = x
         self.y = y
@@ -62,7 +62,7 @@ class mark_2d():
             print('wheel_down')
 
 def get_center(p1, p2):
-    return mark_pixel((p1.x + p2.x) / 2, (p1.y + p2.y) / 2, (p1.z + p2.z) / 2)
+    return Mark_pixel((p1.x + p2.x) / 2, (p1.y + p2.y) / 2, (p1.z + p2.z) / 2)
 
 def hand_click(landmark, pixel):
     x = pixel.x
@@ -254,8 +254,8 @@ if __name__ == "__main__":
 
     gesture_int = 0
 
-    before_c = mark_pixel(0, 0, 0)
-    pixel_c = mark_pixel(0, 0, 0)
+    before_c = Mark_pixel(0, 0, 0)
+    pixel_c = Mark_pixel(0, 0, 0)
     hm_idx = False
     finger_open_ = [False for _ in range(5)]
     gesture_time = time.time()
@@ -295,7 +295,7 @@ if __name__ == "__main__":
                     image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
 
                 for i in range(21):
-                    mark_p.append(mark_pixel(hand_landmarks.landmark[i].x, hand_landmarks.landmark[i].y, hand_landmarks.landmark[i].z))
+                    mark_p.append(Mark_pixel(hand_landmarks.landmark[i].x, hand_landmarks.landmark[i].y, hand_landmarks.landmark[i].z))
                 mark_p_list.append(mark_p)
 
             # TODO 지금 API에서 사용하는 자료형때문에 살짝 꼬였는데 mark_p(list)의 마지막 원소를 lR_idx(left or right)로 표현해놨음.
@@ -310,7 +310,7 @@ if __name__ == "__main__":
                 mark_p = mark_p_list[i]
                 #Handmark 정보 입력
                 if len(mark_p) == 22 and hm_idx == False:
-                    HM = handmark(mark_p)
+                    HM = Handmark(mark_p)
                     hm_idx = True
 
                 #palm_vector 저장

@@ -23,7 +23,7 @@ import sys
 from numpy.core._multiarray_umath import ndarray
 
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-from utils import vector_magnitude, norm, get_distance, handmark, Gesture
+from utils import vector_magnitude, norm, get_distance, Handmark, Gesture
 
 #Experiment 1
 import pandas as pd
@@ -327,7 +327,7 @@ if __name__ == "__main__":
                 mark_p = mark_p_list[i]
                 #Handmark 정보 입력
                 if len(mark_p) == 22 and hm_idx == False:
-                    HM = handmark(mark_p)
+                    HM = Handmark(mark_p)
                     hm_idx = True
 
                 #palm_vector 저장
