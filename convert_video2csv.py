@@ -56,7 +56,7 @@ def keyboard_check(finger_state, name, LR_idx):
 
     # for key in key_list:
     #     if keyboard.is_pressed(key):
-    _list = [[int(name), 'build', LR_idx[0], True]]
+    _list = [[int(name), int(name), LR_idx[0], int(name)]]
 
     for mark_p in finger_state[:-1]:
         _xyz = mark_p.to_list()
@@ -241,8 +241,8 @@ if __name__ == "__main__":
 
     # width = 1024 # 너비
     # height= 600 # 높이
-    width = 1920  # 너비
-    height = 1080  # 높이
+    width = 960  # 너비
+    height = 540  # 높이
     bpp = 3  # 표시 채널(grayscale:1, bgr:3, transparent: 4)
 
     img = np.full((height, width, bpp), 255, np.uint8)  # 빈 화면 표시
@@ -381,7 +381,7 @@ if __name__ == "__main__":
                 #print('gesture_idx triggered')
                 gesture_int = 0
                 gesture_time = time.time()
-
+        image = cv2.resize(image, dsize = (0, 0), fx = 0.2, fy = 0.2)
         cv2.imshow('MediaPipe Hands', image)
         if cv2.waitKey(5) & 0xFF == 27:
             experiment_df = experiment_df.drop(experiment_df.index[0])
