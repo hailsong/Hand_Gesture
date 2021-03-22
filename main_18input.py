@@ -31,7 +31,6 @@ Gesture : 손의 제스처를 판단하기 위한 랜드마크들의 Queue
 MOUSE_USE = False
 USE_TENSORFLOW = True
 
-
 MODEL = keras.models.load_model(
     'keras_util/model_save/my_model_18.h5'
 )
@@ -61,7 +60,7 @@ def process_static_gesture(array_for_static, value_for_static):
 def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r):
     global image
     # For webcam input:
-    hands = mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+    hands = mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.5)
     cap = cv2.VideoCapture(0)
 
     nowclick = False
