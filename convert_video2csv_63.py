@@ -44,14 +44,13 @@ for _str in split_list:
     new_name = new_name + _str
     new_name = new_name + '/'
 
-#print(name)
 # name = 'ㅇㅇ'
 #print('실험을 시작합니다. 본 실험은 14개의 손동작을 오른손, 왼손으로 각 3번씩 취해 그 결과를 확인하고 데이터를 수집합니다.')
 
-init_list = [[0. for _ in range(4+15+3)],] #15+4+4는 15개의 변수 + 팜벡터를 의미
+init_list = [[0. for _ in range(4+21*3)],]
 init_list[0][:4] = ['dummy', 'dummy', 'dummy', True]
 column_name = ['FILENAME', 'real', 'LR', 'match',]
-for i in range(15+3):
+for i in range(21*3):
     column_name.append(str(i))
 #print(column_name)
 experiment_df = pd.DataFrame.from_records(init_list, columns = column_name)
@@ -60,23 +59,17 @@ key_list = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'q', 'w', 'e', 'r'
 
 def keyboard_check(finger_state, name, LR_idx):
     global experiment_df
-    # local_list = []
-    #print(finger_state[0].to_list())
 
-    # for key in key_list:
-    #     if keyboard.is_pressed(key):
     _list = [[int(new_num), int(new_num), LR_idx[0], int(new_num)]]
 
-    for data in finger_state:
-        _list[0].append(data)
-    #     _xyz = mark_p.to_list()
-    #     for xyz in _xyz:
-    #         _list[0].append(xyz)
+    for mark_p in finger_state[:-1]:
+        _xyz = mark_p.to_list()
+        for xyz in _xyz:
+            _list[0].append(xyz)
     #print(_list)
     # for data in finger_state:
     #     for i in range(5):
     #         _list[0].append(data[i])
-    #print(_list)
     local_df = pd.DataFrame.from_records(_list, columns = column_name)
     #print(local_df)
     experiment_df = experiment_df.append(local_df, ignore_index=True)
@@ -295,12 +288,12 @@ if __name__ == "__main__":
 
             # exit()
 
-            df_sum = pd.read_csv('video_output/' + new_name + 'output_18.csv')
-            # print(df_sum)
-            # print(experiment_df)
+            df_sum = pd.read_csv('video_output/' + new_name + 'output_63.csv')
+            #print(df_sum)
+            #print(experiment_df)
             df_sum = pd.concat([df_sum, experiment_df])
-            df_sum.to_csv('video_output/' + new_name + 'output_18.csv')
-            print('Saved dataframe to : ', 'video_output/' + new_name + 'output_18.csv')
+            df_sum.to_csv('video_output/' + new_name + 'output_63.csv')
+            print('Saved dataframe to : ', 'video_output/' + new_name + 'output_63.csv')
             exit()
 
         # Flip the image horizontally for a later selfie-view display, and convert
@@ -355,15 +348,7 @@ if __name__ == "__main__":
                 static_gesture_name = static_gesture_detect(finger_open_, mark_p[-1])
 
 
-                #keyboard_check(HM.p_list, name, LR_idx)
-                finger_info = HM.return_finger_info()
-                finger_info = finger_info.tolist()
-                palm_vector = HM.palm_vector.copy()
-                palm_vector = palm_vector.tolist()
-
-                finger_info.extend(palm_vector)
-                #print(finger_info)
-                keyboard_check(finger_info, name, LR_idx)
+                keyboard_check(HM.p_list, name, LR_idx)
 
                 mark_p0 = mark_p[0].to_pixel()
                 mark_p5 = mark_p[5].to_pixel()
