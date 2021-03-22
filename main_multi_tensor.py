@@ -177,7 +177,7 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
 
             text = hand_shape_name[hsd.index(finger_open_)]
             draw.text((x1, y1), text, font=ImageFont.truetype('C:/Windows/Fonts/malgun.ttf', 36), fill=(255, 0, 0))
-            image = cv2.cvtColor(np.array(pill_image), cv2.COLOR_RGB2BGR)  # 맥
+            imaglf = cv2.cvtColor(np.array(pill_image), cv2.COLOR_RGB2BGR)  # 맥
             try:
                 return hsd.index(finger_open_)
             except:
@@ -298,8 +298,10 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
             for i in range(len(mark_p_list)):  # for문 한 번 도는게 한 손에 대한 것임
                 LR_idx = results.multi_handedness[i].classification[0].label
                 # print(LR_idx)
+                LR_idx = LR_idx[:-1]
                 image = cv2.putText(image, LR_idx[:], (int(mark_p_list[i][17].x * image.shape[1]), int(mark_p_list[i][17].y * image.shape[0])), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
                 mark_p_list[i].append(LR_idx)
+
 
                 mark_c = get_center(mark_p[4], mark_p[8])
 
@@ -316,7 +318,6 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
                 # mark_p 입력
                 if hm_idx == True:
                     HM.p_list = mark_p
-                    mark_p[-1] = mark_p[-1][:-1]
 
                     if USE_TENSORFLOW == True:
                         if len(mark_p[-1]) == 4:

@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 print(tf.__version__)
 
-df = pd.read_csv("output.csv")
+df = pd.read_csv("../video_output/output.csv")
 df = df[1:]
 print(df.tail())
 size = df.shape[0]
@@ -84,5 +84,5 @@ acc_ax.legend(loc='lower left')
 
 plt.show()
 
-model.save('model_save/my_model_0318.h5')
+model.save('model_save/my_model_18.h5')
 print('new model saved')

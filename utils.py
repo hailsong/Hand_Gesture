@@ -167,6 +167,11 @@ class Handmark():
         self.input = np.concatenate((self.finger_angle_list, self.finger_distance_list, self.hand_angle_list))
         return self.input
 
+    def return_18_info(self):
+        output = self.return_finger_info()
+        output = np.concatenate((output, self.palm_vector))
+        return output
+
     # def predict_static(self):
     #     self.input = self.input[np.newaxis]
     #     # print(input.shape)
