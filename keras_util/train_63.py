@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 print(tf.__version__)
 
-df = pd.read_csv("../video_output/output.csv")
+df = pd.read_csv("../video_output/output_sum_63.csv")
 df = df[1:]
 print(df.tail())
 size = df.shape[0]
@@ -42,8 +42,11 @@ print(len(train_y), len(test_y)) #1에서 14사이 정수 label
 
 model = keras.Sequential([
     keras.layers.Dense(63, activation = 'relu'),
-    keras.layers.Dense(100, activation = 'relu'),
-    keras.layers.Dense(40, activation='relu'),
+    keras.layers.Dense(400, activation = 'relu'),
+    keras.layers.MaxPooling3D()
+    keras.layers.Dense(100, activation='relu'),
+    keras.layers.Dense(60, activation='relu'),
+    keras.layers.Dense(30, activation='relu'),
     #keras.layers.Dense(30, activation = 'relu'),
     keras.layers.Dense(15, activation='softmax')
 ])
