@@ -32,7 +32,7 @@ class Handmark():
     def __init__(self, mark_p):
         self._p_list = mark_p
         self.finger_state = [0 for _ in range(5)]
-    
+
     @property
     def p_list(self):
         return self._p_list
@@ -75,12 +75,14 @@ class Handmark():
 
         self.palm_vector = np.cross(l1_, l2_)
         self.palm_vector = self.palm_vector / vector_magnitude(self.palm_vector)
-        #print(self.palm_vector)
+        #print(vector_magnitude((self.palm_vector)))
         return self.palm_vector
 
     def get_finger_vector(self):
         l0 = self._p_list[5] - self._p_list[0]
         self.finger_vector = np.array(l0)
+        self.finger_vector = self.finger_vector / vector_magnitude(self.finger_vector)
+        #print(vector_magnitude((self.finger_vector)))
         return self.finger_vector
 
 
@@ -276,20 +278,74 @@ class Gesture_mode():
         self.right_palm_vector = [[0.] * 3] * self.QUEUE_SIZE
         self.left_finger_vector = [[0.] * 3] * self.QUEUE_SIZE
         self.right_finger_vector = [[0.] * 3] * self.QUEUE_SIZE
+        self.right_finger_vector = [[0.] * 3] * self.QUEUE_SIZE
     def __str__(self):
-        return 'left : {}, right : {}, lpv : {}, lfv : {}, rpv : {}, rgv : {}'.format(
-            self.left, self.right,
-            self.left_palm_vector, self.left_finger_vector, self.right_palm_vector, self.right_finger_vector)
+        return 'left : {}, right : {}, lpv : {}, lfv : {}, rpv : {}, rfv : {}'.format(
+            self.left[-1], self.right[-1],
+            self.left_palm_vector[-1], self.left_finger_vector[-1], self.right_palm_vector[-1], self.right_finger_vector[-1])
     def update_left(self, left, palm_vector, finger_vector):
-        self.left = left
-        self.left_palm_vector = palm_vector
-        self.left_finger_vector = finger_vector
+        self.left.append(left)
+        self.left_palm_vector.append(palm_vector)
+        self.left_finger_vector.append(finger_vector)
+        self.left.pop(0)
+        self.left_palm_vector.pop(0)
+        self.left_finger_vector.pop(0)
     def update_right(self, right, palm_vector, finger_vector):
-        self.right = right
-        self.right_palm_vector = palm_vector
-        self.right_finger_vector = finger_vector
+        self.right.append(right)
+        self.right_palm_vector.append(palm_vector)
+        self.right_finger_vector.append(finger_vector)
+        self.right.pop(0)
+        self.right_palm_vector.pop(0)
+        self.right_finger_vector.pop(0)
+    def select_mode(self):
+        mode = 0
+        lpv_mode_1 = [-0.44, 0.115, -0.89]
+        lfv_mode_1 = [-0.28, -0.95, 0.]
+        rpv_mode_1 = [-0.55, -0.2, 0.8]
+        rfv_mode_1 = [0.28, -0.96, -0.05]
+        mode_result = 0
+        for lpv in self.left_palm_vector:
+            mode_result = mode_result + get_angle(lpv, lpv_mode_1)
+        for lfv in self.left_finger_vector:
+            mode_result = mode_result + get_angle(lfv, lfv_mode_1)
+        for rpv in self.right_palm_vector:
+            mode_result = mode_result + get_angle(rpv, rpv_mode_1)
+        for rfv in self.right_finger_vector:
+            mode_result = mode_result + get_angle(rfv, rfv_mode_1)
+
+        # 손바닥 펴서 앞에 보여주기
+        left_idx_1 = 0
+        for left in self.left:
+            if left == 6:
+                left_idx_1 += 1
+        right_idx_1 = 0
+        for right in self.right:
+            if right == 6:
+                right_idx_1 += 1
+        if mode_result < 10 and left_idx_1 == 10 and right_idx_1 == 10:
+            mode = 1
+
+        # 탈모빔 자세
+        left_idx_1 = 0
+        for left in self.left:
+            if left == 3:
+                left_idx_1 += 1
+        right_idx_1 = 0
+        for right in self.right:
+            if right == 3:
+                right_idx_1 += 1
+        if mode_result < 17 and left_idx_1 == 10 and right_idx_1 == 10:
+            mode = 2
+        return mode
 
 
+
+def get_angle(l1, l2):
+    l1_ = np.array([l1[0], l1[1], l1[2]])
+    l2_ = np.array([l2[0], l2[1], l2[2]])
+
+    return np.arccos(np.dot(l1_, l2_) / (norm(l1) * norm(l2)))
+    #return np.arccos(np.dot(l1_, l2_) / (norm(l1) * norm(l2)))
 
 def vector_magnitude(one_D_array):
     return math.sqrt(np.sum(one_D_array * one_D_array))

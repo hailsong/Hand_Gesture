@@ -42,6 +42,7 @@ mp_face_detection = mp.solutions.face_detection
 
 x_size, y_size = pyautogui.size().width, pyautogui.size().height
 nowclick = False
+nowclick2 = False
 
 def process_static_gesture(array_for_static, value_for_static):
     while(True):
@@ -57,13 +58,15 @@ def process_static_gesture(array_for_static, value_for_static):
         except:
             pass
 
+
+
 def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r):
     global image
+    global MOUSE_USE
     # For webcam input:
     hands = mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.5)
     cap = cv2.VideoCapture(0)
 
-    nowclick = False
     global width, height
 
     # TODO landmark를 대응 인스턴스로 저장
@@ -120,22 +123,39 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
     def get_center(p1, p2):
         return Mark_pixel((p1.x + p2.x) / 2, (p1.y + p2.y) / 2, (p1.z + p2.z) / 2)
 
-    def hand_click(landmark, pixel):
+    def hand_drag(landmark, pixel):
         x = pixel.x
         y = pixel.y
         # print(x, y)
         global nowclick
         if get_distance(landmark[4], landmark[8]) < get_distance(landmark[4], landmark[3]) and nowclick == False:
-            print('click')
+            print('drag on')
             win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, int(x), int(y), 0, 0)
-
             nowclick = True
 
         elif get_distance(landmark[4], landmark[8]) > 1.5 * get_distance(landmark[4], landmark[3]) and nowclick == True:
-            print('click off')
-
+            print('drag off')
             win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, int(x), int(y), 0, 0)
             nowclick = False
+
+    def hand_click(landmark, pixel):
+        x = pixel.x
+        y = pixel.y
+        global nowclick2
+
+        if get_distance(landmark[4], landmark[10]) < get_distance(landmark[7], landmark[8]) and nowclick2 == False:
+            print('click')
+            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, int(x), int(y), 0, 0)
+            print('click off')
+            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, int(x), int(y), 0, 0)
+            nowclick2 = True
+            return -1
+        if get_distance(landmark[4], landmark[10]) > get_distance(landmark[7], landmark[8]) and nowclick2 == True:
+            nowclick2 = False
+
+        return 0
+
+
 
     hand_shape_dateset = [[0, 0, 0, 0, 0],  # 바위
                           [1, 0, 0, 0, 0],  # 따봉
@@ -264,6 +284,9 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
     # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
     # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1440)
     before_time = time.time()
+
+    click_tr = 0
+
     while cap.isOpened():
         success, image = cap.read()
         if not success:
@@ -338,7 +361,7 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
                             static_gesture_drawing(static_gesture_num, mark_p[-1])
                         except:
                             print('static_drawing error')
-                        print(static_gesture_num)
+                        #print(static_gesture_num)
                     else:
                         finger_open_for_ml = np.ndarray.tolist(HM.return_finger_state())
                         # 정지 제스쳐 확인
@@ -348,40 +371,61 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
                 mark_p0 = mark_p[0].to_pixel()
                 mark_p5 = mark_p[5].to_pixel()
 
+                # pixel_c = mark_c.to_pixel()
+                if len(mark_p[-1]) == 5:
+                    pixel_c = mark_p5
+                    # gesture updating
+                    gesture.update(HM)
+                    if len(mark_p) == 22:
+                        gesture.gesture_detect()
+                        pass
+
                 if len(mark_p[-1]) == 4:
                     gesture_mode.update_left(static_gesture_num, palm_vector, finger_vector)
                 if len(mark_p[-1]) == 5:
                     gesture_mode.update_right(static_gesture_num, palm_vector, finger_vector)
 
-                # 마우스 움직임, 클릭
+                # 마우스 움직임, 드래그
                 if (get_distance(pixel_c, before_c) < get_distance(mark_p0, mark_p5)) and \
                         sum(finger_open_[3:]) == 0 and \
                         finger_open_[1] == 1 and \
-                        len(LR_idx) == 5 and \
+                        len(mark_p[-1]) == 5 and \
                         MOUSE_USE == True:
                     pixel_c.mousemove()
-
                     if finger_open_[2] != 1:
-                        hand_click(hand_landmarks.landmark, pixel_c)
+                        if nowclick != True:
+                            click_tr = hand_click(hand_landmarks.landmark, pixel_c)
+                        if click_tr > -1:
+                            hand_drag(hand_landmarks.landmark, pixel_c)
+
                     else:
                         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, int(pixel_c.x), int(pixel_c.y), 0, 0)
                     # 마우스 휠
                     if finger_open_[2] == 1:
                         pixel_c.wheel(before_c)
+                    # 마우스 클릭
 
                 before_c = pixel_c
+            #print(gesture_mode)
+            mode = gesture_mode.select_mode()
+            if mode == 2:
+                MOUSE_USE = True
+                print('MOUSE_USE True')
+            if mode == 1:
+                MOUSE_USE = False
+                print('MOUSE_USE False')
+                win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 100, 100, 0, 0)
 
-            print(gesture_mode)
 
-            if gesture_int > 0 and time.time() - gesture_time > 1:  # gesture int로 gesture 겹쳐지는 현상 방지
-                print('gi')
-                gesture_int = 0
-                gesture_time = time.time()
+            # if gesture_int > 0 and time.time() - gesture_time > 1:  # gesture int로 gesture 겹쳐지는 현상 방지
+            #     print('gi')
+            #     gesture_int = 0
+            #     gesture_time = time.time()
 
         FPS = round(1/(time.time() - before_time), 2)
         before_time = time.time()
         image = cv2.putText(image, str(FPS), (10, 30), cv2.FONT_HERSHEY_DUPLEX, 1, (0,0,0), 2, cv2.LINE_AA)
-        cv2.imshow('MediaPipe Hands', image)
+        cv2.imshow('Gesture_Detection_Hail Song', image)
 
         if cv2.waitKey(5) & 0xFF == 27:
             exit()
