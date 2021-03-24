@@ -5,8 +5,7 @@ import time
 
 path=os.getcwd()
 
-MAX_RANGE = 14
-FOLDER_NAME = '0322_송하일/LEFT/'
+FOLDER_NAME = '0323_송하일/RIGHT/'
 
 split_list = FOLDER_NAME.split('/')
 dir_1 = split_list[0]

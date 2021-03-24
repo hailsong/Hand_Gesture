@@ -84,5 +84,5 @@ acc_ax.legend(loc='lower left')
 
 plt.show()
 
-model.save('model_save/my_model_18.h5')
+model.save('model_save/my_model_21.h5')
 print('new model saved')

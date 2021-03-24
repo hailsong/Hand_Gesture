@@ -28,13 +28,14 @@ Gesture : 손의 제스처를 판단하기 위한 랜드마크들의 Queue
 
 
 
-MOUSE_USE = True
+MOUSE_USE = False
 USE_TENSORFLOW = True
-
+SIGN_LIST = list('1ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㅏㅑㅓㅕㅗㅛㅜㅠㅢㅐㅔㅚㅟㅐㅒㅖㅢ')
 
 MODEL = keras.models.load_model(
-    'keras_util/model_save/my_model.h5'
+    'keras_util/model_save/my_model_21.h5'
 )
+#print(MODEL.summary)
 
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
@@ -46,19 +47,21 @@ nowclick = False
 def process_static_gesture(array_for_static, value_for_static):
     while(True):
         input_ = np.copy(array_for_static[:])
+        #print(input_)
         input_ = input_[np.newaxis]
-        # print(input.shape)
-        # print(input)
-        prediction = MODEL.predict(input_)
-        if np.max(prediction[0]) > 0.6:
-            value_for_static.value = np.argmax(prediction[0])
-        else:
-            value_for_static.value = 0
+        try:
+            prediction = MODEL.predict(input_)
+            if np.max(prediction[0]) > 0.2:
+                value_for_static.value = np.argmax(prediction[0])
+            else:
+                value_for_static.value = 0
+        except:
+            pass
 
 def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r):
     global image
     # For webcam input:
-    hands = mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+    hands = mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.5)
     cap = cv2.VideoCapture(0)
 
     nowclick = False
@@ -177,7 +180,7 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
 
             text = hand_shape_name[hsd.index(finger_open_)]
             draw.text((x1, y1), text, font=ImageFont.truetype('C:/Windows/Fonts/malgun.ttf', 36), fill=(255, 0, 0))
-            imaglf = cv2.cvtColor(np.array(pill_image), cv2.COLOR_RGB2BGR)  # 맥
+            image = cv2.cvtColor(np.array(pill_image), cv2.COLOR_RGB2BGR)  # 맥
             try:
                 return hsd.index(finger_open_)
             except:
@@ -294,19 +297,19 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
                     mark_p.append(Mark_pixel(hand_landmarks.landmark[i].x, hand_landmarks.landmark[i].y, hand_landmarks.landmark[i].z))
                 mark_p_list.append(mark_p)
 
+
             # TODO 지금 API에서 사용하는 자료형때문에 살짝 꼬였는데 mark_p(list)의 마지막 원소를 lR_idx(left or right)로 표현해놨음.
             for i in range(len(mark_p_list)):  # for문 한 번 도는게 한 손에 대한 것임
                 LR_idx = results.multi_handedness[i].classification[0].label
-                # print(LR_idx)
-                LR_idx = LR_idx[:-1]
+                #print(LR_idx)
                 image = cv2.putText(image, LR_idx[:], (int(mark_p_list[i][17].x * image.shape[1]), int(mark_p_list[i][17].y * image.shape[0])), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
                 mark_p_list[i].append(LR_idx)
-
 
                 mark_c = get_center(mark_p[4], mark_p[8])
 
                 mark_p = mark_p_list[i]
                 # Handmark 정보 입력
+
                 if len(mark_p) == 22 and hm_idx == False:
                     HM = Handmark(mark_p)
                     hm_idx = True
@@ -318,21 +321,26 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
                 # mark_p 입력
                 if hm_idx == True:
                     HM.p_list = mark_p
-
+                    mark_p[-1] = mark_p[-1][:-1]
                     if USE_TENSORFLOW == True:
+
                         if len(mark_p[-1]) == 4:
-                            array_for_static_l[:] = HM.return_finger_info()
-                            #print(array_for_static)
+                            f_p_list = HM.return_21_info()
+                            array_for_static_l[:] = f_p_list
+                            # print(array_for_static)
                             static_gesture_num = value_for_static_l.value
                         if len(mark_p[-1]) == 5:
-                            array_for_static_r[:] = HM.return_finger_info()
-                            #print(array_for_static)
+                            f_p_list = HM.return_21_info()
+                            array_for_static_r[:] = f_p_list
+                            # print(array_for_static)
                             static_gesture_num = value_for_static_r.value
-                        try:
-                            static_gesture_drawing(static_gesture_num, mark_p[-1])
-                        except:
-                            print('static_drawing error')
-                        print(static_gesture_num)
+                            print(SIGN_LIST[static_gesture_num])
+                        # try:
+                        #     static_gesture_drawing(static_gesture_num, mark_p[-1])
+                        # except:
+                        #     print('static_drawing error')
+
+
                     else:
                         finger_open_for_ml = np.ndarray.tolist(HM.return_finger_state())
                         # 정지 제스쳐 확인
@@ -401,9 +409,9 @@ if __name__ == "__main__":
 
     image = np.full((height, width, bpp), 255, np.uint8)  # 빈 화면 표시
 
-    shared_array_l = Array('d', [0. for _ in range(15)])
+    shared_array_l = Array('d', [0. for _ in range(21)])
     static_num_l = Value('i', 0)
-    shared_array_r = Array('d', [0. for _ in range(15)])
+    shared_array_r = Array('d', [0. for _ in range(21)])
     static_num_r = Value('i', 0)
 
     process1 = Process(target=main, args=(shared_array_l, static_num_l, shared_array_r, static_num_r))

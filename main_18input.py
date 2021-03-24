@@ -6,7 +6,7 @@ import win32api, win32con, time
 import numpy as np
 from PIL import ImageFont, ImageDraw, Image
 
-from utils import vector_magnitude, norm, get_distance, Handmark, Gesture
+from utils import vector_magnitude, norm, get_distance, Handmark, Gesture, Gesture_mode
 from numpy.core._multiarray_umath import ndarray
 
 from mediapipe.framework.formats import location_data_pb2
@@ -32,7 +32,7 @@ MOUSE_USE = False
 USE_TENSORFLOW = True
 
 MODEL = keras.models.load_model(
-    'keras_util/model_save/my_model_18.h5'
+    'keras_util/model_save/my_model_21.h5'
 )
 #print(MODEL.summary)
 
@@ -50,7 +50,7 @@ def process_static_gesture(array_for_static, value_for_static):
         input_ = input_[np.newaxis]
         try:
             prediction = MODEL.predict(input_)
-            if np.max(prediction[0]) > 0.65:
+            if np.max(prediction[0]) > 0.4:
                 value_for_static.value = np.argmax(prediction[0])
             else:
                 value_for_static.value = 0
@@ -259,6 +259,7 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
     finger_open_ = [False for _ in range(5)]
     gesture_time = time.time()
     gesture = Gesture()
+    gesture_mode = Gesture_mode()
 
     # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
     # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1440)
@@ -314,8 +315,8 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
                     hm_idx = True
 
                 # palm_vector 저장
-                HM.get_palm_vector()
-                HM.get_finger_vector()
+                palm_vector = HM.get_palm_vector()
+                finger_vector = HM.get_finger_vector()
 
                 # mark_p 입력
                 if hm_idx == True:
@@ -326,12 +327,12 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
                         if len(mark_p[-1]) == 4:
                             f_p_list = HM.return_18_info()
                             array_for_static_l[:] = f_p_list
-                            #print(array_for_static)
+                            # print(array_for_static)
                             static_gesture_num = value_for_static_l.value
                         if len(mark_p[-1]) == 5:
                             f_p_list = HM.return_18_info()
                             array_for_static_r[:] = f_p_list
-                            #print(array_for_static)
+                            # print(array_for_static)
                             static_gesture_num = value_for_static_r.value
                         try:
                             static_gesture_drawing(static_gesture_num, mark_p[-1])
@@ -347,14 +348,10 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
                 mark_p0 = mark_p[0].to_pixel()
                 mark_p5 = mark_p[5].to_pixel()
 
-                # pixel_c = mark_c.to_pixel()
-                if len(LR_idx) == 5:
-                    pixel_c = mark_p5
-                    # gesture updating
-                    gesture.update(HM)
-                    if len(mark_p) == 22:
-                        gesture.gesture_detect()
-                        pass
+                if len(mark_p[-1]) == 4:
+                    gesture_mode.update_left(static_gesture_num, palm_vector, finger_vector)
+                if len(mark_p[-1]) == 5:
+                    gesture_mode.update_right(static_gesture_num, palm_vector, finger_vector)
 
                 # 마우스 움직임, 클릭
                 if (get_distance(pixel_c, before_c) < get_distance(mark_p0, mark_p5)) and \
@@ -373,6 +370,8 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
                         pixel_c.wheel(before_c)
 
                 before_c = pixel_c
+
+            print(gesture_mode)
 
             if gesture_int > 0 and time.time() - gesture_time > 1:  # gesture int로 gesture 겹쳐지는 현상 방지
                 print('gi')

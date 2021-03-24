@@ -116,7 +116,7 @@ def get_score(response_list):
         for cand in range(2):
             output[POINT_SET[index]['category']][cand] = output[POINT_SET[index]['category']][cand] +\
                                                          POINT_SET[index]['points'][cand][response - 1]
-    #print(output) #카테고리별 얻은 점수
+    # print(output) #카테고리별 얻은 점수
     return output
 
 def sum_score(score_set):

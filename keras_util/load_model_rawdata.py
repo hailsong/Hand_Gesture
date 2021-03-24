@@ -5,7 +5,7 @@ from tensorflow import keras
 import matplotlib.pyplot as plt
 
 model = keras.models.load_model(
-    'model_save/my_model_18.h5'
+    'model_save/my_model_21.h5'
 )
 print(model.summary())
 

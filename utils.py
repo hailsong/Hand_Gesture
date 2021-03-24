@@ -79,7 +79,7 @@ class Handmark():
         return self.palm_vector
 
     def get_finger_vector(self):
-        l0 = self._p_list[12] - self._p_list[9]
+        l0 = self._p_list[5] - self._p_list[0]
         self.finger_vector = np.array(l0)
         return self.finger_vector
 
@@ -172,6 +172,11 @@ class Handmark():
         output = np.concatenate((output, self.palm_vector))
         return output
 
+    def return_21_info(self):
+        output = self.return_finger_info()
+        output = np.concatenate((output, self.palm_vector, self.finger_vector))
+        return output
+
     # def predict_static(self):
     #     self.input = self.input[np.newaxis]
     #     # print(input.shape)
@@ -261,6 +266,30 @@ class Gesture():
 
         #print(Z_rotate, Z_rotate_inv, hand_open_frame, x_diff, self.fv[1])
         # print(np.array(self.d_palm_data)[:][2])
+
+class Gesture_mode():
+    QUEUE_SIZE = 10
+    def __init__(self):
+        self.left = [0] * self.QUEUE_SIZE
+        self.right = [0] * self.QUEUE_SIZE
+        self.left_palm_vector = [[0.] * 3] * self.QUEUE_SIZE
+        self.right_palm_vector = [[0.] * 3] * self.QUEUE_SIZE
+        self.left_finger_vector = [[0.] * 3] * self.QUEUE_SIZE
+        self.right_finger_vector = [[0.] * 3] * self.QUEUE_SIZE
+    def __str__(self):
+        return 'left : {}, right : {}, lpv : {}, lfv : {}, rpv : {}, rgv : {}'.format(
+            self.left, self.right,
+            self.left_palm_vector, self.left_finger_vector, self.right_palm_vector, self.right_finger_vector)
+    def update_left(self, left, palm_vector, finger_vector):
+        self.left = left
+        self.left_palm_vector = palm_vector
+        self.left_finger_vector = finger_vector
+    def update_right(self, right, palm_vector, finger_vector):
+        self.right = right
+        self.right_palm_vector = palm_vector
+        self.right_finger_vector = finger_vector
+
+
 
 def vector_magnitude(one_D_array):
     return math.sqrt(np.sum(one_D_array * one_D_array))

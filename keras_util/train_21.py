@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 
 print(tf.__version__)
 
-df = pd.read_csv("output.csv")
+df = pd.read_csv("../video_output/지문자/output_21.csv")
+df = df[1:]
 print(df.tail())
 size = df.shape[0]
 print(size, "num of data")
@@ -19,13 +20,14 @@ test_num = int(size - size * test_ratio)
 train = df[:test_num]
 test = df[test_num:]
 
-col_name = [str(i) for i in range(1, 63)]
+col_name = [str(i) for i in range(0, 21)]
 print(col_name)
+
+print(train['FILENAME'].to_numpy())
 
 train_x = train[col_name].to_numpy()
 train_y = train['FILENAME'].to_numpy()
-print('trainy', train_y)
-train_y = train_y.astype(np.float64)
+train_y = train_y.astype(np.int64)
 
 # print(train_x)
 # print(train_y)
@@ -34,16 +36,16 @@ train_y = train_y.astype(np.float64)
 
 test_x = test[col_name].to_numpy()
 test_y = test['FILENAME'].to_numpy()
-test_y = test_y.astype(np.int8)
+test_y = test_y.astype(np.int64)
 
 print(len(train_y), len(test_y)) #1에서 14사이 정수 label
 
 model = keras.Sequential([
-    keras.layers.Dense(62, activation = 'relu'),
-    keras.layers.Dense(130, activation = 'relu'),
-    keras.layers.Dense(50, activation='relu'),
+    keras.layers.Dense(21, activation = 'relu'),
+    keras.layers.Dense(70, activation = 'relu'),
+    keras.layers.Dense(60, activation='relu'),
     #keras.layers.Dense(30, activation = 'relu'),
-    keras.layers.Dense(15, activation='softmax')
+    keras.layers.Dense(32, activation='softmax')
 ])
 
 model.compile(optimizer='adam',

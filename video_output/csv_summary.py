@@ -2,7 +2,7 @@ import pandas as pd
 import glob
 import os
 
-f = open("./csv_list_63.txt", 'r')
+f = open("./csv_list_18.txt", 'r')
 _list = []
 while True:
     line = f.readline()
@@ -21,4 +21,4 @@ for file in _list:
 
 dataCombine = pd.concat(allData, axis=0, ignore_index=True) # concat함수를 이용해서 리스트의 내용을 병합
 # axis=0은 수직으로 병합함. axis=1은 수평. ignore_index=True는 인데스 값이 기존 순서를 무시하고 순서대로 정렬되도록 한다.
-dataCombine.to_csv("output_sum_63.csv", index=False) # to_csv함수로 저장한다. 인데스를 빼려면 False로 설정
+dataCombine.to_csv("output_sum_18.csv", index=False) # to_csv함수로 저장한다. 인데스를 빼려면 False로 설정
