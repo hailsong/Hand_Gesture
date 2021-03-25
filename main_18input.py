@@ -329,8 +329,6 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
                 image = cv2.putText(image, LR_idx[:], (int(mark_p_list[i][17].x * image.shape[1]), int(mark_p_list[i][17].y * image.shape[0])), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
                 mark_p_list[i].append(LR_idx)
 
-                mark_c = get_center(mark_p[4], mark_p[8])
-
                 mark_p = mark_p_list[i]
                 # Handmark 정보 입력
 
@@ -386,6 +384,8 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
                 if len(mark_p[-1]) == 5:
                     gesture_mode.update_right(static_gesture_num, palm_vector, finger_vector)
 
+                pixel_c_mod = pixel_c
+
                 # 마우스 움직임, 드래그
                 if (get_distance(pixel_c, before_c) < get_distance(mark_p0, mark_p5)) and \
                         sum(finger_open_[3:]) == 0 and \
@@ -398,9 +398,9 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
                             click_tr = hand_click(hand_landmarks.landmark, pixel_c)
                         if click_tr > -1:
                             hand_drag(hand_landmarks.landmark, pixel_c)
-
                     else:
                         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, int(pixel_c.x), int(pixel_c.y), 0, 0)
+
                     # 마우스 휠
                     if finger_open_[2] == 1:
                         pixel_c.wheel(before_c)
