@@ -213,10 +213,10 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
             pill_image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
             draw = ImageDraw.Draw(pill_image)
 
-            if len(LR_index) == 4:
+            if LR_index[0] == 'L':
                 x1, y1 = 30, 30
             # LR_index == 'left'
-            elif len(LR_index) == 5:
+            elif LR_index[0] == 'R':
                 x1, y1 = 550, 30
             else:
                 x1, y1 = 30, 30
@@ -324,6 +324,7 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
             # TODO 지금 API에서 사용하는 자료형때문에 살짝 꼬였는데 mark_p(list)의 마지막 원소를 lR_idx(left or right)로 표현해놨음.
             for i in range(len(mark_p_list)):  # for문 한 번 도는게 한 손에 대한 것임
                 LR_idx = results.multi_handedness[i].classification[0].label
+                LR_idx = LR_idx[:-1]
                 #print(LR_idx)
                 image = cv2.putText(image, LR_idx[:], (int(mark_p_list[i][17].x * image.shape[1]), int(mark_p_list[i][17].y * image.shape[0])), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
                 mark_p_list[i].append(LR_idx)
@@ -344,7 +345,7 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
                 # mark_p 입력
                 if hm_idx == True:
                     HM.p_list = mark_p
-                    mark_p[-1] = mark_p[-1][:-1]
+                    #mark_p[-1] = mark_p[-1][:-1]
                     if USE_TENSORFLOW == True:
 
                         if len(mark_p[-1]) == 4:
