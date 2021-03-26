@@ -16,6 +16,10 @@ from tensorflow import keras
 import os
 import tensorflow as tf
 
+import ctypes
+
+
+
 '''
 Mark_pixel : 각각의 랜드마크
 finger_open : 손 하나가 갖고있는 랜드마크들
@@ -137,11 +141,13 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
         if get_distance(landmark[4], landmark[8]) < get_distance(landmark[4], landmark[3]) and nowclick == False:
             print('drag on')
             win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, int(x), int(y), 0, 0)
+            #ctypes.windll.user32.mouse_event(0x0002, 0, 0, 0, 0)
             nowclick = True
 
         elif get_distance(landmark[4], landmark[8]) > 1.5 * get_distance(landmark[4], landmark[3]) and nowclick == True:
             print('drag off')
             win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, int(x), int(y), 0, 0)
+            ctypes.windll.user32.mouse_event(0x0004, 0, 0, 0, 0)
             nowclick = False
 
     def hand_click(landmark, pixel):
