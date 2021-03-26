@@ -29,6 +29,7 @@ Gesture : 손의 제스처를 판단하기 위한 랜드마크들의 Queue
 
 
 MOUSE_USE = False
+WHEEL_USE = False
 USE_TENSORFLOW = True
 
 MODEL = keras.models.load_model(
@@ -63,6 +64,7 @@ def process_static_gesture(array_for_static, value_for_static):
 def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r):
     global image
     global MOUSE_USE
+    global WHEEL_USE
     # For webcam input:
     hands = mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.5)
     cap = cv2.VideoCapture(0)
@@ -402,20 +404,25 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
                         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, int(pixel_c.x), int(pixel_c.y), 0, 0)
 
                     # 마우스 휠
-                    if finger_open_[2] == 1:
+                    if finger_open_[2] == 1 and WHEEL_USE == True:
                         pixel_c.wheel(before_c)
                     # 마우스 클릭
 
                 before_c = pixel_c
             #print(gesture_mode)
             mode = gesture_mode.select_mode()
-            if mode == 2:
-                MOUSE_USE = True
-                print('MOUSE_USE True')
             if mode == 1:
                 MOUSE_USE = False
                 print('MOUSE_USE False')
                 win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 100, 100, 0, 0)
+
+            if mode == 2:
+                MOUSE_USE = True
+                print('MOUSE_USE True')
+
+            if mode == 3:
+                WHEEL_USE = True
+                print('Wheel_USE True')
 
 
             # if gesture_int > 0 and time.time() - gesture_time > 1:  # gesture int로 gesture 겹쳐지는 현상 방지
