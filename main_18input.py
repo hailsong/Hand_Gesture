@@ -29,7 +29,9 @@ Gesture : 손의 제스처를 판단하기 위한 랜드마크들의 Queue
 
 
 MOUSE_USE = False
+CLICK_USE = False
 WHEEL_USE = False
+DRAG_USE = False
 USE_TENSORFLOW = True
 
 MODEL = keras.models.load_model(
@@ -64,7 +66,9 @@ def process_static_gesture(array_for_static, value_for_static):
 def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r):
     global image
     global MOUSE_USE
+    global CLICK_USE
     global WHEEL_USE
+    global DRAG_USE
     # For webcam input:
     hands = mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.5)
     cap = cv2.VideoCapture(0)
@@ -272,6 +276,42 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
                 image = np.where(c_mask > 0, img_all_blurred, image)
         return image
 
+    def mode_setting(mode, mode_before):
+        global MOUSE_USE, CLICK_USE, DRAG_USE, WHEEL_USE
+        if mode != mode_before:
+            if mode == 1:
+                MOUSE_USE = False
+                CLICK_USE = False
+                DRAG_USE = False
+                WHEEL_USE = False
+                print('MODE 1, 대기 모드')
+                win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 100, 100, 0, 0)
+
+            if mode == 2:
+                MOUSE_USE = True
+                CLICK_USE = True
+                DRAG_USE = False
+                WHEEL_USE = False
+                print('MODE 2, 기본 발표 모드')
+
+            if mode == 3:
+                MOUSE_USE = True
+                CLICK_USE = False
+                DRAG_USE = True
+                WHEEL_USE = False
+                win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
+                win32api.keybd_event(0x50, 0, 0, 0)  # P 누르기.
+                time.sleep(0.1)
+                win32api.keybd_event(0xa2, 0, win32con.KEYEVENTF_KEYUP, 0)
+                win32api.keybd_event(0x50, 0, win32con.KEYEVENTF_KEYUP, 0)
+                print('MODE 3, 필기 발표 모드')
+
+            if mode == 4:
+                MOUSE_USE = True
+                CLICK_USE = True
+                DRAG_USE = True
+                WHEEL_USE = True
+                print('MODE 4, 웹서핑 발표 모드')
 
     gesture_int = 0
 
@@ -288,6 +328,8 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
     before_time = time.time()
 
     click_tr = 0
+    mode = 0
+    mode_before = 0
 
     while cap.isOpened():
         success, image = cap.read()
@@ -395,13 +437,15 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
                         len(mark_p[-1]) == 5 and \
                         MOUSE_USE == True:
                     pixel_c.mousemove()
-                    if finger_open_[2] != 1:
+
+                    if finger_open_[2] != 1 and click_tr > -1 and DRAG_USE == True:
+                        hand_drag(hand_landmarks.landmark, pixel_c)
+
+                    if finger_open_[2] != 1 and CLICK_USE == True:
                         if nowclick != True:
                             click_tr = hand_click(hand_landmarks.landmark, pixel_c)
-                        if click_tr > -1:
-                            hand_drag(hand_landmarks.landmark, pixel_c)
-                    else:
-                        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, int(pixel_c.x), int(pixel_c.y), 0, 0)
+                    # else:
+                    #     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, int(pixel_c.x), int(pixel_c.y), 0, 0)
 
                     # 마우스 휠
                     if finger_open_[2] == 1 and WHEEL_USE == True:
@@ -409,26 +453,10 @@ def main(array_for_static_l, value_for_static_l, array_for_static_r, value_for_s
                     # 마우스 클릭
 
                 before_c = pixel_c
-            #print(gesture_mode)
+
             mode = gesture_mode.select_mode()
-            if mode == 1:
-                MOUSE_USE = False
-                print('MOUSE_USE False')
-                win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 100, 100, 0, 0)
-
-            if mode == 2:
-                MOUSE_USE = True
-                print('MOUSE_USE True')
-
-            if mode == 3:
-                WHEEL_USE = True
-                print('Wheel_USE True')
-
-
-            # if gesture_int > 0 and time.time() - gesture_time > 1:  # gesture int로 gesture 겹쳐지는 현상 방지
-            #     print('gi')
-            #     gesture_int = 0
-            #     gesture_time = time.time()
+            mode_setting(mode, mode_before)
+            mode_before = mode
 
         FPS = round(1/(time.time() - before_time), 2)
         before_time = time.time()

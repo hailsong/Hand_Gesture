@@ -28,7 +28,7 @@ Gesture : 손의 제스처를 판단하기 위한 랜드마크들의 Queue
 
 
 
-MOUSE_USE = False
+MOUSE_USE = True
 USE_TENSORFLOW = True
 
 

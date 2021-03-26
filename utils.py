@@ -349,6 +349,20 @@ class Gesture_mode():
         if mode_result < 17 and left_idx_1 == 10 and right_idx_1 == 10:
             mode = 3
 
+        # 손모양 사 자세
+        left_idx_1 = 0
+        for left in self.left:
+            if left == 7:
+                left_idx_1 += 1
+        right_idx_1 = 0
+        for right in self.right:
+            if right == 7:
+                right_idx_1 += 1
+        if mode_result < 17 and left_idx_1 == 10 and right_idx_1 == 10:
+            mode = 4
+
+
+
 
         return mode
 

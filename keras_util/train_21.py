@@ -62,9 +62,6 @@ prediction = model.predict(test_x[[5]])
 print(prediction[0])
 print(test_y[5])
 
-
-
-
 fig, loss_ax = plt.subplots()
 
 acc_ax = loss_ax.twinx()
