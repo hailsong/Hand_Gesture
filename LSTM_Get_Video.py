@@ -13,11 +13,13 @@ cap.set(cv2.CAP_PROP_FPS, 20)
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
 record = False
 
-FOLDERNAME = '/POSE_1/'
-VIDEO_SIZE = 1.5
+POSENAME = '2'
+FOLDERNAME = '/POSE_' + POSENAME + '/'
+VIDEO_SIZE = 40 # 프레임
 index = 1
 record_sign = False
 timer = time.time()
+frame_num = 0
 
 while True:
     ret, frame = cap.read()
@@ -37,19 +39,22 @@ while True:
         video = cv2.VideoWriter(name,
                                 fourcc, 20.0, (w, h))
         index += 1
-        timer = time.time()
-    elif time.time() - timer > VIDEO_SIZE and record == True:
+
+    elif frame_num > VIDEO_SIZE and record == True:
         print("녹화 중지")
         print("Saved to {}".format(name))
         record = False
         record_sign = True
+        frame_num = 0
         video.release()
         print('1초 뒤 재녹화, {}번쨰 영상'.format(index))
+
         time.sleep(1)
 
     if record == True:
         print("녹화 중..")
         video.write(frame)
+        frame_num += 1
 
 cap.release()
 cv2.destroyAllWindows()

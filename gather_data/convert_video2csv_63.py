@@ -258,6 +258,7 @@ if __name__ == "__main__":
     # For webcam input:
     hands = mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.5)
     print('../video_input/' + str(args.target))
+    print(str(args.target))
     cap = cv2.VideoCapture('../video_input/' + str(args.target))
 
     x_size, y_size = pyautogui.size().width, pyautogui.size().height
@@ -287,13 +288,14 @@ if __name__ == "__main__":
             # experiment_df.to_csv('video_output/' + name + '.csv', encoding='utf-8-sig')
 
             # exit()
-
+            '''
             df_sum = pd.read_csv('../video_output/' + new_name + 'output_63.csv')
             #print(df_sum)
             #print(experiment_df)
             df_sum = pd.concat([df_sum, experiment_df])
-            df_sum.to_csv('../video_output/' + new_name + 'output_63.csv')
-            print('Saved dataframe to : ', '../video_output/' + new_name + 'output_63.csv')
+            '''
+            experiment_df.to_csv('../video_output/' + new_name + new_num + '_63.csv')
+            print('Saved dataframe to : ', '../video_output/' + new_name + new_num + '_63.csv')
             exit()
 
         # Flip the image horizontally for a later selfie-view display, and convert
