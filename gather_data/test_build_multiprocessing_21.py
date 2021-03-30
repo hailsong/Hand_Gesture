@@ -18,16 +18,16 @@ column_name = ['FILENAME', 'real', 'LR', 'match',]
 for i in range(21):
     column_name.append(str(i))
 
-if not(os.path.isdir("video_output/" + dir_1)):
-    os.makedirs(os.path.join("video_output/" + dir_1 + "/"))
+if not(os.path.isdir("../video_output/" + dir_1)):
+    os.makedirs(os.path.join("../video_output/" + dir_1 + "/"))
 
-if not os.path.isdir("video_output/" + dir_1 + "/" + dir_2):
-    print("video_output/" + dir_1 + "/" + dir_2 + "/")
-    os.makedirs(os.path.join("video_output/" + dir_1 + "/" + dir_2 + "/"))
+if not os.path.isdir("../video_output/" + dir_1 + "/" + dir_2):
+    print("../video_output/" + dir_1 + "/" + dir_2 + "/")
+    os.makedirs(os.path.join("../video_output/" + dir_1 + "/" + dir_2 + "/"))
 
 experiment_df = pd.DataFrame.from_records(init_list, columns = column_name)
 #print(experiment_df)
-experiment_df.to_csv("video_output/" + FOLDER_NAME + "output_21.csv")
+experiment_df.to_csv("../video_output/" + FOLDER_NAME + "output_21.csv")
 
 # multiprocessing
 
@@ -44,8 +44,8 @@ if __name__ == '__main__':
     pool.map(file_convert, num)
     print(time.time()-start_time)
 
-    if os.path.isfile("./video_output/csv_list_21.txt"):
-        txt = open("./video_output/csv_list_21.txt", 'a')
+    if os.path.isfile("../video_output/csv_list_21.txt"):
+        txt = open("../video_output/csv_list_21.txt", 'a')
         data = FOLDER_NAME + "output_21.csv\n"
         txt.write(data)
 

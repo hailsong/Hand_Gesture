@@ -35,10 +35,6 @@ WHEEL_USE = False
 DRAG_USE = False
 USE_TENSORFLOW = True
 
-MODEL = keras.models.load_model(
-    'keras_util/model_save/my_model_21.h5'
-)
-
 '''
 mark_pixel : 각각의 랜드마크
 finger_open : 손 하나가 갖고있는 랜드마크들

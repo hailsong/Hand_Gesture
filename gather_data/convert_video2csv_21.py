@@ -23,7 +23,7 @@ import sys
 from numpy.core._multiarray_umath import ndarray
 
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-from utils import vector_magnitude, norm, get_distance, Handmark, Gesture
+from utils2 import vector_magnitude, norm, get_distance, Handmark, Gesture
 
 #Experiment 1
 import pandas as pd
@@ -264,8 +264,8 @@ if __name__ == "__main__":
 
     # For webcam input:
     hands = mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.5)
-    print('video_input/' + str(args.target))
-    cap = cv2.VideoCapture('video_input/' + str(args.target))
+    print('../video_input/' + str(args.target))
+    cap = cv2.VideoCapture('../video_input/' + str(args.target))
 
     x_size, y_size = pyautogui.size().width, pyautogui.size().height
     nowclick = False
@@ -295,12 +295,12 @@ if __name__ == "__main__":
 
             # exit()
 
-            df_sum = pd.read_csv('video_output/' + new_name + 'output_21.csv')
+            df_sum = pd.read_csv('../video_output/' + new_name + 'output_21.csv')
             # print(df_sum)
             # print(experiment_df)
             df_sum = pd.concat([df_sum, experiment_df])
-            df_sum.to_csv('video_output/' + new_name + 'output_21.csv')
-            print('Saved dataframe to : ', 'video_output/' + new_name + 'output_21.csv')
+            df_sum.to_csv('../video_output/' + new_name + 'output_21.csv')
+            print('Saved dataframe to : ', '../video_output/' + new_name + 'output_21.csv')
             exit()
 
         # Flip the image horizontally for a later selfie-view display, and convert
@@ -398,7 +398,7 @@ if __name__ == "__main__":
         cv2.imshow('MediaPipe Hands', image)
         if cv2.waitKey(5) & 0xFF == 27:
             experiment_df = experiment_df.drop(experiment_df.index[0])
-            experiment_df.to_csv('video_output/' + name + '.csv', encoding='utf-8-sig')
+            experiment_df.to_csv('../video_output/' + name + '.csv', encoding='utf-8-sig')
             print('Saved dataframe to : ', 'experiment1_' + name + '.csv')
             break
 
