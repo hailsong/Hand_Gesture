@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import glob
 import os
+from keras.preprocessing import sequence
+
 
 def load_data(filename):
     f = open(filename, 'r')
@@ -15,7 +17,8 @@ def load_data(filename):
         line = f.readline()
         if not line: break
         print(line)
-        label.append(line.split('/')[-2])
+        label_1 = line.split('/')[-2]
+        label.append(int(label_1.split('_')[-1]))
         _list.append(line[:-1])
     f.close()
     print(_list)
@@ -47,7 +50,7 @@ print(len(df), len(label))
 
 frame_size = len(df[0])
 data_size = len(df[0][0])
-print(frame_size)
+print(frame_size, data_size)
 
 test_ratio = 0.2
 test_num = int(len(df) * 0.2)
@@ -59,11 +62,11 @@ test_y = []
 
 for i in range(0, data_size):
     if i % 5 == 0:
-        test_x.append(df[i])
-        test_y.append(label[i])
+        test_x.append(np.array(df[i]))
+        test_y.append(np.array(label[i]))
     else:
-        train_x.append(df[i])
-        train_y.append(label[i])
+        train_x.append(np.array(df[i]))
+        train_y.append(np.array(label[i]))
 
 #
 # col_name = [str(i) for i in range(0, 63)]
@@ -86,21 +89,32 @@ for i in range(0, data_size):
 
 print(len(train_y), len(test_y)) #1에서 14사이 정수 label
 
+print('ㅇㅇㅇㅇ', train_x)
+
 model = keras.Sequential([
-    keras.layers.Dense(63, activation = 'relu'),
-    keras.layers.Dense(400, activation = 'relu'),
-    keras.layers.Dense(100, activation='relu'),
-    keras.layers.Dense(60, activation='relu'),
-    keras.layers.Dense(30, activation='relu'),
-    #keras.layers.Dense(30, activation = 'relu'),
-    keras.layers.Dense(15, activation='softmax')
-])
+    # keras.layers.Dense(63, activation = 'relu'),
+    # keras.layers.Dense(400, activation = 'relu'),
+    # keras.layers.Dense(100, activation='relu'),
+    # keras.layers.Dense(60, activation='relu'),
+    # keras.layers.Dense(30, activation='relu'),
+    # #keras.layers.Dense(30, activation = 'relu'),
+    # keras.layers.Dense(15, activation='softmax')
+    keras.layers.Embedding(2, 100),
+    keras.layers.LSTM(200,
+                      input_shape=(21, 63),
+                      activation = 'relu',
+                      return_sequences=False),
+    keras.layers.Dense(50, activation='relu'),
+    keras.layers.Dense(2, activation = 'softmax')
+    ])
 
 model.compile(optimizer='adam',
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
 
-hist = model.fit(train_x, train_y, epochs=100)
+# print(train_x[0].shape, train_y[0])
+# exit()
+hist = model.fit(train_x, train_y, epochs=10)
 
 test_loss, test_acc = model.evaluate(test_x,  test_y, verbose=2)
 

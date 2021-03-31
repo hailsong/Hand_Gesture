@@ -369,7 +369,7 @@ if __name__ == "__main__":
                 if (get_distance(pixel_c, before_c) < get_distance(mark_p0, mark_p5)) and\
                         sum(finger_open_[3:]) == 0 and\
                         finger_open_[1] == 1 and\
-                        len(LR_idx) == 5and\
+                        len(LR_idx) == 5 and\
                         mouse_use == True:
                     pixel_c.mousemove()
 

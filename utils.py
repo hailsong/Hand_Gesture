@@ -687,6 +687,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1440)
     before_time = time.time()
 
+
     click_tr = 0
     mode = 0
     mode_before = 0
