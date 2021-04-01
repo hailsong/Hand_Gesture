@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pybithumb
 
-data = pybithumb.get_ohlcv('ETH', interval="hour6")
+data = pybithumb.get_ohlcv('ADA', interval="hour6")
 df = pd.DataFrame(data)
 print(df)
 
-df = df[-800:]
+df = df[-1800:]
 plt.figure(figsize=(16, 9))
 sns.lineplot(y=df['close'], x=df.index)
 plt.xlabel('time')
@@ -84,7 +84,7 @@ test_label = test_label[0]
 
 prod = 1
 
-before_day = 7
+before_day = 40
 period = 4
 
 for i in range(before_day * period):
@@ -93,9 +93,10 @@ for i in range(before_day * period):
         temp = (test_label[i+1]/test_label[i]) * (1 - 0.05 / 100)
         prod *= temp
         print(temp, prod)
+print(temp, prod, test_label[before_day*period + 1] / test_label[0])
 
-plt.figure(figsize=(12, 9))
-plt.plot(test_label[-before_day * period:], label = 'actual')
-plt.plot(pred[-before_day * period:], label = 'prediction')
-plt.legend()
-plt.show()
+# plt.figure(figsize=(12, 9))
+# plt.plot(test_label[-before_day * period:], label = 'actual')
+# plt.plot(pred[-before_day * period:], label = 'prediction')
+# plt.legend()
+# plt.show()

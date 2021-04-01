@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pybithumb
 
-data = pybithumb.get_ohlcv('XRP', interval="hour6")
+data = pybithumb.get_ohlcv('ADA', interval="hour6")
 df = pd.DataFrame(data)
 print(df)
 
@@ -61,7 +61,6 @@ print(test_feature.shape, test_label.shape)
 test_feature, test_label = make_dataset(test_feature, test_label, 20)
 print(test_feature.shape, test_label.shape)
 
-
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.callbacks import EarlyStopping, ModelCheckpoint
@@ -75,7 +74,6 @@ model.add(LSTM(16,
                activation='relu',
                return_sequences=False)
           )
-
 model.add(Dense(1))
 
 import os
@@ -86,7 +84,6 @@ early_stop = EarlyStopping(monitor='val_loss', patience=5)
 model_path = './'
 filename = os.path.join(model_path, 'tmp_checkpoint.h5')
 checkpoint = ModelCheckpoint(filename, monitor='val_loss', verbose=1, save_best_only=True, mode='auto')
-
 
 history = model.fit(x_train, y_train,
                                     epochs=200,
