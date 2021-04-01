@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pybithumb
 
-data = pybithumb.get_ohlcv('BTC', interval="hour6")
+data = pybithumb.get_ohlcv('XRP', interval="hour6")
 df = pd.DataFrame(data)
 print(df)
 
-df = df[-800:]
+df = df[-365*4*3:]
 plt.figure(figsize=(16, 9))
 sns.lineplot(y=df['close'], x=df.index)
 plt.xlabel('time')

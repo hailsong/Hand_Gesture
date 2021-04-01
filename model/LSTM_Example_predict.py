@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pybithumb
 
-data = pybithumb.get_ohlcv('BTC', interval="hour6")
+data = pybithumb.get_ohlcv('ETH', interval="hour6")
 df = pd.DataFrame(data)
 print(df)
 
@@ -61,7 +61,6 @@ print(test_feature.shape, test_label.shape)
 test_feature, test_label = make_dataset(test_feature, test_label, 20)
 print(test_feature.shape, test_label.shape)
 
-
 from keras.utils import np_utils
 from keras.datasets import mnist
 from keras.models import Sequential
@@ -84,17 +83,19 @@ pred = pred[0]
 test_label = test_label[0]
 
 prod = 1
-for i in range(28):
-    print(pred[i+1], pred[i])
-    if pred[i+1] - pred[i] > 0:
-        prod *= (test_label[i+1]/test_label[i]) * (1 - 0.1 / 100)
-        print(prod)
 
+before_day = 7
+period = 4
 
+for i in range(before_day * period):
+    #print(pred[i+1], pred[i])
+    if pred[i+1]/pred[i] > 1:
+        temp = (test_label[i+1]/test_label[i]) * (1 - 0.05 / 100)
+        prod *= temp
+        print(temp, prod)
 
-
-# plt.figure(figsize=(12, 9))
-# plt.plot(test_label, label = 'actual')
-# plt.plot(pred, label = 'prediction')
-# plt.legend()
-# plt.show()
+plt.figure(figsize=(12, 9))
+plt.plot(test_label[-before_day * period:], label = 'actual')
+plt.plot(pred[-before_day * period:], label = 'prediction')
+plt.legend()
+plt.show()
