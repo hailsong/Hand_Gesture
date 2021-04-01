@@ -25,6 +25,10 @@ if __name__ == "__main__":
     process1.start()
     process2.start()
     process3.start()
+    while process1.is_alive():
+        pass
+    process2.terminate()
+    process3.terminate()
     process1.join()
     process2.join()
     process3.join()
