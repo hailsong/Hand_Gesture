@@ -420,7 +420,7 @@ def process_static_gesture(array_for_static, value_for_static):
         except:
             pass
 
-def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r):
+def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r, test_np_array):
     global image
     global MOUSE_USE
     global CLICK_USE
@@ -843,8 +843,14 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             mode_before = mode
 
         FPS = round(1/(time.time() - before_time), 2)
+        print(FPS)
         before_time = time.time()
         image = cv2.putText(image, str(FPS), (10, 30), cv2.FONT_HERSHEY_DUPLEX, 1, (0,0,0), 2, cv2.LINE_AA)
+        #test_np_array = np.array(image).tolist()
+        #print(image.shape)
+        #print(np.array(image).shape)
+        #print(len(test_np_array[0]))
+        #print(len(test_np_array))
         cv2.imshow('Gesture_Detection_Hail Song', image)
 
         if cv2.waitKey(5) & 0xFF == 27:
@@ -854,10 +860,15 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     hands.close()
     cap.release()
 
+def GUI(image):
+    while 1:
+        print(type(image))
+        print(image)
+        time.sleep(10)
 
 if __name__ == '__main__':
     print("This is util set program, it works well... maybe... XD")
 
-    print('Running main_63input.py...')
+    print('Running main_18input_GUI.py...')
     from os import system
-    system('python main_63input.py')
+    system('python main_18input_GUI.py')
