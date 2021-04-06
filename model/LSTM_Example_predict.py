@@ -4,16 +4,17 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pybithumb
 
-data = pybithumb.get_ohlcv('ADA', interval="hour6")
+data = pybithumb.get_ohlcv('LTC', interval="minute1")
 df = pd.DataFrame(data)
 print(df)
+print(df.shape)
+# exit()
 
-df = df[-1800:]
+df = df[-1400:]
 plt.figure(figsize=(16, 9))
 sns.lineplot(y=df['close'], x=df.index)
 plt.xlabel('time')
 plt.ylabel('price')\
-
 #plt.show()
 
 from sklearn.preprocessing import MinMaxScaler
@@ -81,15 +82,18 @@ print(test_label[0].shape)
 
 pred = pred[0]
 test_label = test_label[0]
+print(test_label)
+print(pred)
+exit()
 
 prod = 1
 
 before_day = 40
-period = 4
+period = 1
 
 for i in range(before_day * period):
     #print(pred[i+1], pred[i])
-    if pred[i+1]/pred[i] > 1:
+    if pred[i+1]/pred[i] > 1.005:
         temp = (test_label[i+1]/test_label[i]) * (1 - 0.05 / 100)
         prod *= temp
         print(temp, prod)

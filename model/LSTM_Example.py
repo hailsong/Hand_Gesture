@@ -4,11 +4,13 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pybithumb
 
-data = pybithumb.get_ohlcv('ADA', interval="hour6")
+data = pybithumb.get_ohlcv('LTC', interval="minute1")
 df = pd.DataFrame(data)
 print(df)
+print(df.shape)
+# exit()
 
-df = df[-365*4*3:]
+df = df[-1400:]
 plt.figure(figsize=(16, 9))
 sns.lineplot(y=df['close'], x=df.index)
 plt.xlabel('time')

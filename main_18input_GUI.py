@@ -30,7 +30,7 @@ if __name__ == "__main__":
     process2 = Process(target=process_static_gesture, args=(shared_array_l, static_num_l))
     process3 = Process(target=process_static_gesture, args=(shared_array_r, static_num_r))
     process4 = Process(target=GUI, args=([test_np_array]))
-    #process4 = GUi(asdfasdfasdf
+    #process4 = GUi
 
     process1.start()
     process2.start()

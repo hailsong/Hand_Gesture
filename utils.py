@@ -420,7 +420,7 @@ def process_static_gesture(array_for_static, value_for_static):
         except:
             pass
 
-def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r, test_np_array):
+def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r, test_np_array = []):
     global image
     global MOUSE_USE
     global CLICK_USE
@@ -843,7 +843,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             mode_before = mode
 
         FPS = round(1/(time.time() - before_time), 2)
-        print(FPS)
+        #print(FPS)
         before_time = time.time()
         image = cv2.putText(image, str(FPS), (10, 30), cv2.FONT_HERSHEY_DUPLEX, 1, (0,0,0), 2, cv2.LINE_AA)
         #test_np_array = np.array(image).tolist()
