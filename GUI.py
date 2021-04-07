@@ -24,7 +24,6 @@ class opcv(QThread):
         self.capture.release()
         #self.wait()
 
-
 class Ui_MainWindow(QObject):
 
     def setupUi(self, MainWindow):
@@ -130,9 +129,9 @@ class Ui_MainWindow(QObject):
         self.pushButton_5.setSizePolicy(sizePolicy)
         self.pushButton_5.setStyleSheet(
             '''
-            QPushButton{image:url(screenshots.png); border:0px;}
-            QPushButton:hover{image:url(screenshotshover.png); border:0px;}
-            #QPushButton:checked{image:url(screenshotsing.png); border:0px;}
+            QPushButton{image:url(./image/screenshots.png); border:0px;}
+            QPushButton:hover{image:url(./image/screenshotshover.png); border:0px;}
+            #QPushButton:checked{image:url(./image/screenshotsing.png); border:0px;}
             ''')
         self.pushButton_5.setCheckable(False)
         self.pushButton_5.setObjectName("pushButton_5")
@@ -147,9 +146,9 @@ class Ui_MainWindow(QObject):
         self.pushButton_6.setSizePolicy(sizePolicy)
         self.pushButton_6.setStyleSheet(
             '''
-            QPushButton{image:url(power.png); border:0px;}
-            QPushButton:hover{image:url(powerhover.png); border:0px;}
-            QPushButton:checked{image:url(powering.png); border:0px;}
+            QPushButton{image:url(./image/power.png); border:0px;}
+            QPushButton:hover{image:url(./image/powerhover.png); border:0px;}
+            QPushButton:checked{image:url(./image/powering.png); border:0px;}
             ''')
         self.pushButton_6.setCheckable(True)
         self.pushButton_6.setObjectName("pushButton_6")
@@ -161,13 +160,13 @@ class Ui_MainWindow(QObject):
         self.label = QtWidgets.QLabel(self.centralwidget)
         self.label.setGeometry(QRect(660, 430, 200, 60))
         self.label.setText("")
-        self.label.setPixmap(QtGui.QPixmap("인바디.png"))
+        self.label.setPixmap(QtGui.QPixmap("./image/인바디.png"))
         self.label.setScaledContents(True)
         self.label.setObjectName("label")
 
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
         self.label_2.setGeometry(QRect(10, 20, 640, 480))
-        self.label_2.setPixmap(QtGui.QPixmap("default.jpg")) ## <-------------- 비디오 프레임이 들어가야함
+        self.label_2.setPixmap(QtGui.QPixmap("./image/default.jpg")) ## <-------------- 비디오 프레임이 들어가야함
         self.label_2.setScaledContents(True)
         self.label_2.setObjectName("label_2")
 
@@ -264,7 +263,7 @@ class Ui_MainWindow(QObject):
     def screenshot(self):
         print('clicked')
         now = datetime.datetime.now().strftime("%d_%H-%M-%S")
-        filename = str(now) + ".jpg"
+        filename = './screenshot/' + str(now) + ".jpg"
         print(filename)
         image = self.label_2.pixmap()
         image.save(filename, 'jpg')
@@ -292,10 +291,7 @@ class Ui_MainWindow(QObject):
             self.button6_checked.emit(True)
         else:
             self.button6_checked.emit(False)
-            self.label_2.setPixmap(QtGui.QPixmap("default.jpg"))
-
-
-
+            self.label_2.setPixmap(QtGui.QPixmap("./image/default.jpg"))
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)

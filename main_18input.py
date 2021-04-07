@@ -11,8 +11,6 @@ if __name__ == "__main__":
     print("Copyright 2021. INBODY inc. all rights reserved")
     print("Contact : shi@inbody.com, HAIL SONG")
 
-    # width = 1024 # 너비
-    # height= 600 # 높이
     shared_array_l = Array('d', [0. for _ in range(18)])
     static_num_l = Value('i', 0)
     shared_array_r = Array('d', [0. for _ in range(18)])
