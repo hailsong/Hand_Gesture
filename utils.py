@@ -6,8 +6,8 @@ import win32api, win32con, time
 import numpy as np
 from PIL import ImageFont, ImageDraw, Image
 from tensorflow import keras
-
 import tensorflow as tf
+print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
 from mediapipe.framework.formats import location_data_pb2
 
 physical_devices = tf.config.list_physical_devices('GPU')

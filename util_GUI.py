@@ -440,15 +440,54 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     class opcv(QThread):
 
         change_pixmap_signal = pyqtSignal(np.ndarray)
+        mode_signal = pyqtSignal(int)
 
         def __init__(self):
             super().__init__()
+
+        @pyqtSlot(int, int)
+        def mode_setting(self, mode, mode_before):
+            global MOUSE_USE, CLICK_USE, DRAG_USE, WHEEL_USE
+
+            if mode != mode_before:
+                if mode == 1:
+                    MOUSE_USE = False
+                    CLICK_USE = False
+                    DRAG_USE = False
+                    WHEEL_USE = False
+                    print('MODE 1, 대기 모드')
+                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 100, 100, 0, 0)
+
+                if mode == 2:
+                    MOUSE_USE = True
+                    CLICK_USE = True
+                    DRAG_USE = False
+                    WHEEL_USE = False
+                    print('MODE 2, 기본 발표 모드')
+
+                if mode == 3:
+                    MOUSE_USE = True
+                    CLICK_USE = False
+                    DRAG_USE = True
+                    WHEEL_USE = False
+                    win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
+                    win32api.keybd_event(0x50, 0, 0, 0)  # P 누르기.
+                    time.sleep(0.1)
+                    win32api.keybd_event(0xa2, 0, win32con.KEYEVENTF_KEYUP, 0)
+                    win32api.keybd_event(0x50, 0, win32con.KEYEVENTF_KEYUP, 0)
+                    print('MODE 3, 필기 발표 모드')
+
+                if mode == 4:
+                    MOUSE_USE = True
+                    CLICK_USE = True
+                    DRAG_USE = True
+                    WHEEL_USE = True
+                    print('MODE 4, 웹서핑 발표 모드')
 
         @pyqtSlot(bool)
         def send_img(self, bool_state):  # p를 보는 emit 함수
             self.capture = cv2.VideoCapture(0, cv2.CAP_DSHOW)
             cap = self.capture
-
             # For webcam input:
             hands = mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.6)
 
@@ -656,42 +695,43 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         image = np.where(c_mask > 0, img_all_blurred, image)
                 return image
 
-            def mode_setting(mode, mode_before):
-                global MOUSE_USE, CLICK_USE, DRAG_USE, WHEEL_USE
-                if mode != mode_before:
-                    if mode == 1:
-                        MOUSE_USE = False
-                        CLICK_USE = False
-                        DRAG_USE = False
-                        WHEEL_USE = False
-                        print('MODE 1, 대기 모드')
-                        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 100, 100, 0, 0)
-
-                    if mode == 2:
-                        MOUSE_USE = True
-                        CLICK_USE = True
-                        DRAG_USE = False
-                        WHEEL_USE = False
-                        print('MODE 2, 기본 발표 모드')
-
-                    if mode == 3:
-                        MOUSE_USE = True
-                        CLICK_USE = False
-                        DRAG_USE = True
-                        WHEEL_USE = False
-                        win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
-                        win32api.keybd_event(0x50, 0, 0, 0)  # P 누르기.
-                        time.sleep(0.1)
-                        win32api.keybd_event(0xa2, 0, win32con.KEYEVENTF_KEYUP, 0)
-                        win32api.keybd_event(0x50, 0, win32con.KEYEVENTF_KEYUP, 0)
-                        print('MODE 3, 필기 발표 모드')
-
-                    if mode == 4:
-                        MOUSE_USE = True
-                        CLICK_USE = True
-                        DRAG_USE = True
-                        WHEEL_USE = True
-                        print('MODE 4, 웹서핑 발표 모드')
+            # def mode_setting(mode, mode_before):
+            #     global MOUSE_USE, CLICK_USE, DRAG_USE, WHEEL_USE
+            #
+            #     if mode != mode_before:
+            #         if mode == 1:
+            #             MOUSE_USE = False
+            #             CLICK_USE = False
+            #             DRAG_USE = False
+            #             WHEEL_USE = False
+            #             print('MODE 1, 대기 모드')
+            #             win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 100, 100, 0, 0)
+            #
+            #         if mode == 2:
+            #             MOUSE_USE = True
+            #             CLICK_USE = True
+            #             DRAG_USE = False
+            #             WHEEL_USE = False
+            #             print('MODE 2, 기본 발표 모드')
+            #
+            #         if mode == 3:
+            #             MOUSE_USE = True
+            #             CLICK_USE = False
+            #             DRAG_USE = True
+            #             WHEEL_USE = False
+            #             win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
+            #             win32api.keybd_event(0x50, 0, 0, 0)  # P 누르기.
+            #             time.sleep(0.1)
+            #             win32api.keybd_event(0xa2, 0, win32con.KEYEVENTF_KEYUP, 0)
+            #             win32api.keybd_event(0x50, 0, win32con.KEYEVENTF_KEYUP, 0)
+            #             print('MODE 3, 필기 발표 모드')
+            #
+            #         if mode == 4:
+            #             MOUSE_USE = True
+            #             CLICK_USE = True
+            #             DRAG_USE = True
+            #             WHEEL_USE = True
+            #             print('MODE 4, 웹서핑 발표 모드')
 
             gesture_int = 0
 
@@ -708,9 +748,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             before_time = time.time()
 
             click_tr = 0
-            mode = 0
             mode_before = 0
             p_key_ready = False
+            mode = 0
+
             while bool_state and cap.isOpened():
                 #print('cam')
                 success, image = cap.read()
@@ -748,7 +789,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     # TODO 지금 API에서 사용하는 자료형때문에 살짝 꼬였는데 mark_p(list)의 마지막 원소를 lR_idx(left or right)로 표현해놨음.
                     for i in range(len(mark_p_list)):  # for문 한 번 도는게 한 손에 대한 것임
                         LR_idx = results.multi_handedness[i].classification[0].label
-                        LR_idx = LR_idx[:-1]
+                        #LR_idx = LR_idx[:-1]
                         # print(LR_idx)
                         image = cv2.putText(image, LR_idx[:], (int(mark_p_list[i][17].x * image.shape[1]), int(mark_p_list[i][17].y * image.shape[0])), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
                         mark_p_list[i].append(LR_idx)
@@ -856,8 +897,14 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         before_c = pixel_c
 
                     mode = gesture_mode.select_mode()
-                    mode_setting(mode, mode_before)
+                    self.mode_setting(mode, mode_before)
+                    if mode != mode_before:
+                        self.mode_signal.emit(int(mode-1))
                     mode_before = mode
+                    # mode2 = self.inv_push_button()
+                    # if mode2 != None :
+                    #     mode_setting(mode2, mode_before)
+                    #     mode_before = mode2
 
                 FPS = round(1 / (time.time() - before_time), 2)
                 # print(FPS)
@@ -871,7 +918,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
                 # cv2.imshow('Gesture_Detection_Hail Song', image)
                 self.change_pixmap_signal.emit(image)
-
                 if cv2.waitKey(5) & 0xFF == 27:
                     print('exitcode : 100')
                     exit()
@@ -879,13 +925,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             hands.close()
             self.capture.release()
-            # while bool_state and cv2.waitKey(33) < 0:  # status가 True일 동안
-            #     ret, cv_img = self.capture.read()
-            #     if ret:
-            #         cv_img = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
-            #         self.change_pixmap_signal.emit(cv_img)
-            # self.capture.release()
-            # self.wait()
 
     class Ui_MainWindow(QObject):
 
@@ -1052,13 +1091,24 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             self.pushButton_6.toggled.connect(lambda: self.checked(MainWindow))
             self.button6_checked.connect(self.thread.send_img)
-
             self.thread.change_pixmap_signal.connect(self.update_img)
+            self.thread.mode_signal.connect(self.push_button)
+            self.click_mode.connect(self.thread.mode_setting)
 
             self.thread.start()
-
             self.retranslateUi(MainWindow)
             QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+        @pyqtSlot(int)
+        def push_button(self, integer):
+            if integer != -1:
+                B_list = [self.pushButton, self.pushButton_2,
+                               self.pushButton_3, self.pushButton_4]
+                if not B_list[integer].isChecked():
+                    B_list[integer].toggle()
+            else :
+                pass
+
 
         def retranslateUi(self, MainWindow):
             _translate = QtCore.QCoreApplication.translate
@@ -1074,12 +1124,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.checkBox_3.setText(_translate("MainWindow", "드래그"))
             self.checkBox_4.setText(_translate("MainWindow", "스크롤"))
 
+        click_mode = pyqtSignal(int, int)
+
         def togglebutton(self, MainWindow, integer):
-            btn1 = self.pushButton
-            btn2 = self.pushButton_2
-            btn3 = self.pushButton_3
-            btn4 = self.pushButton_4
-            Button_list = [btn1, btn2, btn3, btn4]
+            Button_list = [self.pushButton, self.pushButton_2,
+                           self.pushButton_3, self.pushButton_4]
             self.checkBox.setEnabled(True)
             self.checkBox_2.setEnabled(True)
             self.checkBox_3.setEnabled(True)
@@ -1111,6 +1160,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     self.checkBox_4.setChecked(True)
                 else:
                     pass
+                self.click_mode.emit(integer + 1, 0)
             else:
                 self.checkBox.setChecked(False)
                 self.checkBox_2.setChecked(False)
