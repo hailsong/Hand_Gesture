@@ -717,7 +717,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 if not success:
                     print("Ignoring empty camera frame.")
                     # If loading a video, use 'break' instead of 'continue'.
-                    continue
+                    break
 
                 # Flip the image horizontally for a later selfie-view display, and convert
                 # the BGR image to RGB.

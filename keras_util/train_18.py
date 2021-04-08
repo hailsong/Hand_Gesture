@@ -40,6 +40,9 @@ test_y = test_y.astype(np.int64)
 
 print(len(train_y), len(test_y)) #1에서 14사이 정수 label
 
+print(train_x)
+print(train_y)
+
 model = keras.Sequential([
     keras.layers.Dense(18, activation = 'relu'),
     keras.layers.Dense(70, activation = 'relu'),
