@@ -1,5 +1,7 @@
 venv_hail_37/
+venv/
 pyqt/
 .exe
 .spec
 .mp4
+.avi
