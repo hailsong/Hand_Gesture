@@ -449,10 +449,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             super().__init__()
 
         @pyqtSlot(int, int)
-        def mode_setting(self, mode, mode_before):
+        def mode_setting(self, mode, mode_before): #1
             global MOUSE_USE, CLICK_USE, DRAG_USE, WHEEL_USE
-
             if mode != mode_before:
+                self.mode_signal.emit(int(mode - 1)) #2 / #2-4
                 if mode == 1:
                     MOUSE_USE = False
                     CLICK_USE = False
@@ -478,7 +478,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     time.sleep(0.1)
                     win32api.keybd_event(0xa2, 0, win32con.KEYEVENTF_KEYUP, 0)
                     win32api.keybd_event(0x50, 0, win32con.KEYEVENTF_KEYUP, 0)
-                    print('MODE 3, 필기 발표 모드')
+                    print('MODE 3, 필기 발표 모드') #3, #2-5
 
                 if mode == 4:
                     MOUSE_USE = True
@@ -698,43 +698,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         image = np.where(c_mask > 0, img_all_blurred, image)
                 return image
 
-            # def mode_setting(mode, mode_before):
-            #     global MOUSE_USE, CLICK_USE, DRAG_USE, WHEEL_USE
-            #
-            #     if mode != mode_before:
-            #         if mode == 1:
-            #             MOUSE_USE = False
-            #             CLICK_USE = False
-            #             DRAG_USE = False
-            #             WHEEL_USE = False
-            #             print('MODE 1, 대기 모드')
-            #             win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 100, 100, 0, 0)
-            #
-            #         if mode == 2:
-            #             MOUSE_USE = True
-            #             CLICK_USE = True
-            #             DRAG_USE = False
-            #             WHEEL_USE = False
-            #             print('MODE 2, 기본 발표 모드')
-            #
-            #         if mode == 3:
-            #             MOUSE_USE = True
-            #             CLICK_USE = False
-            #             DRAG_USE = True
-            #             WHEEL_USE = False
-            #             win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
-            #             win32api.keybd_event(0x50, 0, 0, 0)  # P 누르기.
-            #             time.sleep(0.1)
-            #             win32api.keybd_event(0xa2, 0, win32con.KEYEVENTF_KEYUP, 0)
-            #             win32api.keybd_event(0x50, 0, win32con.KEYEVENTF_KEYUP, 0)
-            #             print('MODE 3, 필기 발표 모드')
-            #
-            #         if mode == 4:
-            #             MOUSE_USE = True
-            #             CLICK_USE = True
-            #             DRAG_USE = True
-            #             WHEEL_USE = True
-            #             print('MODE 4, 웹서핑 발표 모드')
 
             gesture_int = 0
 
@@ -901,8 +864,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                     mode = gesture_mode.select_mode()
                     self.mode_setting(mode, mode_before)
-                    if mode != mode_before:
-                        self.mode_signal.emit(int(mode-1))
                     mode_before = mode
                     # mode2 = self.inv_push_button()
                     # if mode2 != None :
@@ -1093,23 +1054,29 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.thread = opcv()
 
             self.pushButton_6.toggled.connect(lambda: self.checked(MainWindow))
+            self.click_mode.connect(self.thread.mode_setting)
             self.button6_checked.connect(self.thread.send_img)
             self.thread.change_pixmap_signal.connect(self.update_img)
             self.thread.mode_signal.connect(self.push_button)
-            self.click_mode.connect(self.thread.mode_setting)
+
 
             self.thread.start()
             self.retranslateUi(MainWindow)
             QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+        From_button = False
+
         @pyqtSlot(int)
-        def push_button(self, integer):
+        def push_button(self, integer): #2-1
+            global From_button
             if integer != -1:
                 B_list = [self.pushButton, self.pushButton_2,
                                self.pushButton_3, self.pushButton_4]
                 if not B_list[integer].isChecked():
-                    B_list[integer].toggle()
+                    From_button = True
+                    B_list[integer].toggle() # #2-2
             else :
+                From_button = False
                 pass
 
 
@@ -1130,17 +1097,20 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         click_mode = pyqtSignal(int, int)
 
         def togglebutton(self, MainWindow, integer):
+            global From_button
             Button_list = [self.pushButton, self.pushButton_2,
                            self.pushButton_3, self.pushButton_4]
+            Before_mode_list = []
             self.checkBox.setEnabled(True)
             self.checkBox_2.setEnabled(True)
             self.checkBox_3.setEnabled(True)
             self.checkBox_4.setEnabled(True)
-            if Button_list[integer].isChecked():
+            if Button_list[integer].isChecked(): #2-3
                 Button_list.pop(integer)
                 for button in Button_list:
                     if button.isChecked():
                         button.toggle()
+                        Before_mode_list.append(button)
                 if integer == 0:
                     self.checkBox.setChecked(False)
                     self.checkBox_2.setChecked(False)
@@ -1163,7 +1133,23 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     self.checkBox_4.setChecked(True)
                 else:
                     pass
-                self.click_mode.emit(integer + 1, 0)
+
+                if not From_button:
+                    if Before_mode_list[0] == self.pushButton:
+                        self.click_mode.emit(integer+1,1)
+                    elif Before_mode_list[0] == self.pushButton_2:
+                        self.click_mode.emit(integer + 1, 2)
+                    elif Before_mode_list[0] == self.pushButton_3:
+                        self.click_mode.emit(integer + 1, 3)
+                    elif Before_mode_list[0] == self.pushButton_4:
+                        self.click_mode.emit(integer + 1, 4)
+                    else :
+                        self.click_mode.emit(integer + 1, 0)
+
+                else:
+                    self.click_mode.emit(integer + 1, integer + 1)
+                    From_button = False
+
             else:
                 self.checkBox.setChecked(False)
                 self.checkBox_2.setChecked(False)
