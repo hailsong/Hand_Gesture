@@ -17,10 +17,12 @@ from PyQt5.QtCore import QThread, QObject, QRect, pyqtSlot, pyqtSignal
 import datetime
 import sys
 
-
-physical_devices = tf.config.list_physical_devices('GPU')
-#print(physical_devices)
-tf.config.experimental.set_memory_growth(physical_devices[0], True)
+try:
+    physical_devices = tf.config.list_physical_devices('GPU')
+    #print(physical_devices)
+    tf.config.experimental.set_memory_growth(physical_devices[0], True)
+except:
+    pass
 
 # For webcam input:
 # hands = mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5)
@@ -429,6 +431,7 @@ def process_static_gesture(array_for_static, value_for_static):
             pass
 
 def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r, test_np_array = []):
+
     global image
     global MOUSE_USE
     global CLICK_USE

@@ -1,5 +1,6 @@
 import numpy as np
 from util_GUI import process_static_gesture, initialize
+import tensorflow as tf
 
 from multiprocessing import Process, Value, Array
 import os
@@ -11,6 +12,10 @@ if __name__ == "__main__":
 
     print("Copyright 2021. INBODY inc. all rights reserved")
     print("Contact : shi@inbody.com, HAIL SONG")
+
+    #physical_devices = tf.config.list_physical_devices('GPU')
+    #print(physical_devices)
+    #tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
     # width = 1024 # 너비
     # height= 600 # 높이
