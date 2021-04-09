@@ -889,11 +889,16 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
     class Ui_MainWindow(QObject):
 
+        click_mode = pyqtSignal(int, int)
+        button6_checked = pyqtSignal(bool)
+
         def setupUi(self, MainWindow):
 
             MainWindow.setObjectName("MainWindow")
             MainWindow.resize(870, 550)
             MainWindow.setStyleSheet("background-color: rgb(0, 0, 0);")
+
+            self.From_button = False
 
             self.centralwidget = QtWidgets.QWidget(MainWindow)
             self.centralwidget.setObjectName("centralwidget")
@@ -910,7 +915,13 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             font.setBold(True)
             font.setWeight(75)
             self.pushButton.setFont(font)
-            self.pushButton.setStyleSheet("background-color: rgb(225, 225, 225);")
+            self.pushButton.setStyleSheet("border-radius : 30; border : 2px solid white")
+            self.pushButton.setStyleSheet(
+                '''
+                QPushButton{image:url(./image/Mode1.png); border:0px;}
+                QPushButton:hover{image:url(./image/Mode1hover.png); border:0px;}
+                QPushButton:checked{image:url(./image/Mode1ing.png); border:0px;}
+                ''')
             self.pushButton.setCheckable(True)
             self.pushButton.setObjectName("pushButton")
 
@@ -920,7 +931,13 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             font.setBold(True)
             font.setWeight(75)
             self.pushButton_2.setFont(font)
-            self.pushButton_2.setStyleSheet("background-color: rgb(225, 225, 225);")
+            self.pushButton_2.setStyleSheet("border-radius : 30; border : 2px solid white")
+            self.pushButton_2.setStyleSheet(
+                '''
+                QPushButton{image:url(./image/Mode2.png); border:0px;}
+                QPushButton:hover{image:url(./image/Mode2hover.png); border:0px;}
+                QPushButton:checked{image:url(./image/Mode2ing.png); border:0px;}
+                ''')
             self.pushButton_2.setCheckable(True)
             self.pushButton_2.setObjectName("pushButton_2")
 
@@ -930,7 +947,13 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             font.setBold(True)
             font.setWeight(75)
             self.pushButton_3.setFont(font)
-            self.pushButton_3.setStyleSheet("background-color: rgb(225, 225, 225);")
+            self.pushButton_3.setStyleSheet("border-radius : 30; border : 2px solid white")
+            self.pushButton_3.setStyleSheet(
+                '''
+                QPushButton{image:url(./image/Mode3.png); border:0px;}
+                QPushButton:hover{image:url(./image/Mode3hover.png); border:0px;}
+                QPushButton:checked{image:url(./image/Mode3ing.png); border:0px;}
+                ''')
             self.pushButton_3.setCheckable(True)
             self.pushButton_3.setObjectName("pushButton_3")
 
@@ -940,7 +963,13 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             font.setBold(True)
             font.setWeight(75)
             self.pushButton_4.setFont(font)
-            self.pushButton_4.setStyleSheet("background-color: rgb(225, 225, 225);")
+            self.pushButton_4.setStyleSheet("border-radius : 30; border : 2px solid white")
+            self.pushButton_4.setStyleSheet(
+                '''
+                QPushButton{image:url(./image/Mode4.png); border:0px;}
+                QPushButton:hover{image:url(./image/Mode4hover.png); border:0px;}
+                QPushButton:checked{image:url(./image/Mode4ing.png); border:0px;}
+                ''')
             self.pushButton_4.setCheckable(True)
             self.pushButton_4.setObjectName("pushButton_4")
 
@@ -1019,6 +1048,12 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_5.clicked.connect(self.screenshot)
             self.pushButton_5.raise_()
 
+            self.pushButton.setEnabled(False)
+            self.pushButton_2.setEnabled(False)
+            self.pushButton_3.setEnabled(False)
+            self.pushButton_4.setEnabled(False)
+            self.pushButton_5.setEnabled(False)
+
             self.label = QtWidgets.QLabel(self.centralwidget)
             self.label.setGeometry(QRect(660, 430, 200, 60))
             self.label.setText("")
@@ -1061,40 +1096,30 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.retranslateUi(MainWindow)
             QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-        From_button = False
-
-        @pyqtSlot(int)
-        def push_button(self, integer): #2-1
-            global From_button
-            if integer != -1:
-                B_list = [self.pushButton, self.pushButton_2,
-                               self.pushButton_3, self.pushButton_4]
-                if not B_list[integer].isChecked():
-                    From_button = True
-                    B_list[integer].toggle() # #2-2
-            else :
-                From_button = False
-                pass
-
-
         def retranslateUi(self, MainWindow):
             _translate = QtCore.QCoreApplication.translate
             MainWindow.setWindowTitle(_translate("MainWindow", "Handtracking"))
             self.groupBox.setTitle(_translate("MainWindow", "모드선택"))
-            self.pushButton.setText(_translate("MainWindow", "Mode 1"))
-            self.pushButton_2.setText(_translate("MainWindow", "Mode 2"))
-            self.pushButton_3.setText(_translate("MainWindow", "Mode 3"))
-            self.pushButton_4.setText(_translate("MainWindow", "Mode 4"))
+            #M
             self.groupBox_2.setTitle(_translate("MainWindow", "활성 기능"))
             self.checkBox.setText(_translate("MainWindow", "마우스 움직임"))
             self.checkBox_2.setText(_translate("MainWindow", "마우스 클릭"))
             self.checkBox_3.setText(_translate("MainWindow", "드래그"))
             self.checkBox_4.setText(_translate("MainWindow", "스크롤"))
 
-        click_mode = pyqtSignal(int, int)
+        @pyqtSlot(int)
+        def push_button(self, integer): #2-1
+            if integer != -1:
+                B_list = [self.pushButton, self.pushButton_2,
+                               self.pushButton_3, self.pushButton_4]
+                if not B_list[integer].isChecked():
+                    self.From_button = True
+                    B_list[integer].toggle() # #2-2
+            else :
+                self.From_button = False
+                pass
 
         def togglebutton(self, MainWindow, integer):
-            global From_button
             Button_list = [self.pushButton, self.pushButton_2,
                            self.pushButton_3, self.pushButton_4]
             Before_mode_list = []
@@ -1131,22 +1156,23 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 else:
                     pass
 
-                if not From_button:
-                    if Before_mode_list[0] == self.pushButton:
-                        self.click_mode.emit(integer+1,1)
-                    elif Before_mode_list[0] == self.pushButton_2:
-                        self.click_mode.emit(integer + 1, 2)
-                    elif Before_mode_list[0] == self.pushButton_3:
-                        self.click_mode.emit(integer + 1, 3)
-                    elif Before_mode_list[0] == self.pushButton_4:
-                        self.click_mode.emit(integer + 1, 4)
-                    else :
-                        self.click_mode.emit(integer + 1, 0)
-
+                if len(Before_mode_list) != 0:
+                    if self.From_button == False:
+                        if Before_mode_list[0] == self.pushButton:
+                            self.click_mode.emit(integer+1, 1)
+                        elif Before_mode_list[0] == self.pushButton_2:
+                            self.click_mode.emit(integer + 1, 2)
+                        elif Before_mode_list[0] == self.pushButton_3:
+                            self.click_mode.emit(integer + 1, 3)
+                        elif Before_mode_list[0] == self.pushButton_4:
+                            self.click_mode.emit(integer + 1, 4)
+                    else:
+                        self.click_mode.emit(integer + 1, integer + 1)
                 else:
-                    self.click_mode.emit(integer + 1, integer + 1)
-                    From_button = False
-
+                    if self.From_button == False:
+                        self.click_mode.emit(integer + 1, 0)
+                    else:
+                        self.click_mode.emit(integer + 1, integer + 1)
             else:
                 self.checkBox.setChecked(False)
                 self.checkBox_2.setChecked(False)
@@ -1164,8 +1190,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             print(filename)
             image = self.label_2.pixmap()
             image.save(filename, 'jpg')
-
-        button6_checked = pyqtSignal(bool)
 
         def cvt_qt(self, img):
             # rgb_image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # cv 이미지 파일 rgb 색계열로 바꿔주기
@@ -1185,8 +1209,24 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         def checked(self, MainWindow):
             if self.pushButton_6.isChecked():
                 print('checked')
+                self.pushButton.setEnabled(True)
+                self.pushButton_2.setEnabled(True)
+                self.pushButton_3.setEnabled(True)
+                self.pushButton_4.setEnabled(True)
+                self.pushButton_5.setEnabled(True)
                 self.button6_checked.emit(True)
             else:
+                self.pushButton.setEnabled(False)
+                self.pushButton_2.setEnabled(False)
+                self.pushButton_3.setEnabled(False)
+                self.pushButton_4.setEnabled(False)
+                self.pushButton_5.setEnabled(False)
+                self.button6_checked.emit(False)
+                Button_list = [self.pushButton, self.pushButton_2,
+                               self.pushButton_3, self.pushButton_4]
+                for button in Button_list:
+                    if button.isChecked():
+                        button.toggle()
                 self.button6_checked.emit(False)
                 self.label_2.setPixmap(QtGui.QPixmap("./image/default.jpg"))
 
