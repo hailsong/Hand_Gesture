@@ -58,8 +58,8 @@ data_size = len(df[0][0])
 test_ratio = 0.2
 test_num = int(len(df) * 0.2)
 
-train_x = []
-train_y = []
+train_x = np.array([])
+train_y =
 test_x = []
 test_y = []
 
