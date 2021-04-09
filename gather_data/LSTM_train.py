@@ -63,9 +63,20 @@ frame_size = len(df[0])
 data_size = len(df[0][0])
 print(frame_size, data_size)
 
+for i in range(frame_size, 0, -1):
+    if len(df[i]) > 20:
+        df[i] = df[i][:20]
+        print(len(df[i]))
+    print('ㅁㅁㅁㅁㅁㅁ')
+
 test_ratio = 0.2
 test_num = int(len(df) * 0.2)
 
+print(len(df))
+print(len(label))
+for i in df:
+    print(len(i))
+exit()
 train_x = []
 train_y = []
 test_x = []
