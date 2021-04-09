@@ -13,7 +13,6 @@ from mediapipe.framework.formats import location_data_pb2
 #from GUI import opcv, Ui_MainWindow
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QAction
 from PyQt5.QtCore import QThread, QObject, QRect, pyqtSlot, pyqtSignal
 import datetime
 import sys
@@ -33,6 +32,7 @@ x_size, y_size = pyautogui.size().width, pyautogui.size().height
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
 mp_face_detection = mp.solutions.face_detection
+mp_pose = mp.solutions.pose
 
 x_size, y_size = pyautogui.size().width, pyautogui.size().height
 nowclick = False
@@ -494,6 +494,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             cap = self.capture
             # For webcam input:
             hands = mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.6)
+            pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
 
             global width, height
 
@@ -730,18 +731,20 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 # Flip the image horizontally for a later selfie-view display, and convert
                 # the BGR image to RGB.
                 image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
-                image = BlurFunction(image)
+                #image = BlurFunction(image)
 
                 # x_size, y_size, channel = image.shape
                 # To improve performance, optionally mark the image as not writeable to
                 # pass by reference.
                 image.flags.writeable = False
                 results = hands.process(image)
+                #results_body = pose.process(image)
 
                 # Draw the hand annotations on the image.
                 image.flags.writeable = True
                 image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-
+                #mp_drawing.draw_landmarks(
+                #    image, results_body.pose_landmarks, mp_pose.POSE_CONNECTIONS)
                 if results.multi_hand_landmarks:
                     mark_p_list = []
                     for hand_landmarks in results.multi_hand_landmarks:  # hand_landmarks는 감지된 손의 갯수만큼의 원소 수를 가진 list 자료구조
@@ -898,7 +901,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             MainWindow.setObjectName("MainWindow")
             MainWindow.resize(870, 550)
             MainWindow.setStyleSheet("background-color: rgb(0, 0, 0);")
-
 
             self.centralwidget = QtWidgets.QWidget(MainWindow)
             self.centralwidget.setObjectName("centralwidget")
@@ -1195,15 +1197,18 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 self.button6_checked.emit(False)
                 self.label_2.setPixmap(QtGui.QPixmap("./image/default.jpg"))
 
-    # class Gui(QMainWindow):
-    #     d
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
-    exit()
+
+def GUI(image):
+    while 1:
+        print(type(image))
+        print(image)
+        time.sleep(10)
 
 if __name__ == '__main__':
     print("This is util set program, it works well... maybe... XD")

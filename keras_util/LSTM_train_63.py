@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import glob
 import os
-from keras.preprocessing import sequence
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 
 def load_data(filename):
@@ -48,13 +48,8 @@ label = label[0]
 
 print(len(df), len(label))
 
-rem_idx = 0
-for i in range(len(df)):
-    if len(df[i-rem_idx]) < 20:
-        del df[i-rem_idx]
-        del label[i-rem_idx]
-        rem_idx += 1
-    df[i-rem_idx] = df[i-rem_idx][:20]
+padded = pad_sequences(df, dtype = 'float64', padding = 'post')
+df = padded
 
 frame_size = len(df[0])
 data_size = len(df[0][0])
@@ -70,11 +65,10 @@ test_y = []
 
 
 
-#
-# col_name = [str(i) for i in range(0, 63)]
-# print(col_name)
-#
-# print(train['FILENAME'].to_numpy())
+col_name = [str(i) for i in range(0, 63)]
+#print(col_name)
+
+print(train['FILENAME'].to_numpy())
 #
 # train_x = train[col_name].to_numpy()
 # train_y = train['FILENAME'].to_numpy()
@@ -90,20 +84,7 @@ test_y = []
 # test_y = test_y.astype(np.int64)
 
 #print(len(train_y), len(test_y)) #1에서 14사이 정수 label
-print(train_x[0], train_y[0], end = '\n')
 
-for i in range(len(train_x)):
-    train_x[i] = train_x[i][:20]
-
-for i in range(len(test_x)):
-    try:
-        if len(test_x[i]) < 10:
-            del test_x[i]
-            del test_y[i]
-    except:
-        pass
-    test_x[i] = test_x[i][:20]
-    print('ㅁㅁ', len(test_x[i]))
 
 train_x = np.array(train_x)
 
