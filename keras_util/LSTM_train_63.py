@@ -47,29 +47,33 @@ df, label = load_data("../video_output/LSTM_DATASET/csv_list_LSTM.txt")
 label = label[0]
 
 print(len(df), len(label))
+label = np.array(label)
 
 padded = pad_sequences(df, dtype = 'float64', padding = 'post')
 df = padded
 
 frame_size = len(df[0])
 data_size = len(df[0][0])
-#print(frame_size, data_size)
+df = np.array(df)
+print(df)
+print(df.shape) # 82 * 46 * 63
 
 test_ratio = 0.2
 test_num = int(len(df) * 0.2)
 
-train_x = np.array([])
-train_y =
-test_x = []
-test_y = []
+index = []
+for i in range(len(df)):
+    if i % 5 != 0:
+        index.append(i)
+train_x = df[index, :, :]
+train_y = label[index]
 
-
+test_x = df[::5, :, :]
+test_y = label[::5]
 
 col_name = [str(i) for i in range(0, 63)]
 #print(col_name)
 
-print(train['FILENAME'].to_numpy())
-#
 # train_x = train[col_name].to_numpy()
 # train_y = train['FILENAME'].to_numpy()
 # train_y = train_y.astype(np.int64)
@@ -86,10 +90,6 @@ print(train['FILENAME'].to_numpy())
 #print(len(train_y), len(test_y)) #1에서 14사이 정수 label
 
 
-train_x = np.array(train_x)
-
-print(train_x.shape)
-#print(test_x.shape)
 
 model = keras.Sequential([
     # keras.layers.Dense(63, activation = 'relu'),
@@ -99,9 +99,10 @@ model = keras.Sequential([
     # keras.layers.Dense(30, activation='relu'),
     # #keras.layers.Dense(30, activation = 'relu'),
     # keras.layers.Dense(15, activation='softmax')
-    keras.layers.Embedding(2, 100),
-    keras.layers.LSTM(200,
-                      input_shape=(20, 63),
+
+    # keras.layers.Embedding(2, 100),
+    keras.layers.LSTM(50,
+                      input_shape=(frame_size, 63),
                       activation = 'relu',
                       return_sequences=False),
     keras.layers.Dense(50, activation='relu'),

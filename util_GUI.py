@@ -722,6 +722,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             while bool_state and cap.isOpened():
                 #print('cam')
                 success, image = cap.read()
+
                 if not success:
                     print("Ignoring empty camera frame.")
                     # If loading a video, use 'break' instead of 'continue'.
@@ -902,9 +903,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             MainWindow.resize(870, 550)
             MainWindow.setStyleSheet("background-color: rgb(0, 0, 0);")
 
-
             self.From_button = False
-
 
             self.centralwidget = QtWidgets.QWidget(MainWindow)
             self.centralwidget.setObjectName("centralwidget")
