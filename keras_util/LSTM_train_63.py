@@ -51,7 +51,7 @@ print(len(df), len(label))
 data_i = 0
 target = []
 for data in df:
-    if len(data) < 40 or len(data) > 50:
+    if len(data) < 35 or len(data) > 50:
         target.append(data_i)
     data_i += 1
 print('삭제한 데이터 index :', target)
@@ -117,7 +117,7 @@ model = keras.Sequential([
 
     # keras.layers.Embedding(2, 100),
     #keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001, center=True, scale=True, beta_initializer='zeros', gamma_initializer='ones', moving_mean_initializer='zeros', moving_variance_initializer='ones', beta_regularizer=None, gamma_regularizer=None, beta_constraint=None, gamma_constraint=None),
-    keras.layers.LSTM(200,
+    keras.layers.LSTM(100,
                       input_shape=(frame_size, 63),
                       activation = 'relu',
                       return_sequences=False),
@@ -134,8 +134,8 @@ model.compile(optimizer='adam',
               #loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
 
-# print(train_x[0].shape, train_y[0])
-# exit()
+print(model.summary())
+
 hist = model.fit(train_x, train_y, epochs=100)
 
 test_loss, test_acc = model.evaluate(test_x,  test_y, verbose=2)
