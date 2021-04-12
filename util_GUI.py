@@ -13,7 +13,7 @@ from mediapipe.framework.formats import location_data_pb2
 #from GUI import opcv, Ui_MainWindow
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QAction
+from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtCore import QThread, QObject, QRect, pyqtSlot, pyqtSignal
 import datetime
 import sys
@@ -897,12 +897,16 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         click_mode = pyqtSignal(int, int)
         button6_checked = pyqtSignal(bool)
 
-        def setupUi(self, MainWindow):
-
+        def setupUi(self):
+            self.MainWindow = MyWindow()
+            MainWindow = self.MainWindow
             MainWindow.setObjectName("MainWindow")
             MainWindow.resize(870, 550)
+<<<<<<< HEAD
             MainWindow.setStyleSheet("background-color: rgb(0, 0, 0);")
 
+=======
+>>>>>>> syk
             self.From_button = False
 
             self.centralwidget = QtWidgets.QWidget(MainWindow)
@@ -1077,7 +1081,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.menubar = QtWidgets.QMenuBar(MainWindow)
             self.menubar.setGeometry(QRect(0, 0, 870, 21))
             self.menubar.setObjectName("menubar")
-            MainWindow.setMenuBar(self.menubar)
+            self.MainWindow.setMenuBar(self.menubar)
 
             self.statusbar = QtWidgets.QStatusBar(MainWindow)
             self.statusbar.setObjectName("statusbar")
@@ -1093,6 +1097,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_6.toggled.connect(lambda: self.checked(MainWindow))
             self.click_mode.connect(self.thread.mode_setting)
             self.button6_checked.connect(self.thread.send_img)
+            MainWindow.power_off_signal.connect(self.thread.send_img)
             self.thread.change_pixmap_signal.connect(self.update_img)
             self.thread.mode_signal.connect(self.push_button)
 
@@ -1235,15 +1240,36 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 self.button6_checked.emit(False)
                 self.label_2.setPixmap(QtGui.QPixmap("./image/default.jpg"))
 
+    class MyWindow(QtWidgets.QMainWindow):
+
+        power_off_signal = pyqtSignal(bool)
+
+        def __init__(self):
+            super().__init__()
+            # self.setStyleSheet('''QMainWindow{background-color : rgb(0, 255, 0);}''')
+            self.setStyleSheet('''QMessageBox{background-color: rgb(225, 225, 225);}''')
+            self.setStyleSheet('''QMainWindow{background-color : rgb(0, 0, 0);}''')
+            self.msg = QMessageBox()
+        def closeEvent(self, event):
+            result = self.msg.question(self,
+                                 "Confirm Exit...",
+                                 "Are you sure you want to exit ?",
+                                 self.msg.Yes | self.msg.No)
+            if result == self.msg.Yes:
+                self.power_off_signal.emit(False)
+                event.accept()
+
+            else :
+                event.ignore()
+
+
     # class Gui(QMainWindow):
     #     d
     app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
+    ui.setupUi()
+    ui.MainWindow.show()
     sys.exit(app.exec_())
-    exit()
 
 if __name__ == '__main__':
     print("This is util set program, it works well... maybe... XD")
