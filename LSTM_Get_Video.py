@@ -12,10 +12,10 @@ h = 480
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
 record = False
 
-POSENAME = '2'
+POSENAME = '4'
 FOLDERNAME = '/POSE_' + POSENAME + '/'
 VIDEO_SIZE = 45 # 프레임
-index = 1
+index = 1 #시작 인덱스
 record_sign = False
 timer = time.time()
 frame_num = 0

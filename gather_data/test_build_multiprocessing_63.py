@@ -6,7 +6,7 @@ import time
 
 path=os.getcwd()
 
-POSE_NAME = '1'
+POSE_NAME = '4'
 FOLDER_NAME = 'LSTM_DATASET2/POSE_'+POSE_NAME+'/'
 
 split_list = FOLDER_NAME.split('/')
@@ -46,8 +46,9 @@ if __name__ == '__main__':
     pool.map(file_convert, num)
     print(time.time()-start_time)
 
-    if os.path.isfile("../video_output/LSTM_DATASET/csv_list_LSTM"+POSE_NAME+".txt"):
+    if os.path.isfile("../video_output/LSTM_DATASET2/csv_list_LSTM.txt"):
         for i in num:
-            txt = open("../video_output/LSTM_DATASET/csv_list_LSTM"+POSE_NAME+".txt", 'a')
+            txt = open("../video_output/LSTM_DATASET2/csv_list_LSTM.txt", 'a')
+            print('txt append', i, POSE_NAME)
             data = FOLDER_NAME + str(i) + '_63.csv\n'
             txt.write(data)

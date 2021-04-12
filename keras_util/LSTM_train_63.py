@@ -43,13 +43,26 @@ def load_data(filename):
     label_list = [label for _ in range(size)]
     return df, label_list
 
-df, label = load_data("../video_output/LSTM_DATASET/csv_list_LSTM.txt")
+df, label = load_data("../video_output/LSTM_DATASET2/csv_list_LSTM.txt")
 label = label[0]
 
 print(len(df), len(label))
-label = np.array(label)
 
-padded = pad_sequences(df, dtype = 'float64', padding = 'post')
+data_i = 0
+target = []
+for data in df:
+    if len(data) < 40 or len(data) > 50:
+        target.append(data_i)
+    data_i += 1
+print('삭제한 데이터 index :', target)
+for i in target[::-1]:
+    del df[i]
+    del label[i]
+
+label = np.array(label)
+label = label - 1
+
+padded = pad_sequences(df, dtype = 'float64', padding = 'pre')
 df = padded
 
 frame_size = len(df[0])
@@ -60,6 +73,8 @@ print(df.shape) # 82 * 46 * 63
 
 test_ratio = 0.2
 test_num = int(len(df) * 0.2)
+
+#df = df
 
 index = []
 for i in range(len(df)):
@@ -74,6 +89,8 @@ test_y = label[::5]
 col_name = [str(i) for i in range(0, 63)]
 #print(col_name)
 
+test_y = test_y.astype(np.int64)
+train_y = train_y.astype(np.int64)
 # train_x = train[col_name].to_numpy()
 # train_y = train['FILENAME'].to_numpy()
 # train_y = train_y.astype(np.int64)
@@ -89,8 +106,6 @@ col_name = [str(i) for i in range(0, 63)]
 
 #print(len(train_y), len(test_y)) #1에서 14사이 정수 label
 
-
-
 model = keras.Sequential([
     # keras.layers.Dense(63, activation = 'relu'),
     # keras.layers.Dense(400, activation = 'relu'),
@@ -101,23 +116,27 @@ model = keras.Sequential([
     # keras.layers.Dense(15, activation='softmax')
 
     # keras.layers.Embedding(2, 100),
-    keras.layers.LSTM(300,
+    #keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001, center=True, scale=True, beta_initializer='zeros', gamma_initializer='ones', moving_mean_initializer='zeros', moving_variance_initializer='ones', beta_regularizer=None, gamma_regularizer=None, beta_constraint=None, gamma_constraint=None),
+    keras.layers.LSTM(200,
                       input_shape=(frame_size, 63),
                       activation = 'relu',
                       return_sequences=False),
-    keras.layers.Dense(200, activation='relu'),
+    # keras.layers.Dense(300, activation='relu', kernel_initializer='he_normal'),
+    # keras.layers.Dense(200, activation='relu', kernel_initializer='he_normal'),
+    keras.layers.Dense(100, activation='relu'),
     keras.layers.Dense(100, activation='relu'),
     keras.layers.Dense(50, activation='relu'),
-    keras.layers.Dense(2, activation = 'softmax')
+    keras.layers.Dense(4, activation = 'softmax')
     ])
 
 model.compile(optimizer='adam',
-              loss='sparse_categorical_crossentropy',
+              loss = 'sparse_categorical_crossentropy',
+              #loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
 
 # print(train_x[0].shape, train_y[0])
 # exit()
-hist = model.fit(train_x, train_y, epochs=10)
+hist = model.fit(train_x, train_y, epochs=100)
 
 test_loss, test_acc = model.evaluate(test_x,  test_y, verbose=2)
 
