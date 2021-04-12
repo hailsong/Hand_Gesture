@@ -6,8 +6,8 @@ import time
 
 path=os.getcwd()
 
-POSE_NAME = '2'
-FOLDER_NAME = 'LSTM_DATASET/POSE_'+POSE_NAME+'/'
+POSE_NAME = '1'
+FOLDER_NAME = 'LSTM_DATASET2/POSE_'+POSE_NAME+'/'
 
 split_list = FOLDER_NAME.split('/')
 dir_1 = split_list[0]
@@ -42,7 +42,7 @@ def file_convert(i):
 if __name__ == '__main__':
     start_time = time.time()
     pool = multiprocessing.Pool(processes=6)
-    num = range(1,42)
+    num = range(1,100)
     pool.map(file_convert, num)
     print(time.time()-start_time)
 

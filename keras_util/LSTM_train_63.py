@@ -101,10 +101,12 @@ model = keras.Sequential([
     # keras.layers.Dense(15, activation='softmax')
 
     # keras.layers.Embedding(2, 100),
-    keras.layers.LSTM(50,
+    keras.layers.LSTM(300,
                       input_shape=(frame_size, 63),
                       activation = 'relu',
                       return_sequences=False),
+    keras.layers.Dense(200, activation='relu'),
+    keras.layers.Dense(100, activation='relu'),
     keras.layers.Dense(50, activation='relu'),
     keras.layers.Dense(2, activation = 'softmax')
     ])
