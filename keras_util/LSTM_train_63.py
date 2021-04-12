@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import glob
 import os
-from keras.preprocessing import sequence
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 
 def load_data(filename):
@@ -48,31 +48,27 @@ label = label[0]
 
 print(len(df), len(label))
 
+padded = pad_sequences(df, dtype = 'float64', padding = 'post')
+df = padded
+
 frame_size = len(df[0])
 data_size = len(df[0][0])
-print(frame_size, data_size)
+#print(frame_size, data_size)
 
 test_ratio = 0.2
 test_num = int(len(df) * 0.2)
 
-train_x = []
-train_y = []
+train_x = np.array([])
+train_y =
 test_x = []
 test_y = []
 
-for i in range(0, data_size):
-    if i % 5 == 0:
-        test_x.append(np.array(df[i]))
-        test_y.append(np.array(label[i]))
-    else:
-        train_x.append(np.array(df[i]))
-        train_y.append(np.array(label[i]))
 
-#
-# col_name = [str(i) for i in range(0, 63)]
-# print(col_name)
-#
-# print(train['FILENAME'].to_numpy())
+
+col_name = [str(i) for i in range(0, 63)]
+#print(col_name)
+
+print(train['FILENAME'].to_numpy())
 #
 # train_x = train[col_name].to_numpy()
 # train_y = train['FILENAME'].to_numpy()
@@ -87,9 +83,13 @@ for i in range(0, data_size):
 # test_y = test['FILENAME'].to_numpy()
 # test_y = test_y.astype(np.int64)
 
-print(len(train_y), len(test_y)) #1에서 14사이 정수 label
+#print(len(train_y), len(test_y)) #1에서 14사이 정수 label
 
-print('ㅇㅇㅇㅇ', train_x)
+
+train_x = np.array(train_x)
+
+print(train_x.shape)
+#print(test_x.shape)
 
 model = keras.Sequential([
     # keras.layers.Dense(63, activation = 'relu'),
@@ -101,7 +101,7 @@ model = keras.Sequential([
     # keras.layers.Dense(15, activation='softmax')
     keras.layers.Embedding(2, 100),
     keras.layers.LSTM(200,
-                      input_shape=(21, 63),
+                      input_shape=(20, 63),
                       activation = 'relu',
                       return_sequences=False),
     keras.layers.Dense(50, activation='relu'),
@@ -123,6 +123,7 @@ print('\n테스트 정확도:', test_acc)
 prediction = model.predict(test_x[[5]])
 print(prediction[0])
 print(test_y[5])
+
 
 
 
