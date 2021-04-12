@@ -902,11 +902,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             MainWindow = self.MainWindow
             MainWindow.setObjectName("MainWindow")
             MainWindow.resize(870, 550)
-<<<<<<< HEAD
-            MainWindow.setStyleSheet("background-color: rgb(0, 0, 0);")
-
-=======
->>>>>>> syk
             self.From_button = False
 
             self.centralwidget = QtWidgets.QWidget(MainWindow)
