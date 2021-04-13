@@ -105,71 +105,15 @@ train_y = train_y.astype(np.int64)
 # test_y = test_y.astype(np.int64)
 
 #print(len(train_y), len(test_y)) #1에서 14사이 정수 label
+model = keras.models.load_model(
+    'model_save/my_model_63.h5'
+)
 
-model = keras.Sequential([
-    # keras.layers.Dense(63, activation = 'relu'),
-    # keras.layers.Dense(400, activation = 'relu'),
-    # keras.layers.Dense(100, activation='relu'),
-    # keras.layers.Dense(60, activation='relu'),
-    # keras.layers.Dense(30, activation='relu'),
-    # #keras.layers.Dense(30, activation = 'relu'),
-    # keras.layers.Dense(15, activation='softmax')
 
-    # keras.layers.Embedding(2, 100),
-    #keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001, center=True, scale=True, beta_initializer='zeros', gamma_initializer='ones', moving_mean_initializer='zeros', moving_variance_initializer='ones', beta_regularizer=None, gamma_regularizer=None, beta_constraint=None, gamma_constraint=None),
-    keras.layers.LSTM(100,
-                      input_shape=(frame_size, 63),
-                      activation = 'relu',
-                      return_sequences=False),
-    # keras.layers.Dense(300, activation='relu', kernel_initializer='he_normal'),
-    # keras.layers.Dense(200, activation='relu', kernel_initializer='he_normal'),
-    keras.layers.Dense(70, activation='relu'),
-    keras.layers.Dense(50, activation='relu'),
-    keras.layers.Dense(4, activation = 'softmax')
-    ])
-
-model.compile(optimizer='adam',
-              loss = 'sparse_categorical_crossentropy',
-              #loss='sparse_categorical_crossentropy',
-              metrics=['accuracy'])
-
-from keras.callbacks import EarlyStopping, ModelCheckpoint
-early_stop = EarlyStopping(monitor='val_loss', patience=5)
-
-print(model.summary())
-
-hist = model.fit(train_x, train_y, epochs=40)
-
-test_loss, test_acc = model.evaluate(test_x,  test_y, verbose=2)
-
-print('\n테스트 정확도:', test_acc)
-
-prediction = model.predict(test_x[[5]])
+prediction = model.predict(test_x[[67]])
+print(test_x[[67]].shape)
 print(prediction[0])
-print(test_y[5])
+print(test_y[])
 
 
 
-
-
-fig, loss_ax = plt.subplots()
-
-acc_ax = loss_ax.twinx()
-
-loss_ax.plot(hist.history['loss'], 'y', label='train loss')
-#loss_ax.plot(hist.history['val_loss'], 'r', label='val loss')
-
-acc_ax.plot(hist.history['accuracy'], 'b', label='train acc')
-#acc_ax.plot(hist.history['val_acc'], 'g', label='val acc')
-
-loss_ax.set_xlabel('epoch')
-loss_ax.set_ylabel('loss')
-acc_ax.set_ylabel('accuracy')
-
-loss_ax.legend(loc='upper left')
-acc_ax.legend(loc='lower left')
-
-plt.show()
-
-model.save('model_save/my_model_63.h5')
-print('new model saved')
