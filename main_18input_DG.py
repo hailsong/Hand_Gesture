@@ -11,7 +11,7 @@ if __name__ == "__main__":
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
     print("Copyright 2021. INBODY inc. all rights reserved")
-    print("Contact : shi@inbody.com, HAIL SONG")
+    print("Contact : shi@inbody.com, HAIL SONG, Inbody Future Lab")
 
     #physical_devices = tf.config.list_physical_devices('GPU')
     #print(physical_devices)

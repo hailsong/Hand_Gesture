@@ -32,7 +32,7 @@ def load_data(filename):
         df_list = df2.values.tolist()
         allData.append(df_list) # 빈 리스트에 읽어 들인 내용을 추가한다
 
-    print(allData)
+    #print(allData)
     print(len(allData[0]))
 
     df = allData
@@ -48,29 +48,59 @@ label = label[0]
 
 print(len(df), len(label))
 
+mod_size = 30
+
 data_i = 0
 target = []
 for data in df:
-    if len(data) < 35 or len(data) > 50:
+    if len(data) < mod_size:
         target.append(data_i)
     data_i += 1
 print('삭제한 데이터 index :', target)
 for i in target[::-1]:
     del df[i]
     del label[i]
+# # padded = pad_sequences(df, dtype = 'float64', padding = 'pre')
+# # df = padded
+
+
+
+new_df = []
+inin = 0
+for data in df:
+    max_diff = 0
+    local_i = 0
+    for i in range(len(data[:-mod_size])):
+        target_15 = [[0.] * 63] * mod_size
+        local_diff = 0
+        frame_before = np.array(data[i])
+        if i > 5 or i < len(data[:-mod_size]) - 5:
+            for frame in data[i:i+mod_size]:
+                frame = np.array(frame)
+                local_diff += np.sum(np.abs(frame - frame_before))
+                frame_before = frame
+            if local_diff > max_diff:
+                max_diff = local_diff
+                target_15 = data[i:i+mod_size]
+                local_i = i
+    print(local_i)
+    #print(max_diff)
+    new_df.append(target_15)
+
+print(len(new_df))
+print(len(new_df[0][0]))
+
+df = np.array(new_df)
 
 label = np.array(label)
 label = label - 1
 
-padded = pad_sequences(df, dtype = 'float64', padding = 'post')
-
-df = padded
 
 frame_size = len(df[0])
 data_size = len(df[0][0])
 df = np.array(df)
-print(df)
-print(df.shape) # 82 * 46 * 63
+# print(df)
+# print(df.shape) # 82 * 46 * 63
 
 test_ratio = 0.2
 test_num = int(len(df) * 0.2)
@@ -81,6 +111,7 @@ index = []
 for i in range(len(df)):
     if i % 5 != 0:
         index.append(i)
+print(index)
 train_x = df[index, :, :]
 train_y = label[index]
 
@@ -116,16 +147,16 @@ model = keras.Sequential([
     # #keras.layers.Dense(30, activation = 'relu'),
     # keras.layers.Dense(15, activation='softmax')
 
-    #keras.layers.Embedding(500, 4, mask_zero=True),
-
+    # keras.layers.Embedding(2, 100),
     #keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001, center=True, scale=True, beta_initializer='zeros', gamma_initializer='ones', moving_mean_initializer='zeros', moving_variance_initializer='ones', beta_regularizer=None, gamma_regularizer=None, beta_constraint=None, gamma_constraint=None),
-    keras.layers.LSTM(100,
+    keras.layers.LSTM(150,
                       input_shape=(frame_size, 63),
                       activation = 'relu',
                       return_sequences=False),
     # keras.layers.Dense(300, activation='relu', kernel_initializer='he_normal'),
     # keras.layers.Dense(200, activation='relu', kernel_initializer='he_normal'),
-    keras.layers.Dense(70, activation='relu'),
+    keras.layers.Dense(140, activation='relu'),
+    keras.layers.Dense(100, activation='relu'),
     keras.layers.Dense(50, activation='relu'),
     keras.layers.Dense(4, activation = 'softmax')
     ])

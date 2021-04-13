@@ -476,11 +476,11 @@ class Gesture():
         #print(input_.shape)
         prediction = MODEL_DYNAMIC.predict(input_)
         try:
-            if np.max(prediction[0]) > 0.93:
+            if np.max(prediction[0]) > 0.98:
                 print(np.argmax(prediction[0]))
                 return np.argmax(prediction[0])
             else:
-                return 0
+                return -1
         except:
             print('LSTM error')
 

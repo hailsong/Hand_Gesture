@@ -48,6 +48,9 @@ label = label[0]
 
 print(len(df), len(label))
 
+
+
+# TODO padding ver
 data_i = 0
 target = []
 for data in df:
@@ -58,15 +61,22 @@ print('삭제한 데이터 index :', target)
 for i in target[::-1]:
     del df[i]
     del label[i]
+padded = pad_sequences(df, dtype = 'float64', padding = 'pre')
+df = padded
+
+# TODO 15프레임 ver
+'''
+프레임별로 데이터 들어오는데...
+'''
+df = np.array(df)
 
 label = np.array(label)
 label = label - 1
 
-padded = pad_sequences(df, dtype = 'float64', padding = 'pre')
-df = padded
 
-frame_size = len(df[0])
-data_size = len(df[0][0])
+
+# frame_size = len(df[0])
+# data_size = len(df[0][0])
 df = np.array(df)
 print(df)
 print(df.shape) # 82 * 46 * 63
@@ -109,11 +119,10 @@ model = keras.models.load_model(
     'model_save/my_model_63.h5'
 )
 
-
 prediction = model.predict(test_x[[67]])
 print(test_x[[67]].shape)
 print(prediction[0])
-print(test_y[])
+print(test_y[67])
 
 
 

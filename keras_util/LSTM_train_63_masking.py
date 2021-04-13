@@ -7,7 +7,8 @@ import pandas as pd
 import glob
 import os
 from tensorflow.keras.preprocessing.sequence import pad_sequences
-
+import tensorflow as tf
+from tensorflow.keras import layers
 
 def load_data(filename):
     f = open(filename, 'r')
@@ -63,6 +64,16 @@ label = np.array(label)
 label = label - 1
 
 padded = pad_sequences(df, dtype = 'float64', padding = 'post')
+print(padded)
+
+embedding = layers.Embedding(input_dim=5000, output_dim=16, mask_zero=True)
+masked_output = embedding(padded)
+
+print(masked_output._keras_mask)
+
+
+exit()
+
 
 df = padded
 
