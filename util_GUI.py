@@ -495,7 +495,7 @@ def process_dynamic_gesture(shared_array_dynamic, dynamic_value):
             dynamic_value = result
         time.sleep(0.033)
 
-def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r, shared_array_dynamic, dynamic_value):
+def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r):#, shared_array_dynamic, dynamic_value = 0):
 
     global image
     global MOUSE_USE
@@ -854,8 +854,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                     # print(array_for_static)
                                     static_gesture_num = value_for_static_r.value
 
-                                    shared_array_dynamic[:] = HM.return_flatten_p_list()
-                                    dynamic_gesture_num = dynamic_value.value
+                                    # shared_array_dynamic[:] = HM.return_flatten_p_list()
+                                    # dynamic_gesture_num = dynamic_value.value
                                 # try:
                                 #     static_gesture_drawing(static_gesture_num, mark_p[-1])
                                 # except:

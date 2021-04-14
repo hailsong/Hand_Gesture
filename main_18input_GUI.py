@@ -23,13 +23,10 @@ if __name__ == "__main__":
     static_num_l = Value('i', 0)
     shared_array_r = Array('d', [0. for _ in range(18)])
     static_num_r = Value('i', 0)
-    test_np_array = Array(ctypes.c_double, 480*640*3)
-
-    #video_stream = Array('d', [0. for _ in range(18)])
 
     # GUI과 주고받을 정보 : Mode(쌍방향) [int value], 대기 [int value], 캡쳐 [int value], 이미지 [array]
 
-    process1 = Process(target=initialize, args=(shared_array_l, static_num_l, shared_array_r, static_num_r, test_np_array))
+    process1 = Process(target=initialize, args=(shared_array_l, static_num_l, shared_array_r, static_num_r))
     process2 = Process(target=process_static_gesture, args=(shared_array_l, static_num_l))
     process3 = Process(target=process_static_gesture, args=(shared_array_r, static_num_r))
     #process4 = Process(target=GUI, args=([test_np_array]))

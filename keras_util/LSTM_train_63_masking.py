@@ -72,8 +72,7 @@ masked_output = embedding(padded)
 print(masked_output._keras_mask)
 
 
-exit()
-
+# exit()
 
 df = padded
 
@@ -116,7 +115,8 @@ train_y = train_y.astype(np.int64)
 # test_y = test['FILENAME'].to_numpy()
 # test_y = test_y.astype(np.int64)
 
-#print(len(train_y), len(test_y)) #1에서 14사이 정수 label
+# print(len(train_y), len(test_y)) #1에서 14사이 정수 label
+# https://www.tensorflow.org/guide/keras/masking_and_padding
 
 model = keras.Sequential([
     # keras.layers.Dense(63, activation = 'relu'),
@@ -127,7 +127,7 @@ model = keras.Sequential([
     # #keras.layers.Dense(30, activation = 'relu'),
     # keras.layers.Dense(15, activation='softmax')
 
-    #keras.layers.Embedding(500, 4, mask_zero=True),
+    keras.layers.Embedding(500, 4, mask_zero=True),
 
     #keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001, center=True, scale=True, beta_initializer='zeros', gamma_initializer='ones', moving_mean_initializer='zeros', moving_variance_initializer='ones', beta_regularizer=None, gamma_regularizer=None, beta_constraint=None, gamma_constraint=None),
     keras.layers.LSTM(100,
