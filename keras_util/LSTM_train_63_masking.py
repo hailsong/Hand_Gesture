@@ -130,14 +130,18 @@ model = keras.Sequential([
     keras.layers.Embedding(500, 4, mask_zero=True),
 
     #keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001, center=True, scale=True, beta_initializer='zeros', gamma_initializer='ones', moving_mean_initializer='zeros', moving_variance_initializer='ones', beta_regularizer=None, gamma_regularizer=None, beta_constraint=None, gamma_constraint=None),
-    keras.layers.LSTM(100,
+    keras.layers.LSTM(256,
                       input_shape=(frame_size, 63),
                       activation = 'relu',
-                      return_sequences=False),
+                      return_sequences=True),
+    keras.layers.LSTM(128, return_sequences=True),
+    keras.layers.LSTM(64, return_sequences=True),
+    keras.layers.LSTM(16, return_sequences=True),
+
     # keras.layers.Dense(300, activation='relu', kernel_initializer='he_normal'),
     # keras.layers.Dense(200, activation='relu', kernel_initializer='he_normal'),
-    keras.layers.Dense(70, activation='relu'),
-    keras.layers.Dense(50, activation='relu'),
+    # keras.layers.Dense(70, activation='relu'),
+    # keras.layers.Dense(50, activation='relu'),
     keras.layers.Dense(4, activation = 'softmax')
     ])
 

@@ -476,7 +476,7 @@ class Gesture():
         #print(input_.shape)
         prediction = MODEL_DYNAMIC.predict(input_)
         try:
-            if np.max(prediction[0]) > 0.98:
+            if np.max(prediction[0]) > 0.80:
                 print(np.argmax(prediction[0]))
                 return np.argmax(prediction[0])
             else:
@@ -495,7 +495,7 @@ def process_dynamic_gesture(shared_array_dynamic, dynamic_value):
             dynamic_value = result
         time.sleep(0.033)
 
-def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r):#, shared_array_dynamic, dynamic_value = 0):
+def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r, shared_array_dynamic, dynamic_value = 0):
 
     global image
     global MOUSE_USE
@@ -623,13 +623,15 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 global nowclick
                 if get_distance(landmark[4], landmark[8]) < get_distance(landmark[4], landmark[3]) and nowclick == False:
                     print('drag on')
-                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, int(x), int(y), 0, 0)
+                    pos = win32api.GetCursorPos()
+                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, pos[0], pos[1], 0, 0)
                     # ctypes.windll.user32.mouse_event(0x0002, 0, 0, 0, 0)
                     nowclick = True
 
                 elif get_distance(landmark[4], landmark[8]) > 1.5 * get_distance(landmark[4], landmark[3]) and nowclick == True:
                     print('drag off')
-                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, int(x), int(y), 0, 0)
+                    pos = win32api.GetCursorPos()
+                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, pos[0], pos[1], 0, 0)
                     # ctypes.windll.user32.mouse_event(0x0004, 0, 0, 0, 0)
                     nowclick = False
 
@@ -640,9 +642,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                 if get_distance(landmark[4], landmark[10]) < get_distance(landmark[7], landmark[8]) and nowclick2 == False:
                     print('click')
-                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, int(x), int(y), 0, 0)
+                    pos = win32api.GetCursorPos()
+                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, pos[0], pos[1], 0, 0)
                     print('click off')
-                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, int(x), int(y), 0, 0)
+                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, pos[0], pos[1], 0, 0)
                     nowclick2 = True
                     return -1
                 if get_distance(landmark[4], landmark[10]) > get_distance(landmark[7], landmark[8]) and nowclick2 == True:
@@ -854,8 +857,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                     # print(array_for_static)
                                     static_gesture_num = value_for_static_r.value
 
-                                    # shared_array_dynamic[:] = HM.return_flatten_p_list()
-                                    # dynamic_gesture_num = dynamic_value.value
+                                    shared_array_dynamic[:] = HM.return_flatten_p_list()
+                                    dynamic_gesture_num = dynamic_value.value
                                 # try:
                                 #     static_gesture_drawing(static_gesture_num, mark_p[-1])
                                 # except:
@@ -1334,6 +1337,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 if __name__ == '__main__':
     print("This is util set program, it works well... maybe... XD")
 
-    print('Running main_18input_DG.py...')
+    print('Running main_18input_GUI.py...')
     from os import system
-    system('python main_18input_DG.py')
+    system('python main_18input_GUI.py')

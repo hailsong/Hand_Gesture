@@ -10,9 +10,9 @@ from tensorflow import keras
 import tensorflow as tf
 from mediapipe.framework.formats import location_data_pb2
 
-physical_devices = tf.config.list_physical_devices('GPU')
-#print(physical_devices)
-tf.config.experimental.set_memory_growth(physical_devices[0], True)
+# physical_devices = tf.config.list_physical_devices('GPU')
+# #print(physical_devices)
+# tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 # For webcam input:
 # hands = mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5)

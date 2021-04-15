@@ -119,6 +119,7 @@ model = keras.models.load_model(
     'model_save/my_model_63.h5'
 )
 
+
 prediction = model.predict(test_x[[67]])
 print(test_x[[67]].shape)
 print(prediction[0])
