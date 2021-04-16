@@ -32,7 +32,7 @@ def load_data(filename):
         df_list = df2.values.tolist()
         allData.append(df_list) # 빈 리스트에 읽어 들인 내용을 추가한다
 
-    print(allData)
+    #print(allData)
     print(len(allData[0]))
 
     df = allData
@@ -113,18 +113,26 @@ def frame15(df, label):
 df, label = load_data("../video_output/LSTM_DATASET2/csv_list_LSTM.txt")
 label = label[0]
 
+# min_frame = 60
+# for i in df:
+#     if min_frame > len(i):
+#         min_frame = len(i)
+#         print(min_frame)
+# print(min_frame)
+# exit()
+
 print(len(df), len(label))
 
-# data_i = 0
-# target = []
-# for data in df:
-#     if len(data) < 35 or len(data) > 50:
-#         target.append(data_i)
-#     data_i += 1
-# print('삭제한 데이터 index :', target)
-# for i in target[::-1]:
-#     del df[i]
-#     del label[i]
+data_i = 0
+target = []
+for data in df:
+    if len(data) < 35 or len(data) > 50:
+        target.append(data_i)
+    data_i += 1
+print('삭제한 데이터 index :', target)
+for i in target[::-1]:
+    del df[i]
+    del label[i]
 
 label = np.array(label)
 label = label - 1
@@ -139,6 +147,9 @@ df = padded
 
 frame_size = len(df[0])
 data_size = len(df[0][0])
+
+
+
 df = np.array(df)
 #print(df)
 print(df.shape) # 82 * 46 * 63
@@ -190,13 +201,14 @@ model = keras.Sequential([
     #keras.layers.Embedding(500, 4, mask_zero=True),
 
     #keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001, center=True, scale=True, beta_initializer='zeros', gamma_initializer='ones', moving_mean_initializer='zeros', moving_variance_initializer='ones', beta_regularizer=None, gamma_regularizer=None, beta_constraint=None, gamma_constraint=None),
+
     # keras.layers.LSTM(150,
     #                   input_shape=(frame_size, 63),
     #                   activation = 'relu',
     #                   return_sequences=False),
     # # keras.layers.Dense(300, activation='relu', kernel_initializer='he_normal'),
-    # # keras.layers.Dense(200, activation='relu', kernel_initializer='he_normal'),
-    # keras.layers.Dense(70, activation='relu'),
+    # keras.layers.Dense(150, activation='relu', kernel_initializer='he_normal'),
+    # keras.layers.Dense(100, activation='relu'),
     # keras.layers.Dense(70, activation='relu'),
     # keras.layers.Dense(50, activation='relu'),
 
@@ -207,7 +219,6 @@ model = keras.Sequential([
     keras.layers.LSTM(64, return_sequences=True),
     keras.layers.LSTM(32, return_sequences=True),
     keras.layers.LSTM(16),
-
     keras.layers.Dense(4, activation = 'softmax')
     ])
 
@@ -223,7 +234,7 @@ early_stop = EarlyStopping(monitor='val_loss', patience=5)
 
 print(model.summary())
 
-hist = model.fit(train_x, train_y, epochs=50)
+hist = model.fit(train_x, train_y, epochs=10)
 
 test_loss, test_acc = model.evaluate(test_x,  test_y, verbose=2)
 

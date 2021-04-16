@@ -461,22 +461,49 @@ def process_static_gesture_mod(array_for_static, value_for_static, array_for_sta
             pass
 
 class Gesture():
-    GESTURE_ARRAY_SIZE = 50
+    GESTURE_ARRAY_SIZE = 45
 
     def __init__(self):
         self.data = [[0.] * 63] * Gesture.GESTURE_ARRAY_SIZE
+
+    @staticmethod
+    def norm_df(df):  # df는 numpy array
+        new_df = df.copy()
+        for data in new_df:
+            standard = data[:, 0:3].mean(axis=0)  # numpy array [0., 0., 0.]
+            for i in range(21):
+                for j in range(data.shape[0]):
+                    data[j][i * 3: i * 3 + 3] = data[j][i * 3: i * 3 + 3] - standard
+        return new_df
+
+    @staticmethod
+    def derivative(df):
+        new_df = []
+        for data in df:
+            # Dataframe은 전체 데이터셋으로 데이터 수 * (동영상 프레임 수)
+            data = np.array(data)
+            new_data = []
+            for i in range(1, len(data)):
+                result = data[i] - data[i - 1]
+                result.tolist()
+                new_data.append(result)
+            new_df.append(new_data)
+        return np.array(new_df)
 
     def update(self, handmark):
         #print(handmark)
         self.data.insert(0, handmark)
         self.data.pop()
 
+
     def gesture_detect(self): #이 최근꺼
         input_ = np.array([self.data])
-        #print(input_.shape)
+        input_ = self.norm_df(input_)
+        input_ = self.derivative(input_)
+        # print(input_.shape)
         prediction = MODEL_DYNAMIC.predict(input_)
         try:
-            if np.max(prediction[0]) > 0.80:
+            if np.max(prediction[0]) > 0.90:
                 print(np.argmax(prediction[0]))
                 return np.argmax(prediction[0])
             else:
@@ -493,7 +520,7 @@ def process_dynamic_gesture(shared_array_dynamic, dynamic_value):
             gesture.update(list(input_))
             result = gesture.gesture_detect()
             dynamic_value = result
-        time.sleep(0.033)
+
 
 def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r, shared_array_dynamic, dynamic_value = 0):
 
@@ -1337,6 +1364,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 if __name__ == '__main__':
     print("This is util set program, it works well... maybe... XD")
 
-    print('Running main_18input_GUI.py...')
+    print('Running main_18input_DG.py...')
     from os import system
-    system('python main_18input_GUI.py')
+    system('python main_18input_DG.py')
