@@ -13,6 +13,7 @@ from mediapipe.framework.formats import location_data_pb2
 #from GUI import opcv, Ui_MainWindow
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtCore import QThread, QObject, QRect, pyqtSlot, pyqtSignal
 import datetime
 import sys
@@ -46,8 +47,11 @@ WHEEL_USE = False
 DRAG_USE = False
 USE_TENSORFLOW = True
 
-MODEL = keras.models.load_model(
+MODEL_STATIC = keras.models.load_model(
     'keras_util/model_save/my_model_21.h5'
+)
+MODEL_DYNAMIC = keras.models.load_model(
+    'keras_util/model_save/my_model_63.h5'
 )
 
 '''
@@ -76,7 +80,6 @@ class Handmark():
             #print('type', type(local_mark_p))
             output.extend(local_mark_p.to_list())
         return output
-
 
     #엄지 제외
     def get_finger_angle(self, finger): #finger는 self에서 정의된 손가락들, 4크기 배열
@@ -219,81 +222,81 @@ class Handmark():
     #         return 0
 
 #TODO Gesture 판단, 일단은 15프레임 (0.5초)의 Queue로?
-class Gesture():
-    Gesture_Array_size = 15
-
-    def __init__(self):
-        self.palm_data = [np.array([0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]
-        self.d_palm_data = [np.array([0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)] #palm_data의 차이를 기록할 list
-
-        self.location_data = [np.array([0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]
-        self.finger_data  = [np.array([0, 0, 0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]
-
-    def update(self, handmark):
-        self.palm_data.insert(0, handmark.palm_vector)
-        self.d_palm_data.insert(0, (self.palm_data[1] - handmark.palm_vector) * 1000)
-        self.location_data.insert(0, handmark._p_list)
-        self.finger_data.insert(0, handmark.finger_state)
-        #print(self.palm_data)
-        #print(self.location_data)
-        #print(self.finger_data)
-        self.palm_data.pop()
-        self.d_palm_data.pop()
-        self.location_data.pop()
-        self.finger_data.pop()
-        self.fv = handmark.finger_vector
-
-        #print(handmark.palm_vector * 1000)
-
-    # handmark지닌 10개의 프레임이 들어온다...
-    def gesture_detect(self): #이 최근꺼
-        hand_open_frame = 0
-        Z_rotate = 0
-        Z_rotate_inv = 0
-        x_diff = 0
-        global gesture_int
-        global gesture_time
-        global image
-
-        #print(self.d_palm_data[0], self.finger_data[0], self.location_data[0])
-
-        for i in range(Gesture.Gesture_Array_size - 1):
-            if sum(self.finger_data[i]) > 4:
-                hand_open_frame += 1
-            if self.d_palm_data[i][2] > 1.5:
-                Z_rotate += 1
-            if self.d_palm_data[i][2] < -1.5:
-                Z_rotate_inv += 1
-            #if self.location_data[i+1][1] - self.location_data[i][1]
-            try:
-                if self.location_data[i+1][5].x - self.location_data[i][5].x > 0.005:
-                    x_diff += 1
-                elif self.location_data[i+1][5].x - self.location_data[i][5].x < -0.005:
-                    x_diff -= 1
-
-            except:
-                pass
-            if gesture_int == 0 and abs(self.fv[1]) < 100:
-                if Z_rotate > 2 and hand_open_frame > 6 and x_diff < -3:
-                    print('To Right Sign!!')
-                    #image = cv2.putText(image, 'To right', (80, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
-
-                    win32api.keybd_event(0x27, 0, 0, 0)
-                    gesture_int += 1
-                    gesture_time = time.time()
-
-                elif Z_rotate_inv > 2 and hand_open_frame > 6 and x_diff > 3:
-                    print('To Left Sign!!')
-                    #image = cv2.putText(image, 'To left', (80, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
-
-                    win32api.keybd_event(0x25, 0, 0, 0)
-                    gesture_int += 1
-                    gesture_time = time.time()
-                    break
-
-
-        #print(Z_rotate, Z_rotate_inv, hand_open_frame, x_diff, self.fv[1])
-        # print(np.array(self.d_palm_data)[:][2])
+# class Gesture():
+#     Gesture_Array_size = 15
+#
+#     def __init__(self):
+#         self.palm_data = [np.array([0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]
+#         self.d_palm_data = [np.array([0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)] #palm_data의 차이를 기록할 list
+#
+#         self.location_data = [np.array([0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]
+#         self.finger_data  = [np.array([0, 0, 0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]
+#
+#     def update(self, handmark):
+#         self.palm_data.insert(0, handmark.palm_vector)
+#         self.d_palm_data.insert(0, (self.palm_data[1] - handmark.palm_vector) * 1000)
+#         self.location_data.insert(0, handmark._p_list)
+#         self.finger_data.insert(0, handmark.finger_state)
+#         #print(self.palm_data)
+#         #print(self.location_data)
+#         #print(self.finger_data)
+#         self.palm_data.pop()
+#         self.d_palm_data.pop()
+#         self.location_data.pop()
+#         self.finger_data.pop()
+#         self.fv = handmark.finger_vector
+#
+#         #print(handmark.palm_vector * 1000)
+#
+#     # handmark지닌 10개의 프레임이 들어온다...
+#     def gesture_detect(self): #이 최근꺼
+#         hand_open_frame = 0
+#         Z_rotate = 0
+#         Z_rotate_inv = 0
+#         x_diff = 0
+#         global gesture_int
+#         global gesture_time
+#         global image
+#
+#         #print(self.d_palm_data[0], self.finger_data[0], self.location_data[0])
+#
+#         for i in range(Gesture.Gesture_Array_size - 1):
+#             if sum(self.finger_data[i]) > 4:
+#                 hand_open_frame += 1
+#             if self.d_palm_data[i][2] > 1.5:
+#                 Z_rotate += 1
+#             if self.d_palm_data[i][2] < -1.5:
+#                 Z_rotate_inv += 1
+#             #if self.location_data[i+1][1] - self.location_data[i][1]
+#             try:
+#                 if self.location_data[i+1][5].x - self.location_data[i][5].x > 0.005:
+#                     x_diff += 1
+#                 elif self.location_data[i+1][5].x - self.location_data[i][5].x < -0.005:
+#                     x_diff -= 1
+#
+#             except:
+#                 pass
+#             if gesture_int == 0 and abs(self.fv[1]) < 100:
+#                 if Z_rotate > 2 and hand_open_frame > 6 and x_diff < -3:
+#                     print('To Right Sign!!')
+#                     #image = cv2.putText(image, 'To right', (80, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
+#
+#                     win32api.keybd_event(0x27, 0, 0, 0)
+#                     gesture_int += 1
+#                     gesture_time = time.time()
+#
+#                 elif Z_rotate_inv > 2 and hand_open_frame > 6 and x_diff > 3:
+#                     print('To Left Sign!!')
+#                     #image = cv2.putText(image, 'To left', (80, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
+#
+#                     win32api.keybd_event(0x25, 0, 0, 0)
+#                     gesture_int += 1
+#                     gesture_time = time.time()
+#                     break
+#
+#
+#         #print(Z_rotate, Z_rotate_inv, hand_open_frame, x_diff, self.fv[1])
+#         # print(np.array(self.d_palm_data)[:][2])
 
 class Gesture_mode():
     QUEUE_SIZE = 10
@@ -423,7 +426,7 @@ def process_static_gesture(array_for_static, value_for_static):
         #print(input_)
         input_ = input_[np.newaxis]
         try:
-            prediction = MODEL.predict(input_)
+            prediction = MODEL_STATIC.predict(input_)
             if np.max(prediction[0]) > 0.4:
                 value_for_static.value = np.argmax(prediction[0])
             else:
@@ -431,7 +434,96 @@ def process_static_gesture(array_for_static, value_for_static):
         except:
             pass
 
-def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r, test_np_array = []):
+def process_static_gesture_mod(array_for_static, value_for_static, array_for_static2, value_for_static2):
+    while(True):
+        input_ = np.copy(array_for_static[:])
+        #print(input_)
+        input_ = input_[np.newaxis]
+        time.sleep(0.033)
+        try:
+            prediction = MODEL_STATIC.predict(input_)
+            if np.max(prediction[0]) > 0.4:
+                value_for_static.value = np.argmax(prediction[0])
+            else:
+                value_for_static.value = 0
+        except:
+            pass
+
+        input_2 = np.copy(array_for_static2[:])
+        #print(input_)
+        input_2 = input_2[np.newaxis]
+        try:
+            prediction2 = MODEL_STATIC.predict(input_2)
+            if np.max(prediction2[0]) > 0.4:
+                value_for_static2.value = np.argmax(prediction2[0])
+            else:
+                value_for_static2.value = 0
+        except:
+            pass
+
+class Gesture():
+    GESTURE_ARRAY_SIZE = 45
+
+    def __init__(self):
+        self.data = [[0.] * 63] * Gesture.GESTURE_ARRAY_SIZE
+
+    @staticmethod
+    def norm_df(df):  # df는 numpy array
+        new_df = df.copy()
+        for data in new_df:
+            standard = data[:, 0:3].mean(axis=0)  # numpy array [0., 0., 0.]
+            for i in range(21):
+                for j in range(data.shape[0]):
+                    data[j][i * 3: i * 3 + 3] = data[j][i * 3: i * 3 + 3] - standard
+        return new_df
+
+    @staticmethod
+    def derivative(df):
+        new_df = []
+        for data in df:
+            # Dataframe은 전체 데이터셋으로 데이터 수 * (동영상 프레임 수)
+            data = np.array(data)
+            new_data = []
+            for i in range(1, len(data)):
+                result = data[i] - data[i - 1]
+                result.tolist()
+                new_data.append(result)
+            new_df.append(new_data)
+        return np.array(new_df)
+
+    def update(self, handmark):
+        #print(handpmark)
+        self.data.insert(0, handmark)
+        self.data.pop()
+
+
+    def gesture_detect(self): #이 최근꺼
+        input_ = np.array([self.data])
+        input_ = self.norm_df(input_)
+        input_ = self.derivative(input_)
+        # print(input_.shape)
+        prediction = MODEL_DYNAMIC.predict(input_)
+        try:
+            if np.max(prediction[0]) > 0.99:
+                #print(np.argmax(prediction[0]))
+                return np.argmax(prediction[0])
+            else:
+                return -1
+        except:
+            print('LSTM error')
+
+def process_dynamic_gesture(shared_array_dynamic, dynamic_value):
+    gesture = Gesture()
+    while True:
+        #print(type(shared_array_dynamic[:]), type(gesture.data[0]))
+        if not shared_array_dynamic[:] == gesture.data[0]:
+            input_ = np.copy(shared_array_dynamic[:])
+            gesture.update(list(input_))
+            result = gesture.gesture_detect()
+            dynamic_value = result
+
+
+def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r, shared_array_dynamic, dynamic_value = 0):
 
     global image
     global MOUSE_USE
@@ -494,7 +586,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             cap = self.capture
             # For webcam input:
             hands = mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.6)
-            pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+            pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5, upper_body_only=True)
 
             global width, height
 
@@ -537,10 +629,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     win32api.SetCursorPos((int(self.x), int(self.y)))
 
                 def wheel_up(self):
-                    win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 200, 200, 30, 1)
+                    win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 200, 200, 20, 1)
 
                 def wheel_down(self):
-                    win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 200, 200, -30, 1)
+                    win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 200, 200, -20, 1)
 
                 def wheel(self, before):
                     if self.y > before.y:
@@ -560,13 +652,15 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 global nowclick
                 if get_distance(landmark[4], landmark[8]) < get_distance(landmark[4], landmark[3]) and nowclick == False:
                     print('drag on')
-                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, int(x), int(y), 0, 0)
+                    pos = win32api.GetCursorPos()
+                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, pos[0], pos[1], 0, 0)
                     # ctypes.windll.user32.mouse_event(0x0002, 0, 0, 0, 0)
                     nowclick = True
 
                 elif get_distance(landmark[4], landmark[8]) > 1.5 * get_distance(landmark[4], landmark[3]) and nowclick == True:
                     print('drag off')
-                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, int(x), int(y), 0, 0)
+                    pos = win32api.GetCursorPos()
+                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, pos[0], pos[1], 0, 0)
                     # ctypes.windll.user32.mouse_event(0x0004, 0, 0, 0, 0)
                     nowclick = False
 
@@ -577,9 +671,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                 if get_distance(landmark[4], landmark[10]) < get_distance(landmark[7], landmark[8]) and nowclick2 == False:
                     print('click')
-                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, int(x), int(y), 0, 0)
+                    pos = win32api.GetCursorPos()
+                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, pos[0], pos[1], 0, 0)
                     print('click off')
-                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, int(x), int(y), 0, 0)
+                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, pos[0], pos[1], 0, 0)
                     nowclick2 = True
                     return -1
                 if get_distance(landmark[4], landmark[10]) > get_distance(landmark[7], landmark[8]) and nowclick2 == True:
@@ -708,7 +803,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             hm_idx = False
             finger_open_ = [False for _ in range(5)]
             gesture_time = time.time()
-            gesture = Gesture()
+            #gesture = Gesture()
             gesture_mode = Gesture_mode()
 
             # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
@@ -723,6 +818,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             while bool_state and cap.isOpened():
                 #print('cam')
                 success, image = cap.read()
+
                 if not success:
                     print("Ignoring empty camera frame.")
                     # If loading a video, use 'break' instead of 'continue'.
@@ -731,27 +827,39 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 # Flip the image horizontally for a later selfie-view display, and convert
                 # the BGR image to RGB.
                 image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
-                #image = BlurFunction(image)
+                image = BlurFunction(image)
 
                 # x_size, y_size, channel = image.shape
                 # To improve performance, optionally mark the image as not writeable to
                 # pass by reference.
                 image.flags.writeable = False
                 results = hands.process(image)
-                #results_body = pose.process(image)
+                results_body = pose.process(image)
 
                 # Draw the hand annotations on the image.
                 image.flags.writeable = True
                 image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-                #mp_drawing.draw_landmarks(
-                #    image, results_body.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+
+                # 몸!!
+                if results_body.pose_landmarks:
+                    mark_b = []
+                    body_landmark = results_body.pose_landmarks.landmark
+                    mp_drawing.draw_landmarks(
+                        image, results_body.pose_landmarks, mp_pose.UPPER_BODY_POSE_CONNECTIONS)
+
+                    for i in range(25):
+                        mark_b.append(Mark_pixel(body_landmark[i].x, body_landmark[i].y,
+                                                 body_landmark[i].z))
+                    #print(mark_b_list)
+
+                # 손!!
                 if results.multi_hand_landmarks:
                     mark_p_list = []
+
                     for hand_landmarks in results.multi_hand_landmarks:  # hand_landmarks는 감지된 손의 갯수만큼의 원소 수를 가진 list 자료구조
                         mark_p = []
                         mp_drawing.draw_landmarks(
                             image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
-
                         for i in range(21):
                             mark_p.append(Mark_pixel(hand_landmarks.landmark[i].x, hand_landmarks.landmark[i].y, hand_landmarks.landmark[i].z))
                         mark_p_list.append(mark_p)
@@ -791,6 +899,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                     array_for_static_r[:] = f_p_list
                                     # print(array_for_static)
                                     static_gesture_num = value_for_static_r.value
+
+                                    shared_array_dynamic[:] = HM.return_flatten_p_list()
+                                    dynamic_gesture_num = dynamic_value.value
                                 # try:
                                 #     static_gesture_drawing(static_gesture_num, mark_p[-1])
                                 # except:
@@ -809,9 +920,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         if len(mark_p[-1]) == 5:
                             pixel_c = mark_p5
                             # gesture updating
-                            gesture.update(HM)
+                            # gesture.update(HM)
+
                             if len(mark_p) == 22:
-                                gesture.gesture_detect()
+                                # gesture.gesture_detect()
                                 pass
 
                         if len(mark_p[-1]) == 4:
@@ -896,11 +1008,15 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
     class Ui_MainWindow(QObject):
 
-        def setupUi(self, MainWindow):
+        click_mode = pyqtSignal(int, int)
+        button6_checked = pyqtSignal(bool)
 
+        def setupUi(self):
+            self.MainWindow = MyWindow()
+            MainWindow = self.MainWindow
             MainWindow.setObjectName("MainWindow")
             MainWindow.resize(870, 550)
-            MainWindow.setStyleSheet("background-color: rgb(0, 0, 0);")
+            self.From_button = False
 
             self.centralwidget = QtWidgets.QWidget(MainWindow)
             self.centralwidget.setObjectName("centralwidget")
@@ -917,7 +1033,13 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             font.setBold(True)
             font.setWeight(75)
             self.pushButton.setFont(font)
-            self.pushButton.setStyleSheet("background-color: rgb(225, 225, 225);")
+            self.pushButton.setStyleSheet("border-radius : 30; border : 2px solid white")
+            self.pushButton.setStyleSheet(
+                '''
+                QPushButton{image:url(./image/Mode1.png); border:0px;}
+                QPushButton:hover{image:url(./image/Mode1hover.png); border:0px;}
+                QPushButton:checked{image:url(./image/Mode1ing.png); border:0px;}
+                ''')
             self.pushButton.setCheckable(True)
             self.pushButton.setObjectName("pushButton")
 
@@ -927,7 +1049,13 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             font.setBold(True)
             font.setWeight(75)
             self.pushButton_2.setFont(font)
-            self.pushButton_2.setStyleSheet("background-color: rgb(225, 225, 225);")
+            self.pushButton_2.setStyleSheet("border-radius : 30; border : 2px solid white")
+            self.pushButton_2.setStyleSheet(
+                '''
+                QPushButton{image:url(./image/Mode2.png); border:0px;}
+                QPushButton:hover{image:url(./image/Mode2hover.png); border:0px;}
+                QPushButton:checked{image:url(./image/Mode2ing.png); border:0px;}
+                ''')
             self.pushButton_2.setCheckable(True)
             self.pushButton_2.setObjectName("pushButton_2")
 
@@ -937,7 +1065,13 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             font.setBold(True)
             font.setWeight(75)
             self.pushButton_3.setFont(font)
-            self.pushButton_3.setStyleSheet("background-color: rgb(225, 225, 225);")
+            self.pushButton_3.setStyleSheet("border-radius : 30; border : 2px solid white")
+            self.pushButton_3.setStyleSheet(
+                '''
+                QPushButton{image:url(./image/Mode3.png); border:0px;}
+                QPushButton:hover{image:url(./image/Mode3hover.png); border:0px;}
+                QPushButton:checked{image:url(./image/Mode3ing.png); border:0px;}
+                ''')
             self.pushButton_3.setCheckable(True)
             self.pushButton_3.setObjectName("pushButton_3")
 
@@ -947,7 +1081,13 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             font.setBold(True)
             font.setWeight(75)
             self.pushButton_4.setFont(font)
-            self.pushButton_4.setStyleSheet("background-color: rgb(225, 225, 225);")
+            self.pushButton_4.setStyleSheet("border-radius : 30; border : 2px solid white")
+            self.pushButton_4.setStyleSheet(
+                '''
+                QPushButton{image:url(./image/Mode4.png); border:0px;}
+                QPushButton:hover{image:url(./image/Mode4hover.png); border:0px;}
+                QPushButton:checked{image:url(./image/Mode4ing.png); border:0px;}
+                ''')
             self.pushButton_4.setCheckable(True)
             self.pushButton_4.setObjectName("pushButton_4")
 
@@ -1026,6 +1166,12 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_5.clicked.connect(self.screenshot)
             self.pushButton_5.raise_()
 
+            self.pushButton.setEnabled(False)
+            self.pushButton_2.setEnabled(False)
+            self.pushButton_3.setEnabled(False)
+            self.pushButton_4.setEnabled(False)
+            self.pushButton_5.setEnabled(False)
+
             self.label = QtWidgets.QLabel(self.centralwidget)
             self.label.setGeometry(QRect(660, 430, 200, 60))
             self.label.setText("")
@@ -1044,7 +1190,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.menubar = QtWidgets.QMenuBar(MainWindow)
             self.menubar.setGeometry(QRect(0, 0, 870, 21))
             self.menubar.setObjectName("menubar")
-            MainWindow.setMenuBar(self.menubar)
+            self.MainWindow.setMenuBar(self.menubar)
 
             self.statusbar = QtWidgets.QStatusBar(MainWindow)
             self.statusbar.setObjectName("statusbar")
@@ -1060,6 +1206,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_6.toggled.connect(lambda: self.checked(MainWindow))
             self.click_mode.connect(self.thread.mode_setting)
             self.button6_checked.connect(self.thread.send_img)
+            MainWindow.power_off_signal.connect(self.thread.send_img)
             self.thread.change_pixmap_signal.connect(self.update_img)
             self.thread.mode_signal.connect(self.push_button)
 
@@ -1068,40 +1215,30 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.retranslateUi(MainWindow)
             QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-        From_button = False
-
-        @pyqtSlot(int)
-        def push_button(self, integer): #2-1
-            global From_button
-            if integer != -1:
-                B_list = [self.pushButton, self.pushButton_2,
-                               self.pushButton_3, self.pushButton_4]
-                if not B_list[integer].isChecked():
-                    From_button = True
-                    B_list[integer].toggle() # #2-2
-            else :
-                From_button = False
-                pass
-
-
         def retranslateUi(self, MainWindow):
             _translate = QtCore.QCoreApplication.translate
             MainWindow.setWindowTitle(_translate("MainWindow", "Handtracking"))
             self.groupBox.setTitle(_translate("MainWindow", "모드선택"))
-            self.pushButton.setText(_translate("MainWindow", "Mode 1"))
-            self.pushButton_2.setText(_translate("MainWindow", "Mode 2"))
-            self.pushButton_3.setText(_translate("MainWindow", "Mode 3"))
-            self.pushButton_4.setText(_translate("MainWindow", "Mode 4"))
+            #M
             self.groupBox_2.setTitle(_translate("MainWindow", "활성 기능"))
             self.checkBox.setText(_translate("MainWindow", "마우스 움직임"))
             self.checkBox_2.setText(_translate("MainWindow", "마우스 클릭"))
             self.checkBox_3.setText(_translate("MainWindow", "드래그"))
             self.checkBox_4.setText(_translate("MainWindow", "스크롤"))
 
-        click_mode = pyqtSignal(int, int)
+        @pyqtSlot(int)
+        def push_button(self, integer): #2-1
+            if integer != -1:
+                B_list = [self.pushButton, self.pushButton_2,
+                               self.pushButton_3, self.pushButton_4]
+                if not B_list[integer].isChecked():
+                    self.From_button = True
+                    B_list[integer].toggle() # #2-2
+            else :
+                self.From_button = False
+                pass
 
         def togglebutton(self, MainWindow, integer):
-            global From_button
             Button_list = [self.pushButton, self.pushButton_2,
                            self.pushButton_3, self.pushButton_4]
             Before_mode_list = []
@@ -1138,22 +1275,23 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 else:
                     pass
 
-                if not From_button:
-                    if Before_mode_list[0] == self.pushButton:
-                        self.click_mode.emit(integer+1,1)
-                    elif Before_mode_list[0] == self.pushButton_2:
-                        self.click_mode.emit(integer + 1, 2)
-                    elif Before_mode_list[0] == self.pushButton_3:
-                        self.click_mode.emit(integer + 1, 3)
-                    elif Before_mode_list[0] == self.pushButton_4:
-                        self.click_mode.emit(integer + 1, 4)
-                    else :
-                        self.click_mode.emit(integer + 1, 0)
-
+                if len(Before_mode_list) != 0:
+                    if self.From_button == False:
+                        if Before_mode_list[0] == self.pushButton:
+                            self.click_mode.emit(integer+1, 1)
+                        elif Before_mode_list[0] == self.pushButton_2:
+                            self.click_mode.emit(integer + 1, 2)
+                        elif Before_mode_list[0] == self.pushButton_3:
+                            self.click_mode.emit(integer + 1, 3)
+                        elif Before_mode_list[0] == self.pushButton_4:
+                            self.click_mode.emit(integer + 1, 4)
+                    else:
+                        self.click_mode.emit(integer + 1, integer + 1)
                 else:
-                    self.click_mode.emit(integer + 1, integer + 1)
-                    From_button = False
-
+                    if self.From_button == False:
+                        self.click_mode.emit(integer + 1, 0)
+                    else:
+                        self.click_mode.emit(integer + 1, integer + 1)
             else:
                 self.checkBox.setChecked(False)
                 self.checkBox_2.setChecked(False)
@@ -1171,8 +1309,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             print(filename)
             image = self.label_2.pixmap()
             image.save(filename, 'jpg')
-
-        button6_checked = pyqtSignal(bool)
 
         def cvt_qt(self, img):
             # rgb_image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # cv 이미지 파일 rgb 색계열로 바꿔주기
@@ -1192,27 +1328,58 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         def checked(self, MainWindow):
             if self.pushButton_6.isChecked():
                 print('checked')
+                self.pushButton.setEnabled(True)
+                self.pushButton_2.setEnabled(True)
+                self.pushButton_3.setEnabled(True)
+                self.pushButton_4.setEnabled(True)
+                self.pushButton_5.setEnabled(True)
                 self.button6_checked.emit(True)
             else:
+                self.pushButton.setEnabled(False)
+                self.pushButton_2.setEnabled(False)
+                self.pushButton_3.setEnabled(False)
+                self.pushButton_4.setEnabled(False)
+                self.pushButton_5.setEnabled(False)
+                self.button6_checked.emit(False)
+                Button_list = [self.pushButton, self.pushButton_2,
+                               self.pushButton_3, self.pushButton_4]
+                for button in Button_list:
+                    if button.isChecked():
+                        button.toggle()
                 self.button6_checked.emit(False)
                 self.label_2.setPixmap(QtGui.QPixmap("./image/default.jpg"))
 
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())
+    class MyWindow(QtWidgets.QMainWindow):
 
-def GUI(image):
-    while 1:
-        print(type(image))
-        print(image)
-        time.sleep(10)
+        power_off_signal = pyqtSignal(bool)
+
+        def __init__(self):
+            super().__init__()
+            # self.setStyleSheet('''QMainWindow{background-color : rgb(0, 255, 0);}''')
+            self.setStyleSheet('''QMessageBox{background-color: rgb(225, 225, 225);}''')
+            self.setStyleSheet('''QMainWindow{background-color : rgb(0, 0, 0);}''')
+            self.msg = QMessageBox()
+        def closeEvent(self, event):
+            result = self.msg.question(self,
+                                 "Confirm Exit...",
+                                 "Are you sure you want to exit ?",
+                                 self.msg.Yes | self.msg.No)
+            if result == self.msg.Yes:
+                self.power_off_signal.emit(False)
+                event.accept()
+
+            else :
+                event.ignore()
+
+    app = QtWidgets.QApplication(sys.argv)
+    ui = Ui_MainWindow()
+    ui.setupUi()
+    ui.MainWindow.show()
+    sys.exit(app.exec_())
 
 if __name__ == '__main__':
     print("This is util set program, it works well... maybe... XD")
 
-    print('Running main_18input_GUI.py...')
+    print('Running main_18input_BODY.py...')
     from os import system
-    system('python main_18input_GUI.py')
+    system('python main_18input_BODY.py')

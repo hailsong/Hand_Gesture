@@ -148,7 +148,7 @@ df = derivative(df)
 #df = concat_origin_d(df, d_df)
 #df, label = frame15(df, label)
 
-padded = pad_sequences(df, dtype = 'float64', padding = 'post')
+padded = pad_sequences(df, dtype = 'float64', padding = 'pre')
 
 df = padded
 
@@ -210,6 +210,7 @@ model = keras.Sequential([
     #keras.layers.Embedding(500, 4, mask_zero=True),
 
     #keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001, center=True, scale=True, beta_initializer='zeros', gamma_initializer='ones', moving_mean_initializer='zeros', moving_variance_initializer='ones', beta_regularizer=None, gamma_regularizer=None, beta_constraint=None, gamma_constraint=None),
+
     keras.layers.LSTM(150,
                       input_shape=(frame_size, 63),
                       activation = 'relu',
@@ -242,7 +243,7 @@ early_stop = EarlyStopping(monitor='val_loss', patience=5)
 
 print(model.summary())
 
-hist = model.fit(train_x, train_y, epochs=20)
+hist = model.fit(train_x, train_y, epochs=40)
 
 test_loss, test_acc = model.evaluate(test_x,  test_y, verbose=2)
 

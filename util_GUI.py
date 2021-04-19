@@ -503,10 +503,11 @@ class Gesture():
         # print(input_.shape)
         prediction = MODEL_DYNAMIC.predict(input_)
         try:
-            if np.max(prediction[0]) > 0.90:
+            if np.max(prediction[0]) > 0.99:
                 print(np.argmax(prediction[0]))
                 return np.argmax(prediction[0])
             else:
+                #print('중복')
                 return -1
         except:
             print('LSTM error')
@@ -627,10 +628,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     win32api.SetCursorPos((int(self.x), int(self.y)))
 
                 def wheel_up(self):
-                    win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 200, 200, 30, 1)
+                    win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 200, 200, 20, 1)
 
                 def wheel_down(self):
-                    win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 200, 200, -30, 1)
+                    win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 200, 200, -20, 1)
 
                 def wheel(self, before):
                     if self.y > before.y:
