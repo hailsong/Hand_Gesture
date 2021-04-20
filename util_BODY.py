@@ -51,7 +51,7 @@ MODEL_STATIC = keras.models.load_model(
     'keras_util/model_save/my_model_21.h5'
 )
 MODEL_DYNAMIC = keras.models.load_model(
-    'keras_util/model_save/my_model_63.h5'
+    'keras_util/model_save/my_model_63_BODY.h5'
 )
 
 '''
@@ -76,7 +76,7 @@ class Handmark():
 
     def return_flatten_p_list(self):
         output = []
-        for local_mark_p in self._p_list[:-1]:
+        for local_mark_p in self._p_list:
             #print('type', type(local_mark_p))
             output.extend(local_mark_p.to_list())
         return output
@@ -210,93 +210,6 @@ class Handmark():
         output = self.return_finger_info()
         output = np.concatenate((output, self.palm_vector, self.finger_vector))
         return output
-
-    # def predict_static(self):
-    #     self.input = self.input[np.newaxis]
-    #     # print(input.shape)
-    #     # print(input)
-    #     prediction = model.predict(self.input)
-    #     if np.max(prediction[0]) > 0.75:
-    #         return np.argmax(prediction[0])
-    #     else:
-    #         return 0
-
-#TODO Gesture 판단, 일단은 15프레임 (0.5초)의 Queue로?
-# class Gesture():
-#     Gesture_Array_size = 15
-#
-#     def __init__(self):
-#         self.palm_data = [np.array([0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]
-#         self.d_palm_data = [np.array([0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)] #palm_data의 차이를 기록할 list
-#
-#         self.location_data = [np.array([0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]
-#         self.finger_data  = [np.array([0, 0, 0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]
-#
-#     def update(self, handmark):
-#         self.palm_data.insert(0, handmark.palm_vector)
-#         self.d_palm_data.insert(0, (self.palm_data[1] - handmark.palm_vector) * 1000)
-#         self.location_data.insert(0, handmark._p_list)
-#         self.finger_data.insert(0, handmark.finger_state)
-#         #print(self.palm_data)
-#         #print(self.location_data)
-#         #print(self.finger_data)
-#         self.palm_data.pop()
-#         self.d_palm_data.pop()
-#         self.location_data.pop()
-#         self.finger_data.pop()
-#         self.fv = handmark.finger_vector
-#
-#         #print(handmark.palm_vector * 1000)
-#
-#     # handmark지닌 10개의 프레임이 들어온다...
-#     def gesture_detect(self): #이 최근꺼
-#         hand_open_frame = 0
-#         Z_rotate = 0
-#         Z_rotate_inv = 0
-#         x_diff = 0
-#         global gesture_int
-#         global gesture_time
-#         global image
-#
-#         #print(self.d_palm_data[0], self.finger_data[0], self.location_data[0])
-#
-#         for i in range(Gesture.Gesture_Array_size - 1):
-#             if sum(self.finger_data[i]) > 4:
-#                 hand_open_frame += 1
-#             if self.d_palm_data[i][2] > 1.5:
-#                 Z_rotate += 1
-#             if self.d_palm_data[i][2] < -1.5:
-#                 Z_rotate_inv += 1
-#             #if self.location_data[i+1][1] - self.location_data[i][1]
-#             try:
-#                 if self.location_data[i+1][5].x - self.location_data[i][5].x > 0.005:
-#                     x_diff += 1
-#                 elif self.location_data[i+1][5].x - self.location_data[i][5].x < -0.005:
-#                     x_diff -= 1
-#
-#             except:
-#                 pass
-#             if gesture_int == 0 and abs(self.fv[1]) < 100:
-#                 if Z_rotate > 2 and hand_open_frame > 6 and x_diff < -3:
-#                     print('To Right Sign!!')
-#                     #image = cv2.putText(image, 'To right', (80, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
-#
-#                     win32api.keybd_event(0x27, 0, 0, 0)
-#                     gesture_int += 1
-#                     gesture_time = time.time()
-#
-#                 elif Z_rotate_inv > 2 and hand_open_frame > 6 and x_diff > 3:
-#                     print('To Left Sign!!')
-#                     #image = cv2.putText(image, 'To left', (80, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
-#
-#                     win32api.keybd_event(0x25, 0, 0, 0)
-#                     gesture_int += 1
-#                     gesture_time = time.time()
-#                     break
-#
-#
-#         #print(Z_rotate, Z_rotate_inv, hand_open_frame, x_diff, self.fv[1])
-#         # print(np.array(self.d_palm_data)[:][2])
 
 class Gesture_mode():
     QUEUE_SIZE = 10
@@ -465,15 +378,17 @@ class Gesture():
     GESTURE_ARRAY_SIZE = 45
 
     def __init__(self):
-        self.data = [[0.] * 63] * Gesture.GESTURE_ARRAY_SIZE
+        self.data = [[0.] * 75] * Gesture.GESTURE_ARRAY_SIZE
 
     @staticmethod
     def norm_df(df):  # df는 numpy array
         new_df = df.copy()
+        #print('shape', new_df.shape)
         for data in new_df:
             standard = data[:, 0:3].mean(axis=0)  # numpy array [0., 0., 0.]
-            for i in range(21):
+            for i in range(75):
                 for j in range(data.shape[0]):
+                    #print(data[j][i * 3: i * 3 + 3])
                     data[j][i * 3: i * 3 + 3] = data[j][i * 3: i * 3 + 3] - standard
         return new_df
 
@@ -499,13 +414,13 @@ class Gesture():
 
     def gesture_detect(self): #이 최근꺼
         input_ = np.array([self.data])
-        input_ = self.norm_df(input_)
-        input_ = self.derivative(input_)
+        #input_ = self.norm_df(input_)
+        # input_ = self.derivative(input_)
         # print(input_.shape)
         prediction = MODEL_DYNAMIC.predict(input_)
         try:
             if np.max(prediction[0]) > 0.99:
-                #print(np.argmax(prediction[0]))
+                print(np.argmax(prediction[0]))
                 return np.argmax(prediction[0])
             else:
                 return -1
@@ -521,6 +436,7 @@ def process_dynamic_gesture(shared_array_dynamic, dynamic_value):
             gesture.update(list(input_))
             result = gesture.gesture_detect()
             dynamic_value = result
+    #print(11)
 
 
 def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r, shared_array_dynamic, dynamic_value = 0):
@@ -851,6 +767,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         mark_b.append(Mark_pixel(body_landmark[i].x, body_landmark[i].y,
                                                  body_landmark[i].z))
                     #print(mark_b_list)
+                    #print(mark_b)
+                    BM = Handmark(mark_b)  # BODYMARK
+                    #print(len(BM.return_flatten_p_list()))
+                    shared_array_dynamic[:] = BM.return_flatten_p_list()
+                    dynamic_gesture_num = dynamic_value.value
 
                 # 손!!
                 if results.multi_hand_landmarks:
@@ -863,6 +784,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         for i in range(21):
                             mark_p.append(Mark_pixel(hand_landmarks.landmark[i].x, hand_landmarks.landmark[i].y, hand_landmarks.landmark[i].z))
                         mark_p_list.append(mark_p)
+
+
 
                     # TODO 지금 API에서 사용하는 자료형때문에 살짝 꼬였는데 mark_p(list)의 마지막 원소를 lR_idx(left or right)로 표현해놨음.
                     for i in range(len(mark_p_list)):  # for문 한 번 도는게 한 손에 대한 것임
@@ -900,8 +823,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                     # print(array_for_static)
                                     static_gesture_num = value_for_static_r.value
 
-                                    shared_array_dynamic[:] = HM.return_flatten_p_list()
-                                    dynamic_gesture_num = dynamic_value.value
+
                                 # try:
                                 #     static_gesture_drawing(static_gesture_num, mark_p[-1])
                                 # except:

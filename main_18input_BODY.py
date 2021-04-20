@@ -23,12 +23,12 @@ if __name__ == "__main__":
     static_num_l = Value('i', 0)
     shared_array_r = Array('d', [0. for _ in range(18)])
     static_num_r = Value('i', 0)
-    shared_array_dynamic = Array('d', [0. for _ in range(63)])
+    shared_array_dynamic = Array('d', [0. for _ in range(75)])
     dynamic_value = Value('i', 0)
 
     #video_stream = Array('d', [0. for _ in range(18)])
 
-    # GUI과 주고받을 정보 : Mode(쌍방향) [int value], 대기 [int value], 캡쳐 [int value], 이미지 [array]
+    # GUI과 주고받을 정보 : Mode(쌍방향) [int value], 대기 [int value], 캡쳐 [int value]
 
     process1 = Process(target=initialize, args=(shared_array_l, static_num_l, shared_array_r, static_num_r, shared_array_dynamic, dynamic_value))
     process2 = Process(target=process_static_gesture_mod, args=(shared_array_l, static_num_l, shared_array_r, static_num_r))

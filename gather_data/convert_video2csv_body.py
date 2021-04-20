@@ -313,8 +313,8 @@ if __name__ == "__main__":
             #print(experiment_df)
             df_sum = pd.concat([df_sum, experiment_df])
             '''
-            experiment_df.to_csv('../video_output/' + new_name + new_num + '_body.csv')
-            print('Saved dataframe to : ', '../video_output/' + new_name + new_num + '_body.csv')
+            experiment_df.to_csv('../video_output/' + new_name[:-1] + '_BODY/' + new_num + '.csv')
+            print('Saved dataframe to : ', '../video_output/' + new_name[:-1] + '_BODY/' + new_num + '.csv')
             exit()
 
         # Flip the image horizontally for a later selfie-view display, and convert

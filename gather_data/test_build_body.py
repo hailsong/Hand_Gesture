@@ -6,7 +6,7 @@ import time
 
 path=os.getcwd()
 
-POSE_NAME = '1'
+POSE_NAME = '4'
 FOLDER_NAME = 'LSTM_DATASET2/POSE_'+POSE_NAME+'/'
 
 split_list = FOLDER_NAME.split('/')
@@ -41,7 +41,7 @@ def file_convert(i):
 
 if __name__ == '__main__':
     start_time = time.time()
-    pool = multiprocessing.Pool(processes=6)
+    pool = multiprocessing.Pool(processes=8)
     num = range(1,201)
     pool.map(file_convert, num)
     print(time.time()-start_time)
@@ -50,5 +50,5 @@ if __name__ == '__main__':
         for i in num:
             txt = open("../video_output/LSTM_DATASET2/csv_list_LSTM_BODY.txt", 'a')
             print('txt append', i, POSE_NAME)
-            data = FOLDER_NAME + str(i) + '_BODY.csv\n'
+            data = FOLDER_NAME[:-1]+'_BODY/' + str(i) + '.csv\n'
             txt.write(data)
