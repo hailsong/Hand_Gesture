@@ -90,7 +90,7 @@ def frame15(df, label):
         max_diff = 0
         local_i = 0
         for i in range(len(data[:-mod_size])):
-            target_15 = [[0.] * 63] * mod_size
+            target_15 = [[0.] * 75] * mod_size
             local_diff = 0
             frame_before = np.array(data[i])
             if i > 5 or i < len(data[:-mod_size]) - 5:
@@ -114,9 +114,10 @@ def frame15(df, label):
 
 def norm(df): #df는 numpy array
     for data in df:
-        standard = data[:, 0:3].mean(axis = 0) # numpy array [0., 0., 0.]
+        standard = data[:, 12 * 3 + 0: 12 * 3 + 3].mean(axis = 0) # numpy array [0., 0., 0.]
         for i in range(21):
             for j in range(data.shape[0]):
+
                 data[j][i*3 : i*3 + 3] = data[j][i*3 : i*3 + 3] - standard
     return df
 
@@ -148,7 +149,7 @@ for i in target[::-1]:
 label = np.array(label)
 label = label - 1
 
-#df = derivative(df)
+df = derivative(df)
 #df = concat_origin_d(df, d_df)
 #df, label = frame15(df, label)
 
@@ -162,7 +163,7 @@ data_size = len(df[0][0])
 
 
 df = np.array(df)
-#df = norm(df)
+df = norm(df)
 
 #print(df)
 print(df.shape) # 82 * 46 * 63
@@ -247,7 +248,7 @@ early_stop = EarlyStopping(monitor='val_loss', patience=5)
 
 print(model.summary())
 
-hist = model.fit(train_x, train_y, epochs=40)
+hist = model.fit(train_x, train_y, epochs=15)
 
 test_loss, test_acc = model.evaluate(test_x,  test_y, verbose=2)
 

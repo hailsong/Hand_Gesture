@@ -243,7 +243,7 @@ early_stop = EarlyStopping(monitor='val_loss', patience=5)
 
 print(model.summary())
 
-hist = model.fit(train_x, train_y, epochs=40)
+hist = model.fit(train_x, train_y, epochs=15)
 
 test_loss, test_acc = model.evaluate(test_x,  test_y, verbose=2)
 
