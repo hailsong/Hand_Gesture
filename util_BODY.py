@@ -18,8 +18,6 @@ from PyQt5.QtCore import QThread, QObject, QRect, pyqtSlot, pyqtSignal
 import datetime
 import sys
 
-import matplotlib
-
 try:
     physical_devices = tf.config.list_physical_devices('GPU')
     #print(physical_devices)
@@ -409,10 +407,12 @@ class Gesture():
         return np.array(new_df)
 
     def update(self, handmark):
-        #print(handpmark)
+        #print(handmark)
         self.data.insert(0, handmark)
         self.data.pop()
 
+    def set_zero(self):
+        self.data = [[0.] * 75] * Gesture.GESTURE_ARRAY_SIZE
 
     def gesture_detect(self): #이 최근꺼
         input_ = np.array([self.data])
@@ -421,17 +421,13 @@ class Gesture():
         # print(input_.shape)
         prediction = MODEL_DYNAMIC.predict(input_)
         try:
-            if np.max(prediction[0]) > 0.99:
+            if np.max(prediction[0]) > 0.995:
                 print(np.argmax(prediction[0]))
                 return np.argmax(prediction[0])
             else:
                 return -1
         except:
             print('LSTM error')
-
-    def gesture_detect_manual(self):
-        input_ = np.array([self.data])
-        print(input_[12*3 : 12*3 + 3])
 
 def process_dynamic_gesture(shared_array_dynamic, dynamic_value):
     gesture = Gesture()
@@ -440,12 +436,8 @@ def process_dynamic_gesture(shared_array_dynamic, dynamic_value):
         if not shared_array_dynamic[:] == gesture.data[0]:
             input_ = np.copy(shared_array_dynamic[:])
             gesture.update(list(input_))
-            #result = gesture.gesture_detect_manual()
-            l1 = np.array(input_[11 * 3 : 11*3 + 3]) - np.array(input_[13*3 : 13*3 + 3])
-            l2 = np.array(input_[13 * 3: 13 * 3 + 3]) - np.array(input_[15 * 3: 15 * 3 + 3])
-            print(get_angle(l1 ,l2))
-            #print()
-            #dynamic_value = result
+            result = gesture.gesture_detect()
+            dynamic_value = result
     #print(11)
 
 def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r, shared_array_dynamic, dynamic_value = 0):
@@ -751,7 +743,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 # Flip the image horizontally for a later selfie-view display, and convert
                 # the BGR image to RGB.
                 image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
-                #image = BlurFunction(image)
+                image = BlurFunction(image)
 
                 # x_size, y_size, channel = image.shape
                 # To improve performance, optionally mark the image as not writeable to
@@ -774,13 +766,12 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     for i in range(25):
                         mark_b.append(Mark_pixel(body_landmark[i].x, body_landmark[i].y,
                                                  body_landmark[i].z))
-                    # print(mark_b_list)
-                    # print(mark_b)
+                    #print(mark_b_list)
+                    #print(mark_b)
                     BM = Handmark(mark_b)  # BODYMARK
                     #print(len(BM.return_flatten_p_list()))
                     shared_array_dynamic[:] = BM.return_flatten_p_list()
                     dynamic_gesture_num = dynamic_value.value
-
 
                 # 손!!
                 if results.multi_hand_landmarks:

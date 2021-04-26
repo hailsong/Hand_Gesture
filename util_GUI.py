@@ -18,6 +18,9 @@ from PyQt5.QtCore import QThread, QObject, QRect, pyqtSlot, pyqtSignal
 import datetime
 import sys
 
+import matplotlib.pyplot as plt
+from matplotlib import animation
+
 try:
     physical_devices = tf.config.list_physical_devices('GPU')
     #print(physical_devices)
@@ -503,7 +506,7 @@ class Gesture():
         # print(input_.shape)
         prediction = MODEL_DYNAMIC.predict(input_)
         try:
-            if np.max(prediction[0]) > 0.99:
+            if np.max(prediction[0]) > 0.95:
                 print(np.argmax(prediction[0]))
                 return np.argmax(prediction[0])
             else:
@@ -512,15 +515,59 @@ class Gesture():
         except:
             print('LSTM error')
 
+
 def process_dynamic_gesture(shared_array_dynamic, dynamic_value):
     gesture = Gesture()
+    starttime = time.time()
+    mark_before = [0.]*63
+
+    # fig = plt.figure()  # figure(도표) 생성
+    # ax = plt.subplot(211, xlim=(0, 50), ylim=(-5, 5))
+    input_ = np.copy(shared_array_dynamic[:])
+    gesture.update(list(input_))
+
+    gesture_trigger_queue = [0.] * 5
+
     while True:
         #print(type(shared_array_dynamic[:]), type(gesture.data[0]))
+
+        #input_ = np.copy(shared_array_dynamic[:])
+        #abs_size = shared_array_dynamic[i]
+        plot_x, plot_y, plot_z = 0, 0, 0
+        t = time.time() - starttime
+
+        for i in range(63):
+            point_num = i//3
+            xyz = i%3
+            if xyz == 0:
+                plot_x += abs(shared_array_dynamic[i] - mark_before[i])
+            if xyz == 1:
+                plot_y += abs(shared_array_dynamic[i] - mark_before[i])
+            if xyz == 2:
+                plot_z += abs(shared_array_dynamic[i] - mark_before[i])
+
+        print(t, plot_x, plot_y, plot_z)
+        gesture_trigger_queue.append(plot_x + plot_y + plot_z)
+        gesture_trigger_queue.pop(0)
+
+        mark_before = input_
+        time.sleep(0.1)
+
+        gesture_trigger_frame = 0
+
+        for i in gesture_trigger_queue:
+            if i > 1:
+                gesture_trigger_frame += 1
         if not shared_array_dynamic[:] == gesture.data[0]:
             input_ = np.copy(shared_array_dynamic[:])
             gesture.update(list(input_))
-            result = gesture.gesture_detect()
-            dynamic_value = result
+            if gesture_trigger_frame > 3:
+                print('triggerd')
+
+                result = gesture.gesture_detect()
+                dynamic_value = result
+
+
 
 
 def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r, shared_array_dynamic, dynamic_value = 0):
@@ -814,6 +861,13 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             p_key_ready = False
             mode = 0
 
+            mark_p_before = [0. for _ in range(22)], \
+                            [0. for _ in range(22)], \
+                            [0. for _ in range(22)]
+            starttime = time.time()
+
+
+
             while bool_state and cap.isOpened():
                 #print('cam')
                 success, image = cap.read()
@@ -887,15 +941,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                                     shared_array_dynamic[:] = HM.return_flatten_p_list()
                                     dynamic_gesture_num = dynamic_value.value
-                                # try:
-                                #     static_gesture_drawing(static_gesture_num, mark_p[-1])
-                                # except:
-                                #     print('static_drawing error')
-                                # print(static_gesture_num)
-                            else:
-                                finger_open_for_ml = np.ndarray.tolist(HM.return_finger_state())
-                                # 정지 제스쳐 확인
-                                #static_gesture_detect(finger_open_for_ml, mark_p[-1])
+
+                                    # 일단 X, Y, Z 변화량 플롯해볼 것
+
+
+
                             finger_open_ = HM.return_finger_state()
 
                         mark_p0 = mark_p[0].to_pixel()

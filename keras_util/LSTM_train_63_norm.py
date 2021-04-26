@@ -243,7 +243,7 @@ early_stop = EarlyStopping(monitor='val_loss', patience=5)
 
 print(model.summary())
 
-hist = model.fit(train_x, train_y, epochs=15)
+hist = model.fit(train_x, train_y, epochs=25)
 
 test_loss, test_acc = model.evaluate(test_x,  test_y, verbose=2)
 
@@ -274,7 +274,9 @@ acc_ax.set_ylabel('accuracy')
 loss_ax.legend(loc='upper left')
 acc_ax.legend(loc='lower left')
 
-plt.show()
-
 model.save('model_save/my_model_63.h5')
 print('new model saved')
+
+plt.show()
+
+
