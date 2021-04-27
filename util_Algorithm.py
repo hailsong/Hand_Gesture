@@ -224,81 +224,81 @@ class Handmark():
     #         return 0
 
 #TODO Gesture 판단, 일단은 15프레임 (0.5초)의 Queue로?
-# class Gesture():
-#     Gesture_Array_size = 15
-#
-#     def __init__(self):
-#         self.palm_data = [np.array([0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]
-#         self.d_palm_data = [np.array([0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)] #palm_data의 차이를 기록할 list
-#
-#         self.location_data = [np.array([0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]
-#         self.finger_data  = [np.array([0, 0, 0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]
-#
-#     def update(self, handmark):
-#         self.palm_data.insert(0, handmark.palm_vector)
-#         self.d_palm_data.insert(0, (self.palm_data[1] - handmark.palm_vector) * 1000)
-#         self.location_data.insert(0, handmark._p_list)
-#         self.finger_data.insert(0, handmark.finger_state)
-#         #print(self.palm_data)
-#         #print(self.location_data)
-#         #print(self.finger_data)
-#         self.palm_data.pop()
-#         self.d_palm_data.pop()
-#         self.location_data.pop()
-#         self.finger_data.pop()
-#         self.fv = handmark.finger_vector
-#
-#         #print(handmark.palm_vector * 1000)
-#
-#     # handmark지닌 10개의 프레임이 들어온다...
-#     def gesture_detect(self): #이 최근꺼
-#         hand_open_frame = 0
-#         Z_rotate = 0
-#         Z_rotate_inv = 0
-#         x_diff = 0
-#         global gesture_int
-#         global gesture_time
-#         global image
-#
-#         #print(self.d_palm_data[0], self.finger_data[0], self.location_data[0])
-#
-#         for i in range(Gesture.Gesture_Array_size - 1):
-#             if sum(self.finger_data[i]) > 4:
-#                 hand_open_frame += 1
-#             if self.d_palm_data[i][2] > 1.5:
-#                 Z_rotate += 1
-#             if self.d_palm_data[i][2] < -1.5:
-#                 Z_rotate_inv += 1
-#             #if self.location_data[i+1][1] - self.location_data[i][1]
-#             try:
-#                 if self.location_data[i+1][5].x - self.location_data[i][5].x > 0.005:
-#                     x_diff += 1
-#                 elif self.location_data[i+1][5].x - self.location_data[i][5].x < -0.005:
-#                     x_diff -= 1
-#
-#             except:
-#                 pass
-#             if gesture_int == 0 and abs(self.fv[1]) < 100:
-#                 if Z_rotate > 2 and hand_open_frame > 6 and x_diff < -3:
-#                     print('To Right Sign!!')
-#                     #image = cv2.putText(image, 'To right', (80, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
-#
-#                     win32api.keybd_event(0x27, 0, 0, 0)
-#                     gesture_int += 1
-#                     gesture_time = time.time()
-#
-#                 elif Z_rotate_inv > 2 and hand_open_frame > 6 and x_diff > 3:
-#                     print('To Left Sign!!')
-#                     #image = cv2.putText(image, 'To left', (80, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
-#
-#                     win32api.keybd_event(0x25, 0, 0, 0)
-#                     gesture_int += 1
-#                     gesture_time = time.time()
-#                     break
-#
-#
-#         #print(Z_rotate, Z_rotate_inv, hand_open_frame, x_diff, self.fv[1])
-#         # print(np.array(self.d_palm_data)[:][2])
+class Gesture():
+    Gesture_Array_size = 15
+
+    def __init__(self):
+        self.palm_data = [np.array([0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]
+        self.d_palm_data = [np.array([0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)] #palm_data의 차이를 기록할 list
+
+        self.location_data = [np.array([0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]
+        self.finger_data  = [np.array([0, 0, 0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]
+
+    def update(self, handmark):
+        self.palm_data.insert(0, handmark.palm_vector)
+        self.d_palm_data.insert(0, (self.palm_data[1] - handmark.palm_vector) * 1000)
+        self.location_data.insert(0, handmark._p_list)
+        self.finger_data.insert(0, handmark.finger_state)
+        #print(self.palm_data)
+        #print(self.location_data)
+        #print(self.finger_data)
+        self.palm_data.pop()
+        self.d_palm_data.pop()
+        self.location_data.pop()
+        self.finger_data.pop()
+        self.fv = handmark.finger_vector
+
+        #print(handmark.palm_vector * 1000)
+
+    # handmark지닌 15개의 프레임이 들어온다...
+    def gesture_detect(self): #이 최근꺼
+        hand_open_frame = 0
+        Z_rotate = 0
+        Z_rotate_inv = 0
+        x_diff = 0
+        global gesture_int
+        global gesture_time
+        global image
+
+        #print(self.d_palm_data[0], self.finger_data[0], self.location_data[0])
+
+        for i in range(Gesture.Gesture_Array_size - 1):
+            if sum(self.finger_data[i]) > 4:
+                hand_open_frame += 1
+            if self.d_palm_data[i][2] > 1.5:
+                Z_rotate += 1
+            if self.d_palm_data[i][2] < -1.5:
+                Z_rotate_inv += 1
+            #if self.location_data[i+1][1] - self.location_data[i][1]
+            try:
+                if self.location_data[i+1][5].x - self.location_data[i][5].x > 0.005:
+                    x_diff += 1
+                elif self.location_data[i+1][5].x - self.location_data[i][5].x < -0.005:
+                    x_diff -= 1
+
+            except:
+                pass
+            if gesture_int == 0 and abs(self.fv[1]) < 100:
+                if Z_rotate > 2 and hand_open_frame > 6 and x_diff < -3:
+                    print('To Right Sign!!')
+                    #image = cv2.putText(image, 'To right', (80, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
+
+                    win32api.keybd_event(0x27, 0, 0, 0)
+                    gesture_int += 1
+                    gesture_time = time.time()
+
+                elif Z_rotate_inv > 2 and hand_open_frame > 6 and x_diff > 3:
+                    print('To Left Sign!!')
+                    #image = cv2.putText(image, 'To left', (80, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
+
+                    win32api.keybd_event(0x25, 0, 0, 0)
+                    gesture_int += 1
+                    gesture_time = time.time()
+                    break
+
+
+        #print(Z_rotate, Z_rotate_inv, hand_open_frame, x_diff, self.fv[1])
+        # print(np.array(self.d_palm_data)[:][2])
 
 class Gesture_mode():
     QUEUE_SIZE = 10
@@ -569,7 +569,7 @@ def process_dynamic_gesture(shared_array_dynamic, dynamic_value):
                 #print(result)
                 dynamic_value = result
 
-def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r, shared_array_dynamic, dynamic_value = 0):
+def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r):
 
     global image
     global MOUSE_USE
@@ -937,8 +937,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                     # print(array_for_static)
                                     static_gesture_num = value_for_static_r.value
 
-                                    shared_array_dynamic[:] = HM.return_flatten_p_list()
-                                    dynamic_gesture_num = dynamic_value.value
+                                    # shared_array_dynamic[:] = HM.return_flatten_p_list()
+                                    # dynamic_gesture_num = dynamic_value.value
 
                                     # 일단 X, Y, Z 변화량 플롯해볼 것
 
@@ -1011,13 +1011,12 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                         before_c = pixel_c
 
+                        # Dynamic Gesture Detection
+
                     mode = gesture_mode.select_mode()
                     self.mode_setting(mode, mode_before)
                     mode_before = mode
-                    # mode2 = self.inv_push_button()
-                    # if mode2 != None :
-                    #     mode_setting(mode2, mode_before)
-                    #     mode_before = mode2
+
 
                 FPS = round(1 / (time.time() - before_time), 2)
                 # print(FPS)
@@ -1413,6 +1412,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 if __name__ == '__main__':
     print("This is util set program, it works well... maybe... XD")
 
-    print('Running main_18input_DG.py...')
+    print('Running main_Algorithm.py...')
     from os import system
-    system('python main_18input_DG.py')
+    system('python main_Algorithm.py')

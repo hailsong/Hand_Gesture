@@ -67,7 +67,7 @@ def concat_origin_d(origin, d):
 
 def frame15(df, label):
     new_label = np.array(label)
-    mod_size = 30
+    mod_size =15
     data_i = 0
     target = []
     for data in df:

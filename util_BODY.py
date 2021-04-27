@@ -439,7 +439,9 @@ def process_dynamic_gesture(shared_array_dynamic, dynamic_value):
             result = gesture.gesture_detect()
             dynamic_value = result
     #print(11)
+'''
 
+'''
 def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r, shared_array_dynamic, dynamic_value = 0):
 
     global image
