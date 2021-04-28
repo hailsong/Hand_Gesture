@@ -357,7 +357,7 @@ class Gesture():
                 condition1 += 1
             if self.finger_data[i][1] - self.finger_data[i+1][1] > 0.04:
                 condition2 += 1
-            if self.location_data[i][1] - self.location_data[i + 1][1] > 0.03:
+            if self.location_data[i][1] - self.location_data[i + 1][1] > 0.05:
                 condition3 += 1
         # print(condition1, condition2, condition3, condition4)
         condition_sum = condition1 + condition2 + condition3 + condition4
