@@ -10,6 +10,11 @@ class Hashmap():
     def add(self, key, value):
         hash_key = self.get_hash(key)
         hash_value = [key, value]
-
         if self.map[hash_key] is None:
-            self.map[hash_key] = 
+            self.map[hash_key] = list([hash_value])
+            return True
+        else:
+            for pair in self.map[hash_key]:
+                if pair[0] == key:
+                    pair[1] = value
+                    return True
