@@ -212,7 +212,6 @@ class Handmark():
         return output
 
 
-
 #TODO Gesture 판단, 일단은 15프레임 (0.5초)의 Queue로?
 class Gesture():
     Gesture_Array_size = 7
@@ -255,11 +254,10 @@ class Gesture():
         #print(handmark.palm_vector * 1000)
 
     # handmark지닌 10개의 프레임이 들어온다...
+
     def gesture_detect(self): #이 최근꺼
-
         global gesture_check
-
-        if gesture_check == True or self.gesture_data.count(6) > 2:
+        if gesture_check == True or self.gesture_data.count(6) > 4:
             pass
 
         # 동적 제스처 - LEFT
@@ -285,8 +283,9 @@ class Gesture():
         condition_sum = condition1 + condition2 + condition3 + condition4
 
         #print(get_angle(self.palm_data[-1], angle_threshold))
-        if condition_sum > 9 and angle_min < 1:
+        if condition_sum > 9 and angle_min < 0.8:
             print("LEFT")
+            win32api.keybd_event(0x25, 0, 0, 0)
             return -1
 
         # 동적 제스처 - RIGHT
@@ -312,8 +311,9 @@ class Gesture():
         condition_sum = condition1 + condition2 + condition3 + condition4
         angle_threshold = [-1., 0., 0.]
         #print(get_angle(self.palm_data[-1], angle_threshold))
-        if condition_sum > 10 and angle_min < 1:
+        if condition_sum > 10 and angle_min < 0.8:
             print("RIGHT")
+            win32api.keybd_event(0x27, 0, 0, 0)
             return -1
 
         # 동적 제스처 - UP
@@ -339,6 +339,7 @@ class Gesture():
         #print(get_angle(self.palm_data[-1], angle_threshold))
         if condition_sum > 6 and angle_min < 1:
             print("UP")
+            win32api.keybd_event(0x26, 0, 0, 0)
             return -1
 
         # 동적 제스처 - DOWN
@@ -365,9 +366,9 @@ class Gesture():
         #print(get_angle(self.palm_data[-1], angle_threshold))
         if condition_sum > 7 and angle_min < 1.5:
             print("DOWN")
+            win32api.keybd_event(0x28, 0, 0, 0)
             return -1
         gesture_check = True
-
 
 
         '''
@@ -407,8 +408,6 @@ class Gesture():
 
         #print(Z_rotate, Z_rotate_inv, hand_open_frame, x_diff, self.fv[1])
         # print(np.array(self.d_palm_data)[:][2])
-
-
 
 
 class Gesture_mode():
@@ -814,7 +813,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             mode = 0
             global gesture_check
 
-
+            '''
             #TODO 변화량 모니터링
             from matplotlib import pyplot as plt
             from matplotlib import animation
@@ -860,7 +859,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             anim = animation.FuncAnimation(fig, animate, init_func=init, frames=200, interval=20, blit=False)
 
             plt.show()
-
+            '''
 
             while bool_state and cap.isOpened():
                 #print('cam')

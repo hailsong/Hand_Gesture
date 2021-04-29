@@ -202,35 +202,31 @@ model = keras.Sequential([
 
     #keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001, center=True, scale=True, beta_initializer='zeros', gamma_initializer='ones', moving_mean_initializer='zeros', moving_variance_initializer='ones', beta_regularizer=None, gamma_regularizer=None, beta_constraint=None, gamma_constraint=None),
 
-    # keras.layers.LSTM(150,
-    #                   input_shape=(frame_size, 63),
-    #                   activation = 'relu',
-    #                   return_sequences=False),
-    # # keras.layers.Dense(300, activation='relu', kernel_initializer='he_normal'),
-    # keras.layers.Dense(150, activation='relu', kernel_initializer='he_normal'),
-    # keras.layers.Dense(100, activation='relu'),
-    # keras.layers.Dense(70, activation='relu'),
-    # keras.layers.Dense(50, activation='relu'),
-
-    keras.layers.LSTM(128,
+    keras.layers.LSTM(150,
                       input_shape=(frame_size, 63),
-                      activation='relu',
-                      return_sequences=True),
-    keras.layers.LSTM(64, return_sequences=True),
-    keras.layers.LSTM(32, return_sequences=True),
-    keras.layers.LSTM(16),
+                      activation = 'relu',
+                      return_sequences=False),
+    # keras.layers.Dense(300, activation='relu', kernel_initializer='he_normal'),
+    keras.layers.Dense(150, activation='relu', kernel_initializer='he_normal'),
+    keras.layers.Dense(100, activation='relu'),
+    keras.layers.Dense(70, activation='relu'),
+    keras.layers.Dense(50, activation='relu'),
     keras.layers.Dense(4, activation = 'softmax')
+
+    # keras.layers.LSTM(128,
+    #                   input_shape=(frame_size, 63),
+    #                   activation='relu',
+    #                   return_sequences=True),
+    # keras.layers.LSTM(64, return_sequences=True),
+    # keras.layers.LSTM(32, return_sequences=True),
+    # keras.layers.LSTM(16),
+    # keras.layers.Dense(4, activation = 'softmax')
     ])
 
 model.compile(optimizer='adam',
               loss = 'sparse_categorical_crossentropy',
               #loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
-
-from keras.callbacks import EarlyStopping, ModelCheckpoint
-early_stop = EarlyStopping(monitor='val_loss', patience=5)
-
-
 
 print(model.summary())
 

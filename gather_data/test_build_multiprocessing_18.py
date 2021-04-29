@@ -39,7 +39,7 @@ def file_convert(i):
 
 if __name__ == '__main__':
     start_time = time.time()
-    pool = multiprocessing.Pool(processes=6)
+    pool = multiprocessing.Pool(processes=8)
     num = range(1,15)
     pool.map(file_convert, num)
     print(time.time()-start_time)
