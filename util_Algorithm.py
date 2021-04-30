@@ -215,14 +215,15 @@ class Handmark():
 #TODO Gesture 판단, 일단은 15프레임 (0.5초)의 Queue로?
 class Gesture():
     Gesture_Array_size = 7
+    Gesture_static_size = 30
 
     def __init__(self):
         self.palm_data = [np.array([0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]
         self.d_palm_data = [np.array([0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)] #palm_data의 차이를 기록할 list
 
-        self.location_data = [[0, 0, 0] for _ in range(Gesture.Gesture_Array_size)]
+        self.location_data = [[0.1, 0.1, 0.1] for _ in range(Gesture.Gesture_Array_size)]
         self.finger_data  = [np.array([0, 0, 0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]
-        self.gesture_data = [0] * Gesture.Gesture_Array_size
+        self.gesture_data = [0] * Gesture.Gesture_static_size
 
     @staticmethod
     def get_location(p): #p는 프레임 수 * 좌표 세개
@@ -233,6 +234,16 @@ class Gesture():
             z_mean += p[i].z
         x_mean, y_mean, z_mean = x_mean/(len(p) - 1), y_mean/(len(p) - 1), z_mean/(len(p) - 1)
         return [x_mean, y_mean, z_mean]
+
+    @staticmethod
+    def remove_outlier(target): # 1D numpy array 최대/최소 제거:
+        for i in range(target.shape[0]):
+            if target[i] == np.max(target):
+                max_i = i
+            if target[i] == np.min(target):
+                min_i = i
+        output = np.delete(target, (min_i, max_i))
+        return output
 
     def update(self, handmark, gesture_num):
         #print(self.get_location(handmark._p_list))
@@ -249,166 +260,168 @@ class Gesture():
         self.fv = handmark.finger_vector
         self.gesture_data.pop()
 
+
         #print(self.palm_data[0], self.finger_data[0], self.location_data[0])
 
         #print(handmark.palm_vector * 1000)
 
     # handmark지닌 10개의 프레임이 들어온다...
-
-    def gesture_detect(self): #이 최근꺼
+    def gesture_detect(self, LRUD): #이 최근꺼
         global gesture_check
         if gesture_check == True or self.gesture_data.count(6) > 4:
-            pass
+            #print(self.gesture_data)
+            return -1
+
+        # print(LRUD)
+
+        # i가 작을수록 더 최신 것
+        ld_window = self.location_data[2:]
+        x_classifier = np.array(ld_window[:-1])[:, 0] - np.array(ld_window[1:])[:, 0]
+        y_classifier = np.array(ld_window[:-1])[:, 1] - np.array(ld_window[1:])[:, 1]
+        x_classifier = self.remove_outlier(x_classifier)
+        y_classifier = self.remove_outlier(y_classifier)
+
+        #print(np.mean(x_classifier), np.mean(y_classifier))
+        #if np.mean(x_classifier) >
+
+        # x_classfication = self.d_location_data[:][0]
+        # y_classfication = self.d_location_data[:][1]
+        # print(x_classfication, y_classfication)
+
+        #왼쪽 X감소 오른쪽 X증가
+        #위 y감소 아래 y증가
+
+        x_mean, y_mean = np.mean(x_classifier), np.mean(y_classifier)
+        #print(x_mean, y_mean)
 
         # 동적 제스처 - LEFT
-        condition1 = 0
-        condition2 = 0
-        condition3 = 0
-        condition4 = 0
-        # i가 작을수록 더 최신 것
-        angle_threshold = [-1., 0., 0.]
-        angle_min = 3
-        for i in range(Gesture.Gesture_Array_size - 1):
-            angle = get_angle(self.palm_data[-1], angle_threshold)
-            if angle < angle_min:
-                angle_min = angle
-            if self.palm_data[i][2] - self.palm_data[i+1][2] > 0.05:
-                condition1 += 1
-            if self.finger_data[i][0] - self.finger_data[i+1][0] < -0.04:
-                condition2 += 1
-            if self.finger_data[i][2] - self.finger_data[i + 1][2] < -0.05:
-                condition3 += 1
-            if self.location_data[i][0] - self.location_data[i + 1][0] < -0.04:
-                condition4 += 1
-        condition_sum = condition1 + condition2 + condition3 + condition4
 
-        #print(get_angle(self.palm_data[-1], angle_threshold))
-        if condition_sum > 9 and angle_min < 0.8:
-            print("LEFT")
-            win32api.keybd_event(0x25, 0, 0, 0)
-            return -1
+        if y_mean != 0:
+            if x_mean/abs(y_mean) < -1.3:
+                condition1 = 0
+                condition2 = 0
+                condition3 = 0
+                condition4 = 0
 
-        # 동적 제스처 - RIGHT
-        condition1 = 0
-        condition2 = 0
-        condition3 = 0
-        condition4 = 0
-        # i가 작을수록 더 최신 것
-        angle_threshold = [-1., 0., 0.]
-        angle_min = 3
-        for i in range(Gesture.Gesture_Array_size - 1):
-            angle = get_angle(self.palm_data[-1], angle_threshold)
-            if angle < angle_min:
-                angle_min = angle
-            if self.palm_data[i][2] - self.palm_data[i+1][2] < -0.06:
-                condition1 += 1
-            if self.finger_data[i][0] - self.finger_data[i+1][0] > 0.05:
-                condition2 += 1
-            if self.finger_data[i][2] - self.finger_data[i + 1][2] > 0.05:
-                condition3 += 1
-            if self.location_data[i][0] - self.location_data[i + 1][0] > 0.04:
-                condition4 += 1
-        condition_sum = condition1 + condition2 + condition3 + condition4
-        angle_threshold = [-1., 0., 0.]
-        #print(get_angle(self.palm_data[-1], angle_threshold))
-        if condition_sum > 10 and angle_min < 0.8:
-            print("RIGHT")
-            win32api.keybd_event(0x27, 0, 0, 0)
-            return -1
+                angle_threshold = [-1., 0., 0.]
+                angle_min = 3
 
-        # 동적 제스처 - UP
-        condition1 = 0
-        condition2 = 0
-        condition3 = 0
-        condition4 = 0
-        # i가 작을수록 더 최신 것
-        angle_threshold = [0., -1., 0.]
-        angle_min = 3
-        for i in range(Gesture.Gesture_Array_size - 1):
-            angle = get_angle(self.palm_data[-1], angle_threshold)
-            if angle < angle_min:
-                angle_min = angle
-            if self.palm_data[i][2] - self.palm_data[i+1][2] > 0.05:
-                condition1 += 1
-            if self.finger_data[i][1] - self.finger_data[i+1][1] < -0.05:
-                condition2 += 1
-            if self.location_data[i][1] - self.location_data[i + 1][1] < -0.07:
-                condition3 += 1
-        condition_sum = condition1 + condition2 + condition3 + condition4
+                for i in range(Gesture.Gesture_Array_size - 1):
+                    angle = get_angle(self.palm_data[-1], angle_threshold)
+                    if angle < angle_min:
+                        angle_min = angle
+                    if self.palm_data[i][2] - self.palm_data[i+1][2] > 0.05:
+                        condition1 += 1.2
+                    if self.finger_data[i][0] - self.finger_data[i+1][0] < -0.04:
+                        condition2 += 1
+                    if self.finger_data[i][2] - self.finger_data[i + 1][2] < -0.05:
+                        condition3 += 1
+                    if self.location_data[i][0] - self.location_data[i + 1][0] < -0.04:
+                        condition4 += 1
+                condition_sum = condition1 + condition2 + condition3 + condition4
+                #print(condition1, condition2, condition3, condition4)
+                #print(get_angle(self.palm_data[-1], angle_threshold))
+                if condition_sum > 8 and angle_min < 0.5:
+                    print("LEFT")
+                    win32api.keybd_event(0x25, 0, 0, 0)
+                    return -1
 
-        #print(get_angle(self.palm_data[-1], angle_threshold))
-        if condition_sum > 6 and angle_min < 1:
-            print("UP")
-            win32api.keybd_event(0x26, 0, 0, 0)
-            return -1
+            # 동적 제스처 - RIGHT
+            if x_mean/abs(y_mean) > 1.5:
+                condition1 = 0
+                condition2 = 0
+                condition3 = 0
+                condition4 = 0
 
-        # 동적 제스처 - DOWN
-        condition1 = 0
-        condition2 = 0
-        condition3 = 0
-        condition4 = 0
-        # i가 작을수록 더 최신 것
-        angle_threshold = [0., 1., 0.]
-        angle_min = 3
-        for i in range(Gesture.Gesture_Array_size - 1):
-            angle = get_angle(self.palm_data[-1], angle_threshold)
-            if angle < angle_min:
-                angle_min = angle
-            if self.palm_data[i][2] - self.palm_data[i+1][2] > 0.04:
-                condition1 += 1
-            if self.finger_data[i][1] - self.finger_data[i+1][1] > 0.04:
-                condition2 += 1
-            if self.location_data[i][1] - self.location_data[i + 1][1] > 0.05:
-                condition3 += 1
-        # print(condition1, condition2, condition3, condition4)
-        condition_sum = condition1 + condition2 + condition3 + condition4
-        angle_threshold = [0., 1., 0.]
-        #print(get_angle(self.palm_data[-1], angle_threshold))
-        if condition_sum > 7 and angle_min < 1.5:
-            print("DOWN")
-            win32api.keybd_event(0x28, 0, 0, 0)
-            return -1
+                angle_threshold = [-1., 0., 0.]
+                angle_min = 3
+                for i in range(Gesture.Gesture_Array_size - 1):
+                    angle = get_angle(self.palm_data[-1], angle_threshold)
+                    if angle < angle_min:
+                        angle_min = angle
+                    if self.palm_data[i][2] - self.palm_data[i+1][2] < -0.06:
+                        condition1 += 1
+                    if self.finger_data[i][0] - self.finger_data[i+1][0] > 0.05:
+                        condition2 += 1
+                    if self.finger_data[i][2] - self.finger_data[i + 1][2] > 0.05:
+                        condition3 += 1
+                    if self.location_data[i][0] - self.location_data[i + 1][0] > 0.04:
+                        condition4 += 1
+                condition_sum = condition1 + condition2 + condition3 + condition4
+                angle_threshold = [-1., 0., 0.]
+                #print(get_angle(self.palm_data[-1], angle_threshold))
+                if condition_sum > 10 and angle_min < 0.8:
+                    print("RIGHT")
+                    win32api.keybd_event(0x27, 0, 0, 0)
+                    return -1
+
+            # 동적 제스처 - UP
+            if y_mean/abs(x_mean) < -1.5:
+                condition1 = 0
+                condition2 = 0
+                condition3 = 0
+                condition4 = 0
+                # i가 작을수록 더 최신 것
+                angle_threshold = [0., -1., 0.]
+                angle_min = 3
+                for i in range(Gesture.Gesture_Array_size - 1):
+                    angle = get_angle(self.palm_data[-1], angle_threshold)
+                    if angle < angle_min:
+                        angle_min = angle
+                    if self.palm_data[i][2] - self.palm_data[i+1][2] > 0.05:
+                        condition1 += 1
+                    if self.finger_data[i][1] - self.finger_data[i+1][1] < -0.05:
+                        condition2 += 1
+                    if self.location_data[i][1] - self.location_data[i + 1][1] < -0.07:
+                        condition3 += 1
+                condition_sum = condition1 + condition2 + condition3 + condition4
+
+                #print(get_angle(self.palm_data[-1], angle_threshold))
+                if condition_sum > 6 and angle_min < 1:
+                    print("UP")
+                    win32api.keybd_event(0x26, 0, 0, 0)
+                    return -1
+
+            # 동적 제스처 - DOWN
+            if y_mean/abs(x_mean) > 1.5:
+                condition1 = 0
+                condition2 = 0
+                condition3 = 0
+                condition4 = 0
+                # i가 작을수록 더 최신 것
+                angle_threshold = [0., 1., 0.]
+                angle_min = 3
+                for i in range(Gesture.Gesture_Array_size - 1):
+                    angle = get_angle(self.palm_data[-1], angle_threshold)
+                    if angle < angle_min:
+                        angle_min = angle
+                    if self.palm_data[i][2] - self.palm_data[i+1][2] > 0.04:
+                        condition1 += 1
+                    if self.finger_data[i][1] - self.finger_data[i+1][1] > 0.04:
+                        condition2 += 1
+                    if self.location_data[i][1] - self.location_data[i + 1][1] > 0.05:
+                        condition3 += 1
+                # print(condition1, condition2, condition3, condition4)
+                condition_sum = condition1 + condition2 + condition3 + condition4
+                angle_threshold = [0., 1., 0.]
+                #print(get_angle(self.palm_data[-1], angle_threshold))
+                if condition_sum > 7 and angle_min < 1.5:
+                    print("DOWN")
+                    win32api.keybd_event(0x28, 0, 0, 0)
+                    return -1
+
         gesture_check = True
 
-
-        '''
-        if sum(self.finger_data[i]) > 4:
-            hand_open_frame += 1
-        if self.d_palm_data[i][2] > 1.5:
-            Z_rotate += 1
-        if self.d_palm_data[i][2] < -1.5:
-            Z_rotate_inv += 1
-        #if self.location_data[i+1][1] - self.location_data[i][1]
-        try:
-            if self.location_data[i+1][5].x - self.location_data[i][5].x > 0.005:
-                x_diff += 1
-            elif self.location_data[i+1][5].x - self.location_data[i][5].x < -0.005:
-                x_diff -= 1
-        except:
-            pass
-        if gesture_int == 0 and abs(self.fv[1]) < 100:
-            if Z_rotate > 2 and hand_open_frame > 6 and x_diff < -3:
-                print('To Right Sign!!')
-                #image = cv2.putText(image, 'To right', (80, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
-
-                win32api.keybd_event(0x27, 0, 0, 0)
-                gesture_int += 1
-                gesture_time = time.time()
-
-            elif Z_rotate_inv > 2 and hand_open_frame > 6 and x_diff > 3:
-                print('To Left Sign!!')
-                #image = cv2.putText(image, 'To left', (80, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
-
-                win32api.keybd_event(0x25, 0, 0, 0)
-                gesture_int += 1
-                gesture_time = time.time()
-                break
-        '''
-
-
-        #print(Z_rotate, Z_rotate_inv, hand_open_frame, x_diff, self.fv[1])
-        # print(np.array(self.d_palm_data)[:][2])
-
+    def gesture_LRUD(self): #상하좌우 변화량 판단
+        LR_trigger, UD_trigger = 0, 0
+        for i in range(5):
+            if abs(self.location_data[i][0] - self.location_data[i + 1][0]) > (
+                    self.location_data[i][1] - self.location_data[i + 1][1]):
+                LR_trigger += 1
+            else:
+                UD_trigger += 1
+        output = LR_trigger > UD_trigger
+        return output
 
 class Gesture_mode():
     QUEUE_SIZE = 10
@@ -551,7 +564,7 @@ def process_static_gesture_mod(array_for_static, value_for_static, array_for_sta
         input_ = np.copy(array_for_static[:])
         #print(input_)
         input_ = input_[np.newaxis]
-        time.sleep(0.033)
+        #time.sleep(0.033)
         try:
             prediction = MODEL_STATIC.predict(input_)
             if np.max(prediction[0]) > 0.4:
@@ -731,24 +744,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                 return 0
 
-            hand_shape_dateset = [[0, 0, 0, 0, 0],  # 바위
-                                  [1, 0, 0, 0, 0],  # 따봉
-                                  [1, 1, 0, 0, 0],  # 총
-                                  [1, 1, 1, 0, 0],  # 3-1
-                                  [1, 1, 1, 1, 0],  # 4-1
-                                  [1, 1, 1, 1, 1],  # 보
-                                  [0, 1, 1, 1, 1],  # 4-2
-                                  [0, 0, 1, 1, 1],  # 3-2
-                                  [0, 0, 0, 1, 1],  # 2
-                                  [0, 0, 0, 0, 1],  # 1-2
-                                  [0, 1, 1, 0, 0],  # 가위
-                                  [1, 1, 0, 0, 1],  # 스파이더맨
-                                  [0, 1, 0, 0, 0],  # 1-1
-                                  [0, 1, 1, 1, 0],  # 3-3
-                                  [0, 0, 1, 0, 0],  # Fuck you
-                                  ]
-            hand_shape_name = ['바위', '따봉', '총', '3-1', '4-1', '보', '4-2', '3-2', '2', '1-2', '가위', '스파이더맨', '1-1', '3-3', 'Fuck you']
-
             def BlurFunction(src):
                 with mp_face_detection.FaceDetection(min_detection_confidence=0.5) as face_detection:  # with 문, mp_face_detection.FaceDetection 클래스를 face_detection으로서 사용
                     image = cv2.cvtColor(src, cv2.COLOR_BGR2RGB)  # image 파일의 BGR 색상 베이스를 RGB 베이스로 바꾸기
@@ -813,7 +808,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             mode = 0
             global gesture_check
 
-            '''
+
             #TODO 변화량 모니터링
             from matplotlib import pyplot as plt
             from matplotlib import animation
@@ -859,7 +854,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             anim = animation.FuncAnimation(fig, animate, init_func=init, frames=200, interval=20, blit=False)
 
             plt.show()
-            '''
+
 
             while bool_state and cap.isOpened():
                 #print('cam')
@@ -971,13 +966,18 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         if len(mark_p[-1]) == 5:
                             pixel_c = mark_p5
                             # gesture updating
-                            gesture.update(HM, static_gesture_num)
 
                             if len(mark_p) == 22:
+                                gesture.update(HM, static_gesture_num)
                                 try:
                                     #print(time.time() - gesture_time)
+                                    LRUD = gesture.gesture_LRUD()
+                                    #print(LRUD)
+                                    #print(gesture.gesture_data)
+                                    #print(6. in gesture.gesture_data)
                                     if time.time() - gesture_time > 0.5:
-                                        detect_signal = gesture.gesture_detect()
+                                        # 다이나믹 제스처
+                                        detect_signal = gesture.gesture_detect(LRUD)
                                     if detect_signal == -1: # 디텍트했을때!
                                         gesture_time = time.time()
                                         detect_signal = 0

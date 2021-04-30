@@ -50,29 +50,46 @@ DIRECTION_ON_KEY = {
 block_direction = 'east'  # ❷ 블록의 방향
 block_position = [0, 0]
 last_moved_time = datetime.now()
-
 while True:
     events = pygame.event.get()
     for event in events:
         if event.type == pygame.QUIT:
             exit()
         if event.type == pygame.KEYDOWN:
-            # ❸ 입력된 키가 화살표 키면,
-            if event.key in DIRECTION_ON_KEY:
-                # ❹ 블록의 방향을 화살표 키에 맞게 바꾼다
-                block_direction = DIRECTION_ON_KEY[event.key]
-
-    if timedelta(seconds=1) <= datetime.now() - last_moved_time:
-        if block_direction == 'north':    # ❺ 1초가 지날 때마다
-            block_position[0] -= 1        # 블록의 방향에 따라
-        elif block_direction == 'south':  # 블록의 위치를 변경한다
-            block_position[0] += 1
-        elif block_direction == 'west':
-            block_position[1] -= 1
-        elif block_direction == 'east':
-            block_position[1] += 1
-        last_moved_time = datetime.now()
-
+            if event.key == pygame.K_UP:       # 입력된 키가 위쪽 화살표 키인 경우
+                block_position[0] -= 1         # 블록의 y 좌표를 1 뺀다
+            elif event.key == pygame.K_DOWN:   # 입력된 키가 아래쪽 화살표 키인 경우
+                block_position[0] += 1         # 블록의 y 좌표를 1 더한다
+            elif event.key == pygame.K_LEFT:   # 입력된 키가 왼쪽 화살표 키인 경우
+                block_position[1] -= 1         # 블록의 x 좌표를 1 뺀다
+            elif event.key == pygame.K_RIGHT:  # 입력된 키가 왼쪽 화살표 키인 경우
+                block_position[1] += 1         # 블록의 x 좌표를 1 더한다
     draw_background(screen)
     draw_block(screen, GREEN, block_position)
     pygame.display.update()
+
+# while True:
+#     events = pygame.event.get()
+#     for event in events:
+#         if event.type == pygame.QUIT:
+#             exit()
+#         if event.type == pygame.KEYDOWN:
+#             # ❸ 입력된 키가 화살표 키면,
+#             if event.key in DIRECTION_ON_KEY:
+#                 # ❹ 블록의 방향을 화살표 키에 맞게 바꾼다
+#                 block_direction = DIRECTION_ON_KEY[event.key]
+#
+#     if timedelta(seconds=1) <= datetime.now() - last_moved_time:
+#         if block_direction == 'north':    # ❺ 1초가 지날 때마다
+#             block_position[0] -= 1        # 블록의 방향에 따라
+#         elif block_direction == 'south':  # 블록의 위치를 변경한다
+#             block_position[0] += 1
+#         elif block_direction == 'west':
+#             block_position[1] -= 1
+#         elif block_direction == 'east':
+#             block_position[1] += 1
+#         last_moved_time = datetime.now()
+#
+#     draw_background(screen)
+#     draw_block(screen, GREEN, block_position)
+#     pygame.display.update()
