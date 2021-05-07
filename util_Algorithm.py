@@ -47,6 +47,8 @@ WHEEL_USE = False
 DRAG_USE = False
 USE_TENSORFLOW = True
 
+VISUALIZE_GRAPH = False
+
 MODEL_STATIC = keras.models.load_model(
     'keras_util/model_save/my_model_21.h5'
 )
@@ -211,7 +213,6 @@ class Handmark():
         output = np.concatenate((output, self.palm_vector, self.finger_vector))
         return output
 
-
 #TODO Gesture 판단, 일단은 15프레임 (0.5초)의 Queue로?
 class Gesture():
     Gesture_Array_size = 7
@@ -246,12 +247,13 @@ class Gesture():
         return output
 
     def update(self, handmark, gesture_num):
-        #print(self.get_location(handmark._p_list))
+        # print(self.get_location(handmark._p_list))
         self.palm_data.insert(0, handmark.palm_vector)
         self.d_palm_data.insert(0, (self.palm_data[1] - handmark.palm_vector) * 1000)
         self.location_data.insert(0, Gesture.get_location(handmark._p_list)) # location data는 (프레임 수) * 22 * Mark_p 객체
         self.finger_data.insert(0, handmark.finger_vector)
         self.gesture_data.insert(0, gesture_num)
+        # print(gesture_num)
 
         self.palm_data.pop()
         self.d_palm_data.pop()
@@ -266,13 +268,15 @@ class Gesture():
         #print(handmark.palm_vector * 1000)
 
     # handmark지닌 10개의 프레임이 들어온다...
-    def gesture_detect(self, LRUD): #이 최근꺼
+    def gesture_detect(self): #이 최근꺼
         global gesture_check
-        if gesture_check == True or self.gesture_data.count(6) > 4:
+        #print(self.gesture_data.count(6))
+        #print(gesture_check)
+        if (gesture_check == True) or (self.gesture_data.count(6) < 15):
             #print(self.gesture_data)
             return -1
 
-        # print(LRUD)
+
 
         # i가 작을수록 더 최신 것
         ld_window = self.location_data[2:]
@@ -295,7 +299,6 @@ class Gesture():
         #print(x_mean, y_mean)
 
         # 동적 제스처 - LEFT
-
         if y_mean != 0:
             if x_mean/abs(y_mean) < -1.3:
                 condition1 = 0
@@ -410,7 +413,7 @@ class Gesture():
                     win32api.keybd_event(0x28, 0, 0, 0)
                     return -1
 
-        gesture_check = True
+        #gesture_check = True
 
     def gesture_LRUD(self): #상하좌우 변화량 판단
         LR_trigger, UD_trigger = 0, 0
@@ -567,7 +570,7 @@ def process_static_gesture_mod(array_for_static, value_for_static, array_for_sta
         #time.sleep(0.033)
         try:
             prediction = MODEL_STATIC.predict(input_)
-            if np.max(prediction[0]) > 0.4:
+            if np.max(prediction[0]) > 0.8:
                 value_for_static.value = np.argmax(prediction[0])
             else:
                 value_for_static.value = 0
@@ -579,7 +582,7 @@ def process_static_gesture_mod(array_for_static, value_for_static, array_for_sta
         input_2 = input_2[np.newaxis]
         try:
             prediction2 = MODEL_STATIC.predict(input_2)
-            if np.max(prediction2[0]) > 0.4:
+            if np.max(prediction2[0]) > 0.8:
                 value_for_static2.value = np.argmax(prediction2[0])
             else:
                 value_for_static2.value = 0
@@ -647,7 +650,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.capture = cv2.VideoCapture(0, cv2.CAP_DSHOW)
             cap = self.capture
             # For webcam input:
-            hands = mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.6)
+            hands = mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.8)
             #pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5, upper_body_only=True)
 
             global width, height
@@ -828,32 +831,33 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             line3, = ax.plot(np.arange(max_points),
                             np.ones(max_points, dtype=np.float) * np.nan, lw=2)
 
-            def init():
-                return line,
 
-            def animate(i):
-                y = gesture.palm_data[0][0]
+            if VISUALIZE_GRAPH == True:
+                def init():
+                    return line,
+                def animate(i):
+                    y = gesture.palm_data[0][0]
 
-                old_y = line.get_ydata()
-                new_y = np.r_[old_y[1:], y]
-                line.set_ydata(new_y)
+                    old_y = line.get_ydata()
+                    new_y = np.r_[old_y[1:], y]
+                    line.set_ydata(new_y)
 
-                y2 = gesture.palm_data[0][1]
+                    y2 = gesture.palm_data[0][1]
 
-                old_y2 = line2.get_ydata()
-                new_y2 = np.r_[old_y2[1:], y2]
-                line2.set_ydata(new_y2)
+                    old_y2 = line2.get_ydata()
+                    new_y2 = np.r_[old_y2[1:], y2]
+                    line2.set_ydata(new_y2)
 
-                y3 = gesture.palm_data[0][2]
+                    y3 = gesture.palm_data[0][2]
 
-                old_y3 = line3.get_ydata()
-                new_y3 = np.r_[old_y3[1:], y3]
-                line3.set_ydata(new_y3)
-                return line, line2, line3,
+                    old_y3 = line3.get_ydata()
+                    new_y3 = np.r_[old_y3[1:], y3]
+                    line3.set_ydata(new_y3)
+                    return line, line2, line3,
 
-            anim = animation.FuncAnimation(fig, animate, init_func=init, frames=200, interval=20, blit=False)
+                anim = animation.FuncAnimation(fig, animate, init_func=init, frames=200, interval=20, blit=False)
 
-            plt.show()
+                plt.show()
 
 
             while bool_state and cap.isOpened():
@@ -935,17 +939,17 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             HM.p_list = mark_p
                             # mark_p[-1] = mark_p[-1][:-1]
                             if USE_TENSORFLOW == True:
-
-                                if len(mark_p[-1]) == 4:
+                                #print(len(HM.p_list[-1]))
+                                if len(HM.p_list[-1]) == 4:
                                     f_p_list = HM.return_18_info()
                                     array_for_static_l[:] = f_p_list
                                     # print(array_for_static)
-                                    static_gesture_num = value_for_static_l.value
-                                if len(mark_p[-1]) == 5:
+                                    static_gesture_num_l = value_for_static_l.value
+                                if len(HM.p_list[-1]) == 5:
                                     f_p_list = HM.return_18_info()
                                     array_for_static_r[:] = f_p_list
                                     # print(array_for_static)
-                                    static_gesture_num = value_for_static_r.value
+                                    static_gesture_num_r = value_for_static_r.value
 
 
                                 # try:
@@ -966,18 +970,18 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         if len(mark_p[-1]) == 5:
                             pixel_c = mark_p5
                             # gesture updating
-
                             if len(mark_p) == 22:
-                                gesture.update(HM, static_gesture_num)
+                                gesture.update(HM, static_gesture_num_r)
+                                #print(static_gesture_num)
                                 try:
                                     #print(time.time() - gesture_time)
-                                    LRUD = gesture.gesture_LRUD()
+                                    #LRUD = gesture.gesture_LRUD()
                                     #print(LRUD)
                                     #print(gesture.gesture_data)
                                     #print(6. in gesture.gesture_data)
                                     if time.time() - gesture_time > 0.5:
                                         # 다이나믹 제스처
-                                        detect_signal = gesture.gesture_detect(LRUD)
+                                        detect_signal = gesture.gesture_detect()
                                     if detect_signal == -1: # 디텍트했을때!
                                         gesture_time = time.time()
                                         detect_signal = 0
@@ -985,9 +989,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                     pass
 
                         if len(mark_p[-1]) == 4:
-                            gesture_mode.update_left(static_gesture_num, palm_vector, finger_vector)
+                            gesture_mode.update_left(static_gesture_num_l, palm_vector, finger_vector)
                         if len(mark_p[-1]) == 5:
-                            gesture_mode.update_right(static_gesture_num, palm_vector, finger_vector)
+                            gesture_mode.update_right(static_gesture_num_r, palm_vector, finger_vector)
 
                         pixel_c_mod = pixel_c
 
@@ -1017,7 +1021,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                 finger_open_[1] == 1 and \
                                 len(mark_p[-1]) == 5 and \
                                 sum(finger_open_[2:4]) == 0 and \
-                                static_gesture_num == 12 and \
+                                static_gesture_num_r == 12 and \
                                 p_key_ready == False:
                             p_key_ready = True
 
@@ -1026,7 +1030,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                 finger_open_[1] == 1 and \
                                 len(mark_p[-1]) == 5 and \
                                 sum(finger_open_[2:4]) == 0 and \
-                                static_gesture_num != 12 and \
+                                static_gesture_num_r != 12 and \
                                 p_key_ready == True:
                             p_key_ready = False
 

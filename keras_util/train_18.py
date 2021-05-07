@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 print(tf.__version__)
 
-df = pd.read_csv("../video_output/output_sum.csv")
+df = pd.read_csv("../video_output/output_sum_18.csv")
 df = df[1:]
 print(df.tail())
 size = df.shape[0]
