@@ -18,6 +18,10 @@ from PyQt5.QtCore import QThread, QObject, QRect, pyqtSlot, pyqtSignal
 import datetime
 import sys
 
+'''
+키 코드 링크 : https://lab.cliel.com/entry/%EA%B0%80%EC%83%81-Key-Code%ED%91%9C
+'''
+
 try:
     physical_devices = tf.config.list_physical_devices('GPU')
     #print(physical_devices)
@@ -54,6 +58,7 @@ MODEL_STATIC = keras.models.load_model(
 )
 
 gesture_check = False
+mode_global = 0
 
 '''
 mark_pixel : 각각의 랜드마크
@@ -440,6 +445,7 @@ class Gesture_mode():
             self.left[-1], self.right[-1],
             self.left_palm_vector[-1], self.left_finger_vector[-1], self.right_palm_vector[-1], self.right_finger_vector[-1])
     def update_left(self, left, palm_vector, finger_vector):
+        #print(left, 'left')
         self.left.append(left)
         self.left_palm_vector.append(palm_vector)
         self.left_finger_vector.append(finger_vector)
@@ -447,6 +453,7 @@ class Gesture_mode():
         self.left_palm_vector.pop(0)
         self.left_finger_vector.pop(0)
     def update_right(self, right, palm_vector, finger_vector):
+        #print(right, 'right')
         self.right.append(right)
         self.right_palm_vector.append(palm_vector)
         self.right_finger_vector.append(finger_vector)
@@ -455,11 +462,12 @@ class Gesture_mode():
         self.right_finger_vector.pop(0)
     def select_mode(self):
         mode = 0
-        lpv_mode_1 = [-0.44, 0.115, -0.89]
-        lfv_mode_1 = [-0.28, -0.95, 0.]
-        rpv_mode_1 = [-0.55, -0.2, 0.8]
-        rfv_mode_1 = [0.28, -0.96, -0.05]
+        lpv_mode_1 = [-0.39, 0.144, -0.90]
+        lfv_mode_1 = [-0.33, -0.94, 0.]
+        rpv_mode_1 = [-0.40, -0.14, -0.9]
+        rfv_mode_1 = [-0.33, -0.94, 0.]
         mode_result = 0
+        #print(self.left_palm_vector[0], self.left_finger_vector[0], self.right_palm_vector[0], self.right_finger_vector[0])
         for lpv in self.left_palm_vector:
             mode_result = mode_result + get_angle(lpv, lpv_mode_1)
         for lfv in self.left_finger_vector:
@@ -607,42 +615,52 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
         @pyqtSlot(int, int)
         def mode_setting(self, mode, mode_before): #1
-            global MOUSE_USE, CLICK_USE, DRAG_USE, WHEEL_USE
+            global MOUSE_USE, CLICK_USE, DRAG_USE, WHEEL_USE, mode_global
             if mode != mode_before:
                 self.mode_signal.emit(int(mode - 1)) #2 / #2-4
-                if mode == 1:
+                if mode == 1 and mode_global != mode:
                     MOUSE_USE = False
                     CLICK_USE = False
                     DRAG_USE = False
                     WHEEL_USE = False
                     print('MODE 1, 대기 모드')
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 100, 100, 0, 0)
+                    mode_global = mode
 
-                if mode == 2:
+                if mode == 2 and mode_global != mode:
                     MOUSE_USE = True
                     CLICK_USE = True
                     DRAG_USE = False
                     WHEEL_USE = False
+                    if mode_global == 3:
+                        win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
+                        win32api.keybd_event(0x31, 0, 0, 0)  # 1 누르기.
+                        time.sleep(0.1)
+                        win32api.keybd_event(0xa2, 0, win32con.KEYEVENTF_KEYUP, 0)
+                        win32api.keybd_event(0x31, 0, win32con.KEYEVENTF_KEYUP, 0)
                     print('MODE 2, 기본 발표 모드')
+                    mode_global = mode
 
-                if mode == 3:
+                if mode == 3 and mode_global != mode:
                     MOUSE_USE = True
                     CLICK_USE = False
                     DRAG_USE = True
                     WHEEL_USE = False
                     win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
-                    win32api.keybd_event(0x50, 0, 0, 0)  # P 누르기.
+                    win32api.keybd_event(0x32, 0, 0, 0)  # 2 누르기.
                     time.sleep(0.1)
                     win32api.keybd_event(0xa2, 0, win32con.KEYEVENTF_KEYUP, 0)
-                    win32api.keybd_event(0x50, 0, win32con.KEYEVENTF_KEYUP, 0)
+                    win32api.keybd_event(0x32, 0, win32con.KEYEVENTF_KEYUP, 0)
                     print('MODE 3, 필기 발표 모드') #3, #2-5
+                    mode_global = mode
 
-                if mode == 4:
+                if mode == 4 and mode_global != mode:
                     MOUSE_USE = True
                     CLICK_USE = True
                     DRAG_USE = True
                     WHEEL_USE = True
                     print('MODE 4, 웹서핑 발표 모드')
+                    mode_global = mode
 
         @pyqtSlot(bool)
         def send_img(self, bool_state):  # p를 보는 emit 함수
@@ -810,7 +828,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             p_key_ready = False
             mode = 0
             global gesture_check
-
+            global mode_global
 
             #TODO 변화량 모니터링
             from matplotlib import pyplot as plt
@@ -993,6 +1011,13 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         if len(mark_p[-1]) == 5:
                             gesture_mode.update_right(static_gesture_num_r, palm_vector, finger_vector)
 
+                        mode = gesture_mode.select_mode()
+                        self.mode_setting(mode, mode_before)
+                        mode_before = mode
+                        # mode2 = self.inv_push_button()
+                        # if mode2 != None :
+                        #     mode_setting(mode2, mode_before)
+                        #     mode_before = mode2
                         pixel_c_mod = pixel_c
 
                         # 마우스 움직임, 드래그
@@ -1040,13 +1065,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                         before_c = pixel_c
 
-                    mode = gesture_mode.select_mode()
-                    self.mode_setting(mode, mode_before)
-                    mode_before = mode
-                    # mode2 = self.inv_push_button()
-                    # if mode2 != None :
-                    #     mode_setting(mode2, mode_before)
-                    #     mode_before = mode2
+
 
                 FPS = round(1 / (time.time() - before_time), 2)
                 # print(FPS)
