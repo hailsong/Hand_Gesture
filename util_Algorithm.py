@@ -254,6 +254,7 @@ class Gesture():
         self.finger_data.insert(0, handmark.finger_vector)
         self.gesture_data.insert(0, gesture_num)
         # print(gesture_num)
+        # print(handmark.palm_vector)
 
         self.palm_data.pop()
         self.d_palm_data.pop()
@@ -268,15 +269,13 @@ class Gesture():
         #print(handmark.palm_vector * 1000)
 
     # handmark지닌 10개의 프레임이 들어온다...
-    def gesture_detect(self): #이 최근꺼
+    def detect_gesture(self): #이 최근꺼
         global gesture_check
         #print(self.gesture_data.count(6))
         #print(gesture_check)
         if (gesture_check == True) or (self.gesture_data.count(6) < 15):
             #print(self.gesture_data)
             return -1
-
-
 
         # i가 작을수록 더 최신 것
         ld_window = self.location_data[2:]
@@ -803,6 +802,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
             # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1440)
+            cap.set(cv2.CAP_PROP_FPS, 60)
             before_time = time.time()
 
             click_tr = 0
@@ -912,9 +912,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             mark_p.append(Mark_pixel(hand_landmarks.landmark[i].x, hand_landmarks.landmark[i].y, hand_landmarks.landmark[i].z))
                         mark_p_list.append(mark_p)
 
-
-
-                    # TODO 지금 API에서 사용하는 자료형때문에 살짝 꼬였는데 mark_p(list)의 마지막 원소를 lR_idx(left or right)로 표현해놨음.
                     for i in range(len(mark_p_list)):  # for문 한 번 도는게 한 손에 대한 것임
                         LR_idx = results.multi_handedness[i].classification[0].label
                         #LR_idx = LR_idx[:-1]
@@ -923,16 +920,17 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         mark_p_list[i].append(LR_idx)
 
                         mark_p = mark_p_list[i]
+                        #print(len(mark_p_list), i)
                         # Handmark 정보 입력
+                        #print(mark_p[-1], " / ", mark_p[0])
 
                         if len(mark_p) == 22 and hm_idx == False:
                             HM = Handmark(mark_p)
                             hm_idx = True
-
+                        # print(HM.p_list[-1])
                         # palm_vector 저장
                         palm_vector = HM.get_palm_vector()
                         finger_vector = HM.get_finger_vector()
-                        #print(palm_vector, finger_vector)
 
                         # mark_p 입력
                         if hm_idx == True:
@@ -940,17 +938,16 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             # mark_p[-1] = mark_p[-1][:-1]
                             if USE_TENSORFLOW == True:
                                 #print(len(HM.p_list[-1]))
-                                if len(HM.p_list[-1]) == 4:
+                                if len(mark_p[-1]) == 4:
                                     f_p_list = HM.return_18_info()
                                     array_for_static_l[:] = f_p_list
                                     # print(array_for_static)
                                     static_gesture_num_l = value_for_static_l.value
-                                if len(HM.p_list[-1]) == 5:
+                                if len(mark_p[-1]) == 5:
                                     f_p_list = HM.return_18_info()
                                     array_for_static_r[:] = f_p_list
                                     # print(array_for_static)
                                     static_gesture_num_r = value_for_static_r.value
-
 
                                 # try:
                                 #     static_gesture_drawing(static_gesture_num, mark_p[-1])
@@ -968,9 +965,12 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                         # pixel_c = mark_c.to_pixel()
                         if len(mark_p[-1]) == 5:
+                            palm_vector = HM.get_palm_vector()
+                            finger_vector = HM.get_finger_vector()
                             pixel_c = mark_p5
                             # gesture updating
                             if len(mark_p) == 22:
+                                #print(HM.p_list[-1])
                                 gesture.update(HM, static_gesture_num_r)
                                 #print(static_gesture_num)
                                 try:
@@ -981,7 +981,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                     #print(6. in gesture.gesture_data)
                                     if time.time() - gesture_time > 0.5:
                                         # 다이나믹 제스처
-                                        detect_signal = gesture.gesture_detect()
+                                        detect_signal = gesture.detect_gesture()
                                     if detect_signal == -1: # 디텍트했을때!
                                         gesture_time = time.time()
                                         detect_signal = 0
