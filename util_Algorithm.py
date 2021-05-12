@@ -66,9 +66,11 @@ finger_open : 손 하나가 갖고있는 랜드마크들
 Gesture : 손의 제스처를 판단하기 위한 랜드마크들의 Queue
 '''
 
-
 #TODO 손가락 굽힘 판단, 손바닥 상태, 오른손 왼손 확인
 class Handmark():
+    '''
+
+    '''
     def __init__(self, mark_p):
         self._p_list = mark_p
         self.finger_state = [0 for _ in range(5)]
@@ -124,7 +126,6 @@ class Handmark():
         #print(vector_magnitude((self.finger_vector)))
         return self.finger_vector
 
-
     #True 펴짐 False 내림
     def return_finger_state(self, experiment_mode = False):
         self.thumb = [self._p_list[i] for i in range(1, 5)]
@@ -139,7 +140,7 @@ class Handmark():
                self.get_finger_angle(self.middle),
                self.get_finger_angle(self.ring),
                self.get_finger_angle(self.pinky)])
-        finger_angle_threshold = np.array([2.8, 1.7, 2.2, 2.2, 2.4])
+        finger_angle_threshold = np.array([2.8, 1.5, 2.2, 2.2, 2.4])
         self.finger_state_angle = np.array(self.finger_angle_list > finger_angle_threshold, dtype=int)
 
         #TODO 각 손가락 거리정보 근거로 손가락 굽힘 판단
@@ -149,7 +150,7 @@ class Handmark():
                                      get_distance(self.ring[3], self.ring[0]) / get_distance(self.ring[0], self.ring[1]),
                                      get_distance(self.pinky[3], self.pinky[0]) / get_distance(self.pinky[0], self.pinky[1])])
         #print(self.finger_distance_list)
-        finger_distance_threshold = np.array([1.5, 2, 2, 2, 2])
+        finger_distance_threshold = np.array([1.5, 1.8, 2, 2, 2])
         self.finger_state_distance = np.array(self.finger_distance_list > finger_distance_threshold, dtype=int)
 
         # TODO 손가락과 손바닥 이용해 손가락 굽힘 판단
@@ -159,7 +160,7 @@ class Handmark():
                                 self.get_angle(self.ring[0] - self._p_list[0], self.ring[3] - self.ring[0]),
                                 self.get_angle(self.pinky[0] - self._p_list[0], self.pinky[3] - self.pinky[0])])
         #print(self.hand_angle_list)
-        hand_angle_threshold = np.array([0.7, 1.5, 1.5, 1.5, 1.3])
+        hand_angle_threshold = np.array([0.7, 1.7, 1.5, 1.5, 1.3])
         self.hand_state_angle = np.array(self.hand_angle_list < hand_angle_threshold, dtype=int)
         #print(self.finger_angle_list, self.finger_distance_list, self.hand_angle_list)
         self.input = np.concatenate((self.finger_angle_list, self.finger_distance_list, self.hand_angle_list))
@@ -431,6 +432,9 @@ class Gesture():
         return output
 
 class Gesture_mode():
+    '''
+    전체 MODE 결정하기 위한 Class
+    '''
     QUEUE_SIZE = 10
     def __init__(self):
         self.left = [0] * self.QUEUE_SIZE
@@ -524,10 +528,14 @@ class Gesture_mode():
                 right_idx_1 += 1
         if mode_result < 17 and left_idx_1 == 10 and right_idx_1 == 10:
             mode = 4
-
         return mode
 
 def get_angle(l1, l2):
+    '''
+    :param l1:
+    :param l2:
+    :return: 두 벡터 l1, l2 사이의 값 반환 (RADIAN)
+    '''
     l1_ = np.array([l1[0], l1[1], l1[2]])
     l2_ = np.array([l2[0], l2[1], l2[2]])
     if (norm(l1) * norm(l2)) == 0:
@@ -537,9 +545,17 @@ def get_angle(l1, l2):
     #return np.arccos(np.dot(l1_, l2_) / (norm(l1) * norm(l2)))
 
 def vector_magnitude(one_D_array):
+    '''
+    :param one_D_array: 1D Array
+    :return: 크기 반환
+    '''
     return math.sqrt(np.sum(one_D_array * one_D_array))
 
 def norm(p1):
+    '''
+    :param p1: 점 3차원 정보 list
+    :return: 벡터의 크기 반환
+    '''
     return math.sqrt((p1[0])**2 + (p1[1])**2 + (p1[2])**2)
 
 def convert_offset(x, y):
@@ -549,6 +565,11 @@ def inv_convert_off(x, y):
     return (x + x_size/8)*3/4, (y + y_size/8)*3/4
 
 def get_distance(p1, p2):
+    '''
+    :param p1: Mark_pixel() 객체
+    :param p2: Mark_pixel() 객체
+    :return: p1과 p2 사이의 거리, 3차원/2차원 mark pixel 모두 거리 반환
+    '''
     try:
         return math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2 + (p1.z - p2.z) ** 2)
     except:
@@ -597,12 +618,19 @@ def process_static_gesture_mod(array_for_static, value_for_static, array_for_sta
             pass
 
 def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r):
-
+    '''
+    :param array_for_static_l: static gesture 판별하는 process와 공유할 왼손 input data
+    :param value_for_static_l: static gesture 판별하는 process와 공유할 왼손 output data
+    :param array_for_static_r: static gesture 판별하는 process와 공유할 오른손 input data
+    :param value_for_static_r: static gesture 판별하는 process와 공유할 오른손 output data
+    :return:
+    '''
     global image
     global MOUSE_USE
     global CLICK_USE
     global WHEEL_USE
     global DRAG_USE
+    global pen_color
 
     #GUI Part
     class opcv(QThread):
@@ -612,6 +640,23 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
         def __init__(self):
             super().__init__()
+
+        def mode_3_interrupt(self, mode_global):
+            if mode_global == 3:
+                # win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
+                # win32api.keybd_event(0x31, 0, 0, 0)  # 1 누르기.
+                # time.sleep(0.1)
+                # win32api.keybd_event(0xa2, 0, win32con.KEYEVENTF_KEYUP, 0)
+                # win32api.keybd_event(0x31, 0, win32con.KEYEVENTF_KEYUP, 0)
+                win32api.keybd_event(0x1B, 0, 0, 0)  # ESC DOWN
+                win32api.keybd_event(0x1B, 0, win32con.KEYEVENTF_KEYUP, 0)  # ESC UP
+
+        def set_pen_color(self, palm, finger):
+            palm_standard = [-0.29779509, -0.56894808, 0.76656126]
+            
+            if get_angle(palm, palm_standard) < 0.7:
+                print(palm, finger)
+
 
         @pyqtSlot(int, int)
         def mode_setting(self, mode, mode_before): #1
@@ -625,7 +670,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     WHEEL_USE = False
                     print('MODE 1, 대기 모드')
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 100, 100, 0, 0)
+                    self.mode_3_interrupt(mode_global)
                     mode_global = mode
+
 
                 if mode == 2 and mode_global != mode:
                     MOUSE_USE = True
@@ -633,12 +680,15 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     DRAG_USE = False
                     WHEEL_USE = False
                     if mode_global == 3:
-                        win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
-                        win32api.keybd_event(0x31, 0, 0, 0)  # 1 누르기.
-                        time.sleep(0.1)
-                        win32api.keybd_event(0xa2, 0, win32con.KEYEVENTF_KEYUP, 0)
-                        win32api.keybd_event(0x31, 0, win32con.KEYEVENTF_KEYUP, 0)
+                        # win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
+                        # win32api.keybd_event(0x31, 0, 0, 0)  # 1 누르기.
+                        # time.sleep(0.1)
+                        # win32api.keybd_event(0xa2, 0, win32con.KEYEVENTF_KEYUP, 0)
+                        # win32api.keybd_event(0x31, 0, win32con.KEYEVENTF_KEYUP, 0)
+                        win32api.keybd_event(0x1B, 0, 0, 0)  # ESC DOWN
+                        win32api.keybd_event(0x1B, 0, win32con.KEYEVENTF_KEYUP, 0)  # ESC UP
                     print('MODE 2, 기본 발표 모드')
+                    self.mode_3_interrupt(mode_global)
                     mode_global = mode
 
                 if mode == 3 and mode_global != mode:
@@ -660,6 +710,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     DRAG_USE = True
                     WHEEL_USE = True
                     print('MODE 4, 웹서핑 발표 모드')
+                    self.mode_3_interrupt(mode_global)
                     mode_global = mode
 
         @pyqtSlot(bool)
@@ -702,19 +753,32 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 def __str__(self):
                     return tuple(self.x, self.y)
 
+                @staticmethod
+                def mod_cursor_position(pos : tuple):
+                    x, y = pos[0], pos[1]
+                    FULLSIZE = 1920, 1080
+                    MOD_SIZE = 1600, 640
+                    mod_x = x * FULLSIZE[0] / MOD_SIZE[0] - (FULLSIZE[0] - MOD_SIZE[0])/2
+                    mod_x = max(0, mod_x); mod_x = min(FULLSIZE[0], mod_x)
+                    mod_y = y * FULLSIZE[1] / MOD_SIZE[1] - (FULLSIZE[1] - MOD_SIZE[1])/2
+                    mod_y = max(0, mod_y); mod_y = min(FULLSIZE[1], mod_y)
+                    return int(mod_x), int(mod_y)
+
                 def mousemove(self):
                     if nowclick == True:
                         cv2.circle(image, (int(self.x / 3), int(self.y / 2.25)), 5, (0, 0, 255), -1)
                     else:
                         cv2.circle(image, (int(self.x / 3), int(self.y / 2.25)), 5, (255, 255, 0), -1)
                     # self.x, self.y = convert_offset(self.x, self.y)
-                    win32api.SetCursorPos((int(self.x), int(self.y)))
+                    cursor_position = (int(self.x), int(self.y))
+                    m_cursor_position = self.mod_cursor_position(cursor_position)
+                    win32api.SetCursorPos(m_cursor_position)
 
                 def wheel_up(self):
-                    win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 200, 200, 20, 1)
+                    win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 200, 200, 30, 1)
 
                 def wheel_down(self):
-                    win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 200, 200, -20, 1)
+                    win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 200, 200, -30, 1)
 
                 def wheel(self, before):
                     if self.y > before.y:
@@ -807,9 +871,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         image = np.where(c_mask > 0, img_all_blurred, image)
                 return image
 
-
-            gesture_int = 0
-
             before_c = Mark_pixel(0, 0, 0)
             pixel_c = Mark_pixel(0, 0, 0)
             hm_idx = False
@@ -890,7 +951,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 # Flip the image horizontally for a later selfie-view display, and convert
                 # the BGR image to RGB.
                 image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
-                image = BlurFunction(image)
+                #image = BlurFunction(image)
 
                 # x_size, y_size, channel = image.shape
                 # To improve performance, optionally mark the image as not writeable to
@@ -1006,14 +1067,26 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                 except:
                                     pass
 
+
+
                         if len(mark_p[-1]) == 4:
                             gesture_mode.update_left(static_gesture_num_l, palm_vector, finger_vector)
+
+                            # 색 변경
+                            palm_vector = HM.get_palm_vector()
+                            finger_vector = HM.get_finger_vector()
+                            mode = gesture_mode.select_mode()
+                            self.mode_setting(mode, mode_before)
+                            mode_before = mode
+
+                            if mode_global == 3 and len(mark_p[-1]) == 4 and static_gesture_num_l == 6:
+                                self.set_pen_color(palm_vector, finger_vector)
+
                         if len(mark_p[-1]) == 5:
                             gesture_mode.update_right(static_gesture_num_r, palm_vector, finger_vector)
 
-                        mode = gesture_mode.select_mode()
-                        self.mode_setting(mode, mode_before)
-                        mode_before = mode
+
+
                         # mode2 = self.inv_push_button()
                         # if mode2 != None :
                         #     mode_setting(mode2, mode_before)
@@ -1038,7 +1111,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             #     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, int(pixel_c.x), int(pixel_c.y), 0, 0)
 
                             # 마우스 휠
-                            if finger_open_[2] == 1 and WHEEL_USE == True:
+                            if finger_open_[2] == 1 and WHEEL_USE == True and get_angle(mark_p[5] - mark_p[8], mark_p[5] - mark_p[12]) < 0.3:
                                 pixel_c.wheel(before_c)
 
                         if finger_open_[2] != 1 and \
