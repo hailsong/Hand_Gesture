@@ -755,6 +755,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                     pill_image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
                     draw = ImageDraw.Draw(pill_image)
+
                     # print(LR_index, type(LR_index))
                     if len(LR_index) == 4:
                         x1, y1 = 30, 30

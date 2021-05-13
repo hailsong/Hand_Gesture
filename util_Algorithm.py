@@ -18,6 +18,8 @@ from PyQt5.QtCore import QThread, QObject, QRect, pyqtSlot, pyqtSignal
 import datetime
 import sys
 
+from game.text import egg
+
 '''
 키 코드 링크 : https://lab.cliel.com/entry/%EA%B0%80%EC%83%81-Key-Code%ED%91%9C
 '''
@@ -59,6 +61,7 @@ MODEL_STATIC = keras.models.load_model(
 
 gesture_check = False
 mode_global = 0
+pen_color = ''
 
 '''
 mark_pixel : 각각의 랜드마크
@@ -634,9 +637,23 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
     #GUI Part
     class opcv(QThread):
-
         change_pixmap_signal = pyqtSignal(np.ndarray)
         mode_signal = pyqtSignal(int)
+
+        R = np.array([0.22, -0.98, 0])
+        G = np.array([0.73, -0.68, 0])
+        B = np.array([0.95, -0.3, 0])
+        O = np.array([0.9, 0.4, 0])
+        COLOR_SET = {'R' : R, 'G' : G, 'B' : B, 'O' : O}
+
+        BASE_LAYER = Image.open('./image/color_select.png')
+        R_LAYER = './image/Red.png'
+        G_LAYER = './image/Green.png'
+        B_LAYER = './image/Blue.png'
+        O_LAYER = './image/Orange.png'
+        LAYER_PATH = {'R' : R_LAYER, 'G' : G_LAYER, 'B' : B_LAYER, 'O' : O_LAYER}
+        LAYER_SET = {'R': Image.open(R_LAYER), 'G': Image.open(G_LAYER),
+                     'B': Image.open(B_LAYER), 'O': Image.open(O_LAYER)}
 
         def __init__(self):
             super().__init__()
@@ -651,11 +668,47 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 win32api.keybd_event(0x1B, 0, 0, 0)  # ESC DOWN
                 win32api.keybd_event(0x1B, 0, win32con.KEYEVENTF_KEYUP, 0)  # ESC UP
 
-        def set_pen_color(self, palm, finger):
+        def set_pen_color(self, palm, finger, image):
+            global pen_color
+
             palm_standard = [-0.29779509, -0.56894808, 0.76656126]
-            
             if get_angle(palm, palm_standard) < 0.7:
-                print(palm, finger)
+                color_value = self.COLOR_SET.copy()
+
+                pill_image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+
+                for key, value in self.COLOR_SET.items():
+                    color_value[key] = get_angle(finger, value)
+                if min(color_value.values()) < 0.3:
+                    color_name_l = [k for k, v in color_value.items() if min(color_value.values()) == v]
+                    if len(color_name_l) > 0:
+                        color_name = color_name_l[0]
+                        pill_image.paste(self.LAYER_SET[color_name], (380, 350), mask=self.LAYER_SET[color_name])
+                    if color_name != pen_color:
+                        if color_name == 'R':
+                            win32api.keybd_event(0x52, 0, 0, 0)
+                            win32api.keybd_event(0x52, 0, win32con.KEYEVENTF_KEYUP, 0)
+                        if color_name == 'G':
+                            win32api.keybd_event(0x47, 0, 0, 0)
+                            win32api.keybd_event(0x47, 0, win32con.KEYEVENTF_KEYUP, 0)
+                        if color_name == 'B':
+                            win32api.keybd_event(0x42, 0, 0, 0)
+                            win32api.keybd_event(0x42, 0, win32con.KEYEVENTF_KEYUP, 0)
+                        if color_name == 'O':
+                            win32api.keybd_event(0x4F, 0, 0, 0)
+                            win32api.keybd_event(0x4F, 0, win32con.KEYEVENTF_KEYUP, 0)
+                    pen_color = color_name
+
+                else:
+                    pill_image.paste(self.BASE_LAYER, (380, 350), self.BASE_LAYER)
+
+                image = cv2.cvtColor(np.array(pill_image), cv2.COLOR_RGB2BGR)
+
+            return image
+
+            # Color Set : R G B O
+            # print(get_angle(finger, finger_vector_1), get_angle(finger, finger_vector_2))
+
 
 
         @pyqtSlot(int, int)
@@ -1080,7 +1133,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             mode_before = mode
 
                             if mode_global == 3 and len(mark_p[-1]) == 4 and static_gesture_num_l == 6:
-                                self.set_pen_color(palm_vector, finger_vector)
+                                image = self.set_pen_color(palm_vector, finger_vector, image)
 
                         if len(mark_p[-1]) == 5:
                             gesture_mode.update_right(static_gesture_num_r, palm_vector, finger_vector)
