@@ -2,15 +2,15 @@ import cv2
 import mediapipe as mp
 import pyautogui
 import math
-import win32api, win32con, time
+import win32api
+import win32con
+import time
 import numpy as np
-from PIL import ImageFont, ImageDraw, Image
+from PIL import Image
 from tensorflow import keras
 
 import tensorflow as tf
 from mediapipe.framework.formats import location_data_pb2
-
-#from GUI import opcv, Ui_MainWindow
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
@@ -24,12 +24,9 @@ from game.text import egg
 키 코드 링크 : https://lab.cliel.com/entry/%EA%B0%80%EC%83%81-Key-Code%ED%91%9C
 '''
 
-try:
-    physical_devices = tf.config.list_physical_devices('GPU')
-    #print(physical_devices)
-    tf.config.experimental.set_memory_growth(physical_devices[0], True)
-except:
-    pass
+physical_devices = tf.config.list_physical_devices('GPU')
+# print(physical_devices)
+tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 # For webcam input:
 # hands = mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5)
@@ -42,8 +39,9 @@ mp_face_detection = mp.solutions.face_detection
 mp_pose = mp.solutions.pose
 
 x_size, y_size = pyautogui.size().width, pyautogui.size().height
-nowclick = False
-nowclick2 = False
+now_click = False
+now_click2 = False
+straight_line = False
 
 gesture_int = 0
 
@@ -69,14 +67,17 @@ finger_open : 손 하나가 갖고있는 랜드마크들
 Gesture : 손의 제스처를 판단하기 위한 랜드마크들의 Queue
 '''
 
-#TODO 손가락 굽힘 판단, 손바닥 상태, 오른손 왼손 확인
-class Handmark():
-    '''
 
-    '''
+# TODO 손가락 굽힘 판단, 손바닥 상태, 오른손 왼손 확인
+class Handmark():
+
     def __init__(self, mark_p):
         self._p_list = mark_p
         self.finger_state = [0 for _ in range(5)]
+        self.palm_vector = np.array([0., 0., 0.])
+        self.finger_vector = np.array([0., 0., 0.])
+        # self.thumb, self.index, self.middle, self.ring, self.pinky = np.array()
+        # self.finger_angle_list = np.array()
 
     @property
     def p_list(self):
@@ -89,19 +90,21 @@ class Handmark():
     def return_flatten_p_list(self):
         output = []
         for local_mark_p in self._p_list:
-            #print('type', type(local_mark_p))
+            # print('type', type(local_mark_p))
             output.extend(local_mark_p.to_list())
         return output
 
-    #엄지 제외
-    def get_finger_angle(self, finger): #finger는 self에서 정의된 손가락들, 4크기 배열
+    # 엄지 제외
+    @staticmethod
+    def get_finger_angle(finger):
         l1 = finger[0] - finger[1]
         l2 = finger[3] - finger[1]
         l1_ = np.array([l1[0], l1[1], l1[2]])
         l2_ = np.array([l2[0], l2[1], l2[2]])
         return np.arccos(np.dot(l1_, l2_) / (norm(l1) * norm(l2)))
 
-    def get_angle(self, l1, l2):
+    @staticmethod
+    def get_angle(l1, l2):
         l1_ = np.array([l1[0], l1[1], l1[2]])
         l2_ = np.array([l2[0], l2[1], l2[2]])
         return np.arccos(np.dot(l1_, l2_) / (norm(l1) * norm(l2)))
@@ -119,65 +122,69 @@ class Handmark():
 
         self.palm_vector = np.cross(l1_, l2_)
         self.palm_vector = self.palm_vector / vector_magnitude(self.palm_vector)
-        #print(vector_magnitude((self.palm_vector)))
+        # print(vector_magnitude((self.palm_vector)))
         return self.palm_vector
 
     def get_finger_vector(self):
         l0 = self._p_list[5] - self._p_list[0]
         self.finger_vector = np.array(l0)
         self.finger_vector = self.finger_vector / vector_magnitude(self.finger_vector)
-        #print(vector_magnitude((self.finger_vector)))
+        # print(vector_magnitude((self.finger_vector)))
         return self.finger_vector
 
-    #True 펴짐 False 내림
-    def return_finger_state(self, experiment_mode = False):
+    # True 펴짐 False 내림
+    def return_finger_state(self, experiment_mode=False):
         self.thumb = [self._p_list[i] for i in range(1, 5)]
         self.index = [self._p_list[i] for i in range(5, 9)]
         self.middle = [self._p_list[i] for i in range(9, 13)]
         self.ring = [self._p_list[i] for i in range(13, 17)]
         self.pinky = [self._p_list[i] for i in range(17, 21)]
 
-        #TODO 각 손가락 각도 근거로 손가락 굽힘 판단
+        # TODO 각 손가락 각도 근거로 손가락 굽힘 판단
         self.finger_angle_list = np.array([self.get_finger_angle(self.thumb),
-               self.get_finger_angle(self.index),
-               self.get_finger_angle(self.middle),
-               self.get_finger_angle(self.ring),
-               self.get_finger_angle(self.pinky)])
+                                           self.get_finger_angle(self.index),
+                                           self.get_finger_angle(self.middle),
+                                           self.get_finger_angle(self.ring),
+                                           self.get_finger_angle(self.pinky)])
         finger_angle_threshold = np.array([2.8, 1.5, 2.2, 2.2, 2.4])
         self.finger_state_angle = np.array(self.finger_angle_list > finger_angle_threshold, dtype=int)
 
-        #TODO 각 손가락 거리정보 근거로 손가락 굽힘 판단
-        self.finger_distance_list = np.array([get_distance(self.thumb[3], self.pinky[0]) / get_distance(self.index[0], self.pinky[0]),
-                                     get_distance(self.index[3], self.index[0]) / get_distance(self.index[0], self.index[1]),
-                                     get_distance(self.middle[3], self.middle[0]) / get_distance(self.middle[0], self.middle[1]),
-                                     get_distance(self.ring[3], self.ring[0]) / get_distance(self.ring[0], self.ring[1]),
-                                     get_distance(self.pinky[3], self.pinky[0]) / get_distance(self.pinky[0], self.pinky[1])])
-        #print(self.finger_distance_list)
+        # TODO 각 손가락 거리정보 근거로 손가락 굽힘 판단
+        self.finger_distance_list = np.array(
+            [get_distance(self.thumb[3], self.pinky[0]) / get_distance(self.index[0], self.pinky[0]),
+             get_distance(self.index[3], self.index[0]) / get_distance(self.index[0], self.index[1]),
+             get_distance(self.middle[3], self.middle[0]) / get_distance(self.middle[0], self.middle[1]),
+             get_distance(self.ring[3], self.ring[0]) / get_distance(self.ring[0], self.ring[1]),
+             get_distance(self.pinky[3], self.pinky[0]) / get_distance(self.pinky[0], self.pinky[1])])
+        # print(self.finger_distance_list)
         finger_distance_threshold = np.array([1.5, 1.8, 2, 2, 2])
         self.finger_state_distance = np.array(self.finger_distance_list > finger_distance_threshold, dtype=int)
 
         # TODO 손가락과 손바닥 이용해 손가락 굽힘 판단
         self.hand_angle_list = np.array([self.get_angle(self.thumb[1] - self._p_list[0], self.thumb[3] - self.thumb[1]),
-                                self.get_angle(self.index[0] - self._p_list[0], self.index[3] - self.index[0]),
-                                self.get_angle(self.middle[0] - self._p_list[0], self.middle[3] - self.middle[0]),
-                                self.get_angle(self.ring[0] - self._p_list[0], self.ring[3] - self.ring[0]),
-                                self.get_angle(self.pinky[0] - self._p_list[0], self.pinky[3] - self.pinky[0])])
-        #print(self.hand_angle_list)
+                                         self.get_angle(self.index[0] - self._p_list[0], self.index[3] - self.index[0]),
+                                         self.get_angle(self.middle[0] - self._p_list[0],
+                                                        self.middle[3] - self.middle[0]),
+                                         self.get_angle(self.ring[0] - self._p_list[0], self.ring[3] - self.ring[0]),
+                                         self.get_angle(self.pinky[0] - self._p_list[0],
+                                                        self.pinky[3] - self.pinky[0])])
+        # print(self.hand_angle_list)
         hand_angle_threshold = np.array([0.7, 1.7, 1.5, 1.5, 1.3])
         self.hand_state_angle = np.array(self.hand_angle_list < hand_angle_threshold, dtype=int)
-        #print(self.finger_angle_list, self.finger_distance_list, self.hand_angle_list)
+        # print(self.finger_angle_list, self.finger_distance_list, self.hand_angle_list)
         self.input = np.concatenate((self.finger_angle_list, self.finger_distance_list, self.hand_angle_list))
 
-        #print(predict_static(self.input))
-        #print(np.round(self.finger_angle_list, 3), np.round(self.finger_distance_list, 3), np.round(self.hand_angle_list, 3))
-        #print(self.finger_state_angle, self.finger_state_distance, self.hand_state_angle)
+        # print(predict_static(self.input))
+        # print(np.round(self.finger_angle_list, 3), np.round(self.finger_distance_list, 3), np.round(self.hand_angle_list, 3))
+        # print(self.finger_state_angle, self.finger_state_distance, self.hand_state_angle)
 
         self.result = self.finger_state_angle + self.finger_state_distance + self.hand_state_angle > 1
-        #print(self.result)
+        # print(self.result)
         if experiment_mode == False:
             return self.result
         else:
-            return np.round(self.finger_angle_list, 3), np.round(self.finger_distance_list, 3), np.round(self.hand_angle_list, 3)
+            return np.round(self.finger_angle_list, 3), np.round(self.finger_distance_list, 3), np.round(
+                self.hand_angle_list, 3)
 
     def return_finger_info(self):
         self.thumb = [self._p_list[i] for i in range(1, 5)]
@@ -194,19 +201,22 @@ class Handmark():
                                            self.get_finger_angle(self.pinky)])
 
         # TODO 각 손가락 거리정보 근거로 손가락 굽힘 판단
-        self.finger_distance_list = np.array([get_distance(self.thumb[3], self.pinky[0]) / get_distance(self.index[0], self.pinky[0]),
-                                              get_distance(self.index[3], self.index[0]) / get_distance(self.index[0], self.index[1]),
-                                              get_distance(self.middle[3], self.middle[0]) / get_distance(self.middle[0], self.middle[1]),
-                                              get_distance(self.ring[3], self.ring[0]) / get_distance(self.ring[0], self.ring[1]),
-                                              get_distance(self.pinky[3], self.pinky[0]) / get_distance(self.pinky[0], self.pinky[1])])
+        self.finger_distance_list = np.array(
+            [get_distance(self.thumb[3], self.pinky[0]) / get_distance(self.index[0], self.pinky[0]),
+             get_distance(self.index[3], self.index[0]) / get_distance(self.index[0], self.index[1]),
+             get_distance(self.middle[3], self.middle[0]) / get_distance(self.middle[0], self.middle[1]),
+             get_distance(self.ring[3], self.ring[0]) / get_distance(self.ring[0], self.ring[1]),
+             get_distance(self.pinky[3], self.pinky[0]) / get_distance(self.pinky[0], self.pinky[1])])
         # print(self.finger_distance_list)
 
         # TODO 손가락과 손바닥 이용해 손가락 굽힘 판단
         self.hand_angle_list = np.array([self.get_angle(self.thumb[1] - self._p_list[0], self.thumb[3] - self.thumb[1]),
                                          self.get_angle(self.index[0] - self._p_list[0], self.index[3] - self.index[0]),
-                                         self.get_angle(self.middle[0] - self._p_list[0], self.middle[3] - self.middle[0]),
+                                         self.get_angle(self.middle[0] - self._p_list[0],
+                                                        self.middle[3] - self.middle[0]),
                                          self.get_angle(self.ring[0] - self._p_list[0], self.ring[3] - self.ring[0]),
-                                         self.get_angle(self.pinky[0] - self._p_list[0], self.pinky[3] - self.pinky[0])])
+                                         self.get_angle(self.pinky[0] - self._p_list[0],
+                                                        self.pinky[3] - self.pinky[0])])
         # print(self.hand_angle_list)
         # print(self.finger_angle_list, self.finger_distance_list, self.hand_angle_list)
         self.input = np.concatenate((self.finger_angle_list, self.finger_distance_list, self.hand_angle_list))
@@ -222,31 +232,32 @@ class Handmark():
         output = np.concatenate((output, self.palm_vector, self.finger_vector))
         return output
 
-#TODO Gesture 판단, 일단은 15프레임 (0.5초)의 Queue로?
+
+# TODO Gesture 판단, 일단은 15프레임 (0.5초)의 Queue로?
 class Gesture():
     Gesture_Array_size = 7
     Gesture_static_size = 30
 
     def __init__(self):
         self.palm_data = [np.array([0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]
-        self.d_palm_data = [np.array([0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)] #palm_data의 차이를 기록할 list
+        self.d_palm_data = [np.array([0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]  # palm_data의 차이를 기록할 list
 
         self.location_data = [[0.1, 0.1, 0.1] for _ in range(Gesture.Gesture_Array_size)]
-        self.finger_data  = [np.array([0, 0, 0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]
+        self.finger_data = [np.array([0, 0, 0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]
         self.gesture_data = [0] * Gesture.Gesture_static_size
 
     @staticmethod
-    def get_location(p): #p는 프레임 수 * 좌표 세개
+    def get_location(p):  # p는 프레임 수 * 좌표 세개
         x_mean, y_mean, z_mean = 0, 0, 0
         for i in range(len(p) - 1):
             x_mean += p[i].x
             y_mean += p[i].y
             z_mean += p[i].z
-        x_mean, y_mean, z_mean = x_mean/(len(p) - 1), y_mean/(len(p) - 1), z_mean/(len(p) - 1)
+        x_mean, y_mean, z_mean = x_mean / (len(p) - 1), y_mean / (len(p) - 1), z_mean / (len(p) - 1)
         return [x_mean, y_mean, z_mean]
 
     @staticmethod
-    def remove_outlier(target): # 1D numpy array 최대/최소 제거:
+    def remove_outlier(target):  # 1D numpy array 최대/최소 제거:
         for i in range(target.shape[0]):
             if target[i] == np.max(target):
                 max_i = i
@@ -259,7 +270,7 @@ class Gesture():
         # print(self.get_location(handmark._p_list))
         self.palm_data.insert(0, handmark.palm_vector)
         self.d_palm_data.insert(0, (self.palm_data[1] - handmark.palm_vector) * 1000)
-        self.location_data.insert(0, Gesture.get_location(handmark._p_list)) # location data는 (프레임 수) * 22 * Mark_p 객체
+        self.location_data.insert(0, Gesture.get_location(handmark._p_list))  # location data는 (프레임 수) * 22 * Mark_p 객체
         self.finger_data.insert(0, handmark.finger_vector)
         self.gesture_data.insert(0, gesture_num)
         # print(gesture_num)
@@ -272,18 +283,17 @@ class Gesture():
         self.fv = handmark.finger_vector
         self.gesture_data.pop()
 
+        # print(self.palm_data[0], self.finger_data[0], self.location_data[0])
 
-        #print(self.palm_data[0], self.finger_data[0], self.location_data[0])
-
-        #print(handmark.palm_vector * 1000)
+        # print(handmark.palm_vector * 1000)
 
     # handmark지닌 10개의 프레임이 들어온다...
-    def detect_gesture(self): #이 최근꺼
+    def detect_gesture(self):  # 이 최근꺼
         global gesture_check
-        #print(self.gesture_data.count(6))
-        #print(gesture_check)
+        # print(self.gesture_data.count(6))
+        # print(gesture_check)
         if (gesture_check == True) or (self.gesture_data.count(6) < 15):
-            #print(self.gesture_data)
+            # print(self.gesture_data)
             return -1
 
         # i가 작을수록 더 최신 것
@@ -293,22 +303,22 @@ class Gesture():
         x_classifier = self.remove_outlier(x_classifier)
         y_classifier = self.remove_outlier(y_classifier)
 
-        #print(np.mean(x_classifier), np.mean(y_classifier))
-        #if np.mean(x_classifier) >
+        # print(np.mean(x_classifier), np.mean(y_classifier))
+        # if np.mean(x_classifier) >
 
         # x_classfication = self.d_location_data[:][0]
         # y_classfication = self.d_location_data[:][1]
         # print(x_classfication, y_classfication)
 
-        #왼쪽 X감소 오른쪽 X증가
-        #위 y감소 아래 y증가
+        # 왼쪽 X감소 오른쪽 X증가
+        # 위 y감소 아래 y증가
 
         x_mean, y_mean = np.mean(x_classifier), np.mean(y_classifier)
-        #print(x_mean, y_mean)
+        # print(x_mean, y_mean)
 
         # 동적 제스처 - LEFT
         if y_mean != 0:
-            if x_mean/abs(y_mean) < -1.3:
+            if x_mean / abs(y_mean) < -1.3:
                 condition1 = 0
                 condition2 = 0
                 condition3 = 0
@@ -321,24 +331,24 @@ class Gesture():
                     angle = get_angle(self.palm_data[-1], angle_threshold)
                     if angle < angle_min:
                         angle_min = angle
-                    if self.palm_data[i][2] - self.palm_data[i+1][2] > 0.05:
+                    if self.palm_data[i][2] - self.palm_data[i + 1][2] > 0.05:
                         condition1 += 1.2
-                    if self.finger_data[i][0] - self.finger_data[i+1][0] < -0.04:
+                    if self.finger_data[i][0] - self.finger_data[i + 1][0] < -0.04:
                         condition2 += 1
                     if self.finger_data[i][2] - self.finger_data[i + 1][2] < -0.05:
                         condition3 += 1
                     if self.location_data[i][0] - self.location_data[i + 1][0] < -0.04:
                         condition4 += 1
                 condition_sum = condition1 + condition2 + condition3 + condition4
-                #print(condition1, condition2, condition3, condition4)
-                #print(get_angle(self.palm_data[-1], angle_threshold))
+                # print(condition1, condition2, condition3, condition4)
+                # print(get_angle(self.palm_data[-1], angle_threshold))
                 if condition_sum > 8 and angle_min < 0.5:
                     print("LEFT")
                     win32api.keybd_event(0x25, 0, 0, 0)
                     return -1
 
             # 동적 제스처 - RIGHT
-            if x_mean/abs(y_mean) > 1.5:
+            if x_mean / abs(y_mean) > 1.5:
                 condition1 = 0
                 condition2 = 0
                 condition3 = 0
@@ -350,9 +360,9 @@ class Gesture():
                     angle = get_angle(self.palm_data[-1], angle_threshold)
                     if angle < angle_min:
                         angle_min = angle
-                    if self.palm_data[i][2] - self.palm_data[i+1][2] < -0.06:
+                    if self.palm_data[i][2] - self.palm_data[i + 1][2] < -0.06:
                         condition1 += 1
-                    if self.finger_data[i][0] - self.finger_data[i+1][0] > 0.05:
+                    if self.finger_data[i][0] - self.finger_data[i + 1][0] > 0.05:
                         condition2 += 1
                     if self.finger_data[i][2] - self.finger_data[i + 1][2] > 0.05:
                         condition3 += 1
@@ -360,14 +370,14 @@ class Gesture():
                         condition4 += 1
                 condition_sum = condition1 + condition2 + condition3 + condition4
                 angle_threshold = [-1., 0., 0.]
-                #print(get_angle(self.palm_data[-1], angle_threshold))
+                # print(get_angle(self.palm_data[-1], angle_threshold))
                 if condition_sum > 10 and angle_min < 0.8:
                     print("RIGHT")
                     win32api.keybd_event(0x27, 0, 0, 0)
                     return -1
 
             # 동적 제스처 - UP
-            if y_mean/abs(x_mean) < -1.5:
+            if y_mean / abs(x_mean) < -1.5:
                 condition1 = 0
                 condition2 = 0
                 condition3 = 0
@@ -379,22 +389,22 @@ class Gesture():
                     angle = get_angle(self.palm_data[-1], angle_threshold)
                     if angle < angle_min:
                         angle_min = angle
-                    if self.palm_data[i][2] - self.palm_data[i+1][2] > 0.05:
+                    if self.palm_data[i][2] - self.palm_data[i + 1][2] > 0.05:
                         condition1 += 1
-                    if self.finger_data[i][1] - self.finger_data[i+1][1] < -0.05:
+                    if self.finger_data[i][1] - self.finger_data[i + 1][1] < -0.05:
                         condition2 += 1
                     if self.location_data[i][1] - self.location_data[i + 1][1] < -0.07:
                         condition3 += 1
                 condition_sum = condition1 + condition2 + condition3 + condition4
 
-                #print(get_angle(self.palm_data[-1], angle_threshold))
+                # print(get_angle(self.palm_data[-1], angle_threshold))
                 if condition_sum > 6 and angle_min < 1:
                     print("UP")
                     win32api.keybd_event(0x26, 0, 0, 0)
                     return -1
 
             # 동적 제스처 - DOWN
-            if y_mean/abs(x_mean) > 1.5:
+            if y_mean / abs(x_mean) > 1.5:
                 condition1 = 0
                 condition2 = 0
                 condition3 = 0
@@ -406,24 +416,24 @@ class Gesture():
                     angle = get_angle(self.palm_data[-1], angle_threshold)
                     if angle < angle_min:
                         angle_min = angle
-                    if self.palm_data[i][2] - self.palm_data[i+1][2] > 0.04:
+                    if self.palm_data[i][2] - self.palm_data[i + 1][2] > 0.04:
                         condition1 += 1
-                    if self.finger_data[i][1] - self.finger_data[i+1][1] > 0.04:
+                    if self.finger_data[i][1] - self.finger_data[i + 1][1] > 0.04:
                         condition2 += 1
                     if self.location_data[i][1] - self.location_data[i + 1][1] > 0.05:
                         condition3 += 1
                 # print(condition1, condition2, condition3, condition4)
                 condition_sum = condition1 + condition2 + condition3 + condition4
                 angle_threshold = [0., 1., 0.]
-                #print(get_angle(self.palm_data[-1], angle_threshold))
+                # print(get_angle(self.palm_data[-1], angle_threshold))
                 if condition_sum > 7 and angle_min < 1.5:
                     print("DOWN")
                     win32api.keybd_event(0x28, 0, 0, 0)
                     return -1
 
-        #gesture_check = True
+        # gesture_check = True
 
-    def gesture_LRUD(self): #상하좌우 변화량 판단
+    def gesture_LRUD(self):  # 상하좌우 변화량 판단
         LR_trigger, UD_trigger = 0, 0
         for i in range(5):
             if abs(self.location_data[i][0] - self.location_data[i + 1][0]) > (
@@ -434,11 +444,13 @@ class Gesture():
         output = LR_trigger > UD_trigger
         return output
 
+
 class Gesture_mode():
-    '''
+    """
     전체 MODE 결정하기 위한 Class
-    '''
+    """
     QUEUE_SIZE = 10
+
     def __init__(self):
         self.left = [0] * self.QUEUE_SIZE
         self.right = [0] * self.QUEUE_SIZE
@@ -447,34 +459,40 @@ class Gesture_mode():
         self.left_finger_vector = [[0.] * 3] * self.QUEUE_SIZE
         self.right_finger_vector = [[0.] * 3] * self.QUEUE_SIZE
         self.right_finger_vector = [[0.] * 3] * self.QUEUE_SIZE
+
     def __str__(self):
         return 'left : {}, right : {}, lpv : {}, lfv : {}, rpv : {}, rfv : {}'.format(
             self.left[-1], self.right[-1],
-            self.left_palm_vector[-1], self.left_finger_vector[-1], self.right_palm_vector[-1], self.right_finger_vector[-1])
+            self.left_palm_vector[-1], self.left_finger_vector[-1], self.right_palm_vector[-1],
+            self.right_finger_vector[-1])
+
     def update_left(self, left, palm_vector, finger_vector):
-        #print(left, 'left')
+        # print(left, 'left')
         self.left.append(left)
         self.left_palm_vector.append(palm_vector)
         self.left_finger_vector.append(finger_vector)
         self.left.pop(0)
         self.left_palm_vector.pop(0)
         self.left_finger_vector.pop(0)
+
     def update_right(self, right, palm_vector, finger_vector):
-        #print(right, 'right')
+        # print(right, 'right')
         self.right.append(right)
         self.right_palm_vector.append(palm_vector)
         self.right_finger_vector.append(finger_vector)
         self.right.pop(0)
         self.right_palm_vector.pop(0)
         self.right_finger_vector.pop(0)
-    def select_mode(self):
+
+    def select_mode(self, pixel):
         mode = 0
         lpv_mode_1 = [-0.39, 0.144, -0.90]
         lfv_mode_1 = [-0.33, -0.94, 0.]
         rpv_mode_1 = [-0.40, -0.14, -0.9]
         rfv_mode_1 = [-0.33, -0.94, 0.]
         mode_result = 0
-        #print(self.left_palm_vector[0], self.left_finger_vector[0], self.right_palm_vector[0], self.right_finger_vector[0])
+        # print(self.left_palm_vector[0], self.left_finger_vector[0],
+        # self.right_palm_vector[0], self.right_finger_vector[0])
         for lpv in self.left_palm_vector:
             mode_result = mode_result + get_angle(lpv, lpv_mode_1)
         for lfv in self.left_finger_vector:
@@ -518,6 +536,7 @@ class Gesture_mode():
             if right == 4:
                 right_idx_1 += 1
         if mode_result < 17 and left_idx_1 == 10 and right_idx_1 == 10:
+            pixel.mousemove()
             mode = 3
 
         # 손모양 사 자세
@@ -533,56 +552,63 @@ class Gesture_mode():
             mode = 4
         return mode
 
+
 def get_angle(l1, l2):
-    '''
+    """
     :param l1:
     :param l2:
     :return: 두 벡터 l1, l2 사이의 값 반환 (RADIAN)
-    '''
+    """
     l1_ = np.array([l1[0], l1[1], l1[2]])
     l2_ = np.array([l2[0], l2[1], l2[2]])
     if (norm(l1) * norm(l2)) == 0:
         return 0
     else:
         return np.arccos(np.dot(l1_, l2_) / (norm(l1) * norm(l2)))
-    #return np.arccos(np.dot(l1_, l2_) / (norm(l1) * norm(l2)))
+    # return np.arccos(np.dot(l1_, l2_) / (norm(l1) * norm(l2)))
 
-def vector_magnitude(one_D_array):
-    '''
+
+def vector_magnitude(one_d_array):
+    """
     :param one_D_array: 1D Array
     :return: 크기 반환
-    '''
-    return math.sqrt(np.sum(one_D_array * one_D_array))
+    """
+    return math.sqrt(np.sum(one_d_array * one_d_array))
+
 
 def norm(p1):
-    '''
+    """
     :param p1: 점 3차원 정보 list
     :return: 벡터의 크기 반환
-    '''
-    return math.sqrt((p1[0])**2 + (p1[1])**2 + (p1[2])**2)
+    """
+    return math.sqrt((p1[0]) ** 2 + (p1[1]) ** 2 + (p1[2]) ** 2)
+
 
 def convert_offset(x, y):
-    return x*4/3 - x_size/8, y*4/3 - y_size/8
+    return x * 4 / 3 - x_size / 8, y * 4 / 3 - y_size / 8
+
 
 def inv_convert_off(x, y):
-    return (x + x_size/8)*3/4, (y + y_size/8)*3/4
+    return (x + x_size / 8) * 3 / 4, (y + y_size / 8) * 3 / 4
+
 
 def get_distance(p1, p2):
-    '''
+    """
     :param p1: Mark_pixel() 객체
     :param p2: Mark_pixel() 객체
     :return: p1과 p2 사이의 거리, 3차원/2차원 mark pixel 모두 거리 반환
-    '''
+    """
     try:
         return math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2 + (p1.z - p2.z) ** 2)
     except:
         return math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2)
 
-#TODO 프로세스 함수들
+
+# TODO 프로세스 함수들
 def process_static_gesture(array_for_static, value_for_static):
-    while(True):
+    while True:
         input_ = np.copy(array_for_static[:])
-        #print(input_)
+        # print(input_)
         input_ = input_[np.newaxis]
         try:
             prediction = MODEL_STATIC.predict(input_)
@@ -593,12 +619,13 @@ def process_static_gesture(array_for_static, value_for_static):
         except:
             pass
 
+
 def process_static_gesture_mod(array_for_static, value_for_static, array_for_static2, value_for_static2):
-    while(True):
+    while True:
         input_ = np.copy(array_for_static[:])
-        #print(input_)
+        # print(input_)
         input_ = input_[np.newaxis]
-        #time.sleep(0.033)
+        # time.sleep(0.033)
         try:
             prediction = MODEL_STATIC.predict(input_)
             if np.max(prediction[0]) > 0.8:
@@ -609,7 +636,7 @@ def process_static_gesture_mod(array_for_static, value_for_static, array_for_sta
             pass
 
         input_2 = np.copy(array_for_static2[:])
-        #print(input_)
+        # print(input_)
         input_2 = input_2[np.newaxis]
         try:
             prediction2 = MODEL_STATIC.predict(input_2)
@@ -619,6 +646,7 @@ def process_static_gesture_mod(array_for_static, value_for_static, array_for_sta
                 value_for_static2.value = 0
         except:
             pass
+
 
 def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r):
     '''
@@ -635,7 +663,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     global DRAG_USE
     global pen_color
 
-    #GUI Part
+    # GUI Part
     class opcv(QThread):
         change_pixmap_signal = pyqtSignal(np.ndarray)
         mode_signal = pyqtSignal(int)
@@ -644,14 +672,14 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         G = np.array([0.73, -0.68, 0])
         B = np.array([0.95, -0.3, 0])
         O = np.array([0.9, 0.4, 0])
-        COLOR_SET = {'R' : R, 'G' : G, 'B' : B, 'O' : O}
+        COLOR_SET = {'R': R, 'G': G, 'B': B, 'O': O}
 
-        BASE_LAYER = Image.open('./image/color_select.png')
+        BASE_LAYER = Image.open('./image/background.png')
         R_LAYER = './image/Red.png'
         G_LAYER = './image/Green.png'
         B_LAYER = './image/Blue.png'
         O_LAYER = './image/Orange.png'
-        LAYER_PATH = {'R' : R_LAYER, 'G' : G_LAYER, 'B' : B_LAYER, 'O' : O_LAYER}
+        LAYER_PATH = {'R': R_LAYER, 'G': G_LAYER, 'B': B_LAYER, 'O': O_LAYER}
         LAYER_SET = {'R': Image.open(R_LAYER), 'G': Image.open(G_LAYER),
                      'B': Image.open(B_LAYER), 'O': Image.open(O_LAYER)}
 
@@ -672,18 +700,18 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             global pen_color
 
             palm_standard = [-0.29779509, -0.56894808, 0.76656126]
-            if get_angle(palm, palm_standard) < 0.7:
+            if get_angle(palm, palm_standard) < 0.8:
                 color_value = self.COLOR_SET.copy()
 
                 pill_image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
 
                 for key, value in self.COLOR_SET.items():
                     color_value[key] = get_angle(finger, value)
-                if min(color_value.values()) < 0.3:
+                if min(color_value.values()) < 0.6:
                     color_name_l = [k for k, v in color_value.items() if min(color_value.values()) == v]
                     if len(color_name_l) > 0:
                         color_name = color_name_l[0]
-                        pill_image.paste(self.LAYER_SET[color_name], (380, 350), mask=self.LAYER_SET[color_name])
+                        pill_image.paste(self.LAYER_SET[color_name], (0, 280), mask=self.LAYER_SET[color_name])
                     if color_name != pen_color:
                         if color_name == 'R':
                             win32api.keybd_event(0x52, 0, 0, 0)
@@ -700,7 +728,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     pen_color = color_name
 
                 else:
-                    pill_image.paste(self.BASE_LAYER, (380, 350), self.BASE_LAYER)
+                    pill_image.paste(self.BASE_LAYER, (0, 280), self.BASE_LAYER)
 
                 image = cv2.cvtColor(np.array(pill_image), cv2.COLOR_RGB2BGR)
 
@@ -709,13 +737,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # Color Set : R G B O
             # print(get_angle(finger, finger_vector_1), get_angle(finger, finger_vector_2))
 
-
-
         @pyqtSlot(int, int)
-        def mode_setting(self, mode, mode_before): #1
+        def mode_setting(self, mode, mode_before):  # 1
             global MOUSE_USE, CLICK_USE, DRAG_USE, WHEEL_USE, mode_global
             if mode != mode_before:
-                self.mode_signal.emit(int(mode - 1)) #2 / #2-4
+                self.mode_signal.emit(int(mode - 1))  # 2 / #2-4
                 if mode == 1 and mode_global != mode:
                     MOUSE_USE = False
                     CLICK_USE = False
@@ -725,7 +751,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 100, 100, 0, 0)
                     self.mode_3_interrupt(mode_global)
                     mode_global = mode
-
 
                 if mode == 2 and mode_global != mode:
                     MOUSE_USE = True
@@ -749,12 +774,14 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     CLICK_USE = False
                     DRAG_USE = True
                     WHEEL_USE = False
+
+                    # win32api.SetCursorPos((200, 200))
                     win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
                     win32api.keybd_event(0x32, 0, 0, 0)  # 2 누르기.
                     time.sleep(0.1)
                     win32api.keybd_event(0xa2, 0, win32con.KEYEVENTF_KEYUP, 0)
                     win32api.keybd_event(0x32, 0, win32con.KEYEVENTF_KEYUP, 0)
-                    print('MODE 3, 필기 발표 모드') #3, #2-5
+                    print('MODE 3, 필기 발표 모드')  # 3, # 2-5
                     mode_global = mode
 
                 if mode == 4 and mode_global != mode:
@@ -772,7 +799,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             cap = self.capture
             # For webcam input:
             hands = mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.8)
-            #pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5, upper_body_only=True)
+            # pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5, upper_body_only=True)
 
             global width, height
 
@@ -807,18 +834,20 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     return tuple(self.x, self.y)
 
                 @staticmethod
-                def mod_cursor_position(pos : tuple):
+                def mod_cursor_position(pos: tuple):
                     x, y = pos[0], pos[1]
                     FULLSIZE = 1920, 1080
                     MOD_SIZE = 1600, 640
-                    mod_x = x * FULLSIZE[0] / MOD_SIZE[0] - (FULLSIZE[0] - MOD_SIZE[0])/2
-                    mod_x = max(0, mod_x); mod_x = min(FULLSIZE[0], mod_x)
-                    mod_y = y * FULLSIZE[1] / MOD_SIZE[1] - (FULLSIZE[1] - MOD_SIZE[1])/2
-                    mod_y = max(0, mod_y); mod_y = min(FULLSIZE[1], mod_y)
+                    mod_x = x * FULLSIZE[0] / MOD_SIZE[0] - (FULLSIZE[0] - MOD_SIZE[0]) / 2
+                    mod_x = max(0, mod_x);
+                    mod_x = min(FULLSIZE[0], mod_x)
+                    mod_y = y * FULLSIZE[1] / MOD_SIZE[1] - (FULLSIZE[1] - MOD_SIZE[1]) / 2
+                    mod_y = max(0, mod_y);
+                    mod_y = min(FULLSIZE[1], mod_y)
                     return int(mod_x), int(mod_y)
 
                 def mousemove(self):
-                    if nowclick == True:
+                    if now_click == True:
                         cv2.circle(image, (int(self.x / 3), int(self.y / 2.25)), 5, (0, 0, 255), -1)
                     else:
                         cv2.circle(image, (int(self.x / 3), int(self.y / 2.25)), 5, (255, 255, 0), -1)
@@ -848,46 +877,58 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 x = pixel.x
                 y = pixel.y
                 # print(x, y)
-                global nowclick
-                if get_distance(landmark[4], landmark[8]) < get_distance(landmark[4], landmark[3]) and nowclick == False:
+                global now_click
+                global straight_line
+
+                drag_threshold = 0.85
+                if straight_line:
+                    drag_threshold = drag_threshold * 1.3
+                # print('s, d', straight_line, drag_threshold)
+                if get_distance(landmark[4], landmark[8]) < drag_threshold * get_distance(landmark[4], landmark[3]) \
+                        and now_click == False:
                     print('drag on')
                     pos = win32api.GetCursorPos()
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, pos[0], pos[1], 0, 0)
                     # ctypes.windll.user32.mouse_event(0x0002, 0, 0, 0, 0)
-                    nowclick = True
+                    now_click = True
 
-                elif get_distance(landmark[4], landmark[8]) > 1.5 * get_distance(landmark[4], landmark[3]) and nowclick == True:
+                elif get_distance(landmark[4], landmark[8]) > drag_threshold * get_distance(landmark[4], landmark[3])\
+                        and now_click == True:
                     print('drag off')
                     pos = win32api.GetCursorPos()
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, pos[0], pos[1], 0, 0)
                     # ctypes.windll.user32.mouse_event(0x0004, 0, 0, 0, 0)
-                    nowclick = False
+                    now_click = False
 
             def hand_click(landmark, pixel):
                 x = pixel.x
                 y = pixel.y
-                global nowclick2
+                global now_click2
 
-                if get_distance(landmark[4], landmark[10]) < get_distance(landmark[7], landmark[8]) and nowclick2 == False:
+                if get_distance(landmark[4], landmark[10]) < get_distance(landmark[7],
+                                                                          landmark[8]) and now_click2 == False:
                     print('click')
                     pos = win32api.GetCursorPos()
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, pos[0], pos[1], 0, 0)
                     print('click off')
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, pos[0], pos[1], 0, 0)
-                    nowclick2 = True
+                    now_click2 = True
                     return -1
-                if get_distance(landmark[4], landmark[10]) > get_distance(landmark[7], landmark[8]) and nowclick2 == True:
-                    nowclick2 = False
+                if get_distance(landmark[4], landmark[10]) > get_distance(landmark[7],
+                                                                          landmark[8]) and now_click2 == True:
+                    now_click2 = False
 
                 return 0
-
-            def BlurFunction(src):
-                with mp_face_detection.FaceDetection(min_detection_confidence=0.5) as face_detection:  # with 문, mp_face_detection.FaceDetection 클래스를 face_detection으로서 사용
+            """
+            def blurFunction(src):
+                with mp_face_detection.FaceDetection(
+                        min_detection_confidence=0.5) as face_detection:  
+                    "with 문, mp_face_detection.FaceDetection 클래스를 face_detection 으로 사용"
                     image = cv2.cvtColor(src, cv2.COLOR_BGR2RGB)  # image 파일의 BGR 색상 베이스를 RGB 베이스로 바꾸기
                     results = face_detection.process(image)  # 튜플 형태
                     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
                     image_rows, image_cols, _ = image.shape
-                    c_mask: ndarray = np.zeros((image_rows, image_cols), np.uint8)
+                    c_mask: np.ndarray = np.zeros((image_rows, image_cols), np.uint8)
                     if results.detections:
                         for detection in results.detections:
                             if not detection.location_data:
@@ -923,7 +964,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         # print(c_mask.shape)
                         image = np.where(c_mask > 0, img_all_blurred, image)
                 return image
-
+            """
             before_c = Mark_pixel(0, 0, 0)
             pixel_c = Mark_pixel(0, 0, 0)
             hm_idx = False
@@ -943,8 +984,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             mode = 0
             global gesture_check
             global mode_global
+            global straight_line
 
-            #TODO 변화량 모니터링
+            # TODO 변화량 모니터링
             from matplotlib import pyplot as plt
             from matplotlib import animation
 
@@ -954,20 +996,20 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             line2, = ax.plot([], [], 'g', lw=2)
             line3, = ax.plot([], [], 'r', lw=2)
 
-            ############### x가 파란색 y가 빨간색 z가 초록색 ###################
+            '''x가 파란색 y가 빨간색 z가 초록색'''
             max_points = 50
             line, = ax.plot(np.arange(max_points),
                             np.ones(max_points, dtype=np.float) * np.nan, lw=2)
             line2, = ax.plot(np.arange(max_points),
-                            np.ones(max_points, dtype=np.float) * np.nan, lw=2)
+                             np.ones(max_points, dtype=np.float) * np.nan, lw=2)
             line3, = ax.plot(np.arange(max_points),
-                            np.ones(max_points, dtype=np.float) * np.nan, lw=2)
+                             np.ones(max_points, dtype=np.float) * np.nan, lw=2)
 
-
-            if VISUALIZE_GRAPH == True:
+            if VISUALIZE_GRAPH:
                 def init():
                     return line,
-                def animate(i):
+
+                def animate():
                     y = gesture.palm_data[0][0]
 
                     old_y = line.get_ydata()
@@ -991,9 +1033,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                 plt.show()
 
-
             while bool_state and cap.isOpened():
-                #print('cam')
+                # print('cam')
                 success, image = cap.read()
 
                 if not success:
@@ -1004,14 +1045,14 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 # Flip the image horizontally for a later selfie-view display, and convert
                 # the BGR image to RGB.
                 image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
-                #image = BlurFunction(image)
+                # image = blurFunction(image)
 
                 # x_size, y_size, channel = image.shape
                 # To improve performance, optionally mark the image as not writeable to
                 # pass by reference.
                 image.flags.writeable = False
                 results = hands.process(image)
-                #results_body = pose.process(image)
+                # results_body = pose.process(image)
 
                 # Draw the hand annotations on the image.
                 image.flags.writeable = True
@@ -1036,25 +1077,29 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 if results.multi_hand_landmarks:
                     mark_p_list = []
 
-                    for hand_landmarks in results.multi_hand_landmarks:  # hand_landmarks는 감지된 손의 갯수만큼의 원소 수를 가진 list 자료구조
+                    for hand_landmarks in results.multi_hand_landmarks:
+                        '''hand_landmarks 는 감지된 손의 갯수만큼의 원소 수를 가진 list 자료구조'''
                         mark_p = []
                         mp_drawing.draw_landmarks(
                             image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
                         for i in range(21):
-                            mark_p.append(Mark_pixel(hand_landmarks.landmark[i].x, hand_landmarks.landmark[i].y, hand_landmarks.landmark[i].z))
+                            mark_p.append(Mark_pixel(hand_landmarks.landmark[i].x, hand_landmarks.landmark[i].y,
+                                                     hand_landmarks.landmark[i].z))
                         mark_p_list.append(mark_p)
 
-                    for i in range(len(mark_p_list)):  # for문 한 번 도는게 한 손에 대한 것임
+                    for i in range(len(mark_p_list)):  # for 문 한 번 도는게 한 손에 대한 것임
                         LR_idx = results.multi_handedness[i].classification[0].label
-                        #LR_idx = LR_idx[:-1]
+                        # LR_idx = LR_idx[:-1]
                         # print(LR_idx)
-                        image = cv2.putText(image, LR_idx[:], (int(mark_p_list[i][17].x * image.shape[1]), int(mark_p_list[i][17].y * image.shape[0])), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
+                        image = cv2.putText(image, LR_idx[:], (
+                            int(mark_p_list[i][17].x * image.shape[1]), int(mark_p_list[i][17].y * image.shape[0])),
+                                            cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
                         mark_p_list[i].append(LR_idx)
 
                         mark_p = mark_p_list[i]
-                        #print(len(mark_p_list), i)
+                        # print(len(mark_p_list), i)
                         # Handmark 정보 입력
-                        #print(mark_p[-1], " / ", mark_p[0])
+                        # print(mark_p[-1], " / ", mark_p[0])
 
                         if len(mark_p) == 22 and hm_idx == False:
                             HM = Handmark(mark_p)
@@ -1065,11 +1110,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         finger_vector = HM.get_finger_vector()
 
                         # mark_p 입력
-                        if hm_idx == True:
+                        if hm_idx:
                             HM.p_list = mark_p
                             # mark_p[-1] = mark_p[-1][:-1]
-                            if USE_TENSORFLOW == True:
-                                #print(len(HM.p_list[-1]))
+                            if USE_TENSORFLOW:
+                                # print(len(HM.p_list[-1]))
                                 if len(mark_p[-1]) == 4:
                                     f_p_list = HM.return_18_info()
                                     array_for_static_l[:] = f_p_list
@@ -1089,7 +1134,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             else:
                                 finger_open_for_ml = np.ndarray.tolist(HM.return_finger_state())
                                 # 정지 제스쳐 확인
-                                #static_gesture_detect(finger_open_for_ml, mark_p[-1])
+                                # static_gesture_detect(finger_open_for_ml, mark_p[-1])
                             finger_open_ = HM.return_finger_state()
 
                         mark_p0 = mark_p[0].to_pixel()
@@ -1102,25 +1147,23 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             pixel_c = mark_p5
                             # gesture updating
                             if len(mark_p) == 22:
-                                #print(HM.p_list[-1])
+                                # print(HM.p_list[-1])
                                 gesture.update(HM, static_gesture_num_r)
-                                #print(static_gesture_num)
+                                # print(static_gesture_num)
                                 try:
-                                    #print(time.time() - gesture_time)
-                                    #LRUD = gesture.gesture_LRUD()
-                                    #print(LRUD)
-                                    #print(gesture.gesture_data)
-                                    #print(6. in gesture.gesture_data)
+                                    # print(time.time() - gesture_time)
+                                    # LRUD = gesture.gesture_LRUD()
+                                    # print(LRUD)
+                                    # print(gesture.gesture_data)
+                                    # print(6. in gesture.gesture_data)
                                     if time.time() - gesture_time > 0.5:
                                         # 다이나믹 제스처
                                         detect_signal = gesture.detect_gesture()
-                                    if detect_signal == -1: # 디텍트했을때!
+                                    if detect_signal == -1:  # 디텍트했을때!
                                         gesture_time = time.time()
                                         detect_signal = 0
                                 except:
                                     pass
-
-
 
                         if len(mark_p[-1]) == 4:
                             gesture_mode.update_left(static_gesture_num_l, palm_vector, finger_vector)
@@ -1128,17 +1171,24 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             # 색 변경
                             palm_vector = HM.get_palm_vector()
                             finger_vector = HM.get_finger_vector()
-                            mode = gesture_mode.select_mode()
+                            mode = gesture_mode.select_mode(pixel_c)
                             self.mode_setting(mode, mode_before)
                             mode_before = mode
+                            if not now_click:
+                                if mode_global == 3 and len(mark_p[-1]) == 4 and static_gesture_num_l == 6:
+                                    image = self.set_pen_color(palm_vector, finger_vector, image)
 
-                            if mode_global == 3 and len(mark_p[-1]) == 4 and static_gesture_num_l == 6:
-                                image = self.set_pen_color(palm_vector, finger_vector, image)
+                                # 직선 그리기
+                                if mode_global == 3 and len(mark_p[-1]) == 4 and static_gesture_num_l == 13:
+                                    straight_line = True
+                                    win32api.keybd_event(0xA0, 0, 0, 0)  # LShift 누르기.
+
+                                else:
+                                    win32api.keybd_event(0xA0, 0, win32con.KEYEVENTF_KEYUP, 0)
+                                    straight_line = False
 
                         if len(mark_p[-1]) == 5:
                             gesture_mode.update_right(static_gesture_num_r, palm_vector, finger_vector)
-
-
 
                         # mode2 = self.inv_push_button()
                         # if mode2 != None :
@@ -1158,40 +1208,43 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                 hand_drag(hand_landmarks.landmark, pixel_c)
 
                             if finger_open_[2] != 1 and CLICK_USE == True:
-                                if nowclick != True:
+                                if not now_click:
                                     click_tr = hand_click(hand_landmarks.landmark, pixel_c)
                             # else:
-                            #     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, int(pixel_c.x), int(pixel_c.y), 0, 0)
+                            # win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, int(pixel_c.x), int(pixel_c.y), 0, 0)
 
                             # 마우스 휠
-                            if finger_open_[2] == 1 and WHEEL_USE == True and get_angle(mark_p[5] - mark_p[8], mark_p[5] - mark_p[12]) < 0.3:
+                            if finger_open_[2] == 1 and WHEEL_USE == True and get_angle(mark_p[5] - mark_p[8],
+                                                                                        mark_p[5] - mark_p[12]) < 0.3:
                                 pixel_c.wheel(before_c)
 
-                        if finger_open_[2] != 1 and \
-                                CLICK_USE == True and \
-                                finger_open_[1] == 1 and \
-                                len(mark_p[-1]) == 5 and \
-                                sum(finger_open_[2:4]) == 0 and \
-                                static_gesture_num_r == 12 and \
-                                p_key_ready == False:
-                            p_key_ready = True
+                        if mode_global == 1:
+                            """
+                            스파이더맨 손에서 접으면 p 버튼 이용해서 뒤로 가기 (p_key_ready 변수로 제어)
+                            """
+                            if finger_open_[2] != 1 and \
+                                    CLICK_USE == True and \
+                                    finger_open_[1] == 1 and \
+                                    len(mark_p[-1]) == 5 and \
+                                    sum(finger_open_[2:4]) == 0 and \
+                                    static_gesture_num_r == 12 and \
+                                    p_key_ready == False:
+                                p_key_ready = True
 
-                        if finger_open_[2] != 1 and \
-                                CLICK_USE == True and \
-                                finger_open_[1] == 1 and \
-                                len(mark_p[-1]) == 5 and \
-                                sum(finger_open_[2:4]) == 0 and \
-                                static_gesture_num_r != 12 and \
-                                p_key_ready == True:
-                            p_key_ready = False
+                            if finger_open_[2] != 1 and \
+                                    CLICK_USE == True and \
+                                    finger_open_[1] == 1 and \
+                                    len(mark_p[-1]) == 5 and \
+                                    sum(finger_open_[2:4]) == 0 and \
+                                    static_gesture_num_r != 12 and \
+                                    p_key_ready == True:
+                                p_key_ready = False
 
-                            win32api.keybd_event(0x50, 0, 0, 0)  # P 누르기.
-                            win32api.keybd_event(0x50, 0, win32con.KEYEVENTF_KEYUP, 0)
-                            time.sleep(0.1)
+                                win32api.keybd_event(0x50, 0, 0, 0)  # P 누르기.
+                                win32api.keybd_event(0x50, 0, win32con.KEYEVENTF_KEYUP, 0)
+                                time.sleep(0.1)
 
                         before_c = pixel_c
-
-
 
                 FPS = round(1 / (time.time() - before_time), 2)
                 # print(FPS)
@@ -1214,7 +1267,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.capture.release()
 
     class Ui_MainWindow(QObject):
-
         click_mode = pyqtSignal(int, int)
         button6_checked = pyqtSignal(bool)
 
@@ -1417,7 +1469,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.thread.change_pixmap_signal.connect(self.update_img)
             self.thread.mode_signal.connect(self.push_button)
 
-
             self.thread.start()
             self.retranslateUi(MainWindow)
             QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -1426,7 +1477,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             _translate = QtCore.QCoreApplication.translate
             MainWindow.setWindowTitle(_translate("MainWindow", "Handtracking"))
             self.groupBox.setTitle(_translate("MainWindow", "모드선택"))
-            #M
+            # M
             self.groupBox_2.setTitle(_translate("MainWindow", "활성 기능"))
             self.checkBox.setText(_translate("MainWindow", "마우스 움직임"))
             self.checkBox_2.setText(_translate("MainWindow", "마우스 클릭"))
@@ -1434,14 +1485,14 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.checkBox_4.setText(_translate("MainWindow", "스크롤"))
 
         @pyqtSlot(int)
-        def push_button(self, integer): #2-1
+        def push_button(self, integer):  # 2-1
             if integer != -1:
                 B_list = [self.pushButton, self.pushButton_2,
-                               self.pushButton_3, self.pushButton_4]
+                          self.pushButton_3, self.pushButton_4]
                 if not B_list[integer].isChecked():
                     self.From_button = True
-                    B_list[integer].toggle() # #2-2
-            else :
+                    B_list[integer].toggle()  # #2-2
+            else:
                 self.From_button = False
                 pass
 
@@ -1453,7 +1504,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.checkBox_2.setEnabled(True)
             self.checkBox_3.setEnabled(True)
             self.checkBox_4.setEnabled(True)
-            if Button_list[integer].isChecked(): #2-3
+            if Button_list[integer].isChecked():  # 2-3
                 Button_list.pop(integer)
                 for button in Button_list:
                     if button.isChecked():
@@ -1485,7 +1536,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 if len(Before_mode_list) != 0:
                     if self.From_button == False:
                         if Before_mode_list[0] == self.pushButton:
-                            self.click_mode.emit(integer+1, 1)
+                            self.click_mode.emit(integer + 1, 1)
                         elif Before_mode_list[0] == self.pushButton_2:
                             self.click_mode.emit(integer + 1, 2)
                         elif Before_mode_list[0] == self.pushButton_3:
@@ -1566,16 +1617,17 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.setStyleSheet('''QMessageBox{background-color: rgb(225, 225, 225);}''')
             self.setStyleSheet('''QMainWindow{background-color : rgb(0, 0, 0);}''')
             self.msg = QMessageBox()
+
         def closeEvent(self, event):
             result = self.msg.question(self,
-                                 "Confirm Exit...",
-                                 "Are you sure you want to exit ?",
-                                 self.msg.Yes | self.msg.No)
+                                       "Confirm Exit...",
+                                       "Are you sure you want to exit ?",
+                                       self.msg.Yes | self.msg.No)
             if result == self.msg.Yes:
                 self.power_off_signal.emit(False)
                 event.accept()
 
-            else :
+            else:
                 event.ignore()
 
     app = QtWidgets.QApplication(sys.argv)
@@ -1584,9 +1636,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     ui.MainWindow.show()
     sys.exit(app.exec_())
 
+
 if __name__ == '__main__':
     print("This is util set program, it works well... maybe... XD")
 
     print('Running main_Algorithm.py...')
     from os import system
+
     system('python main_Algorithm.py')
