@@ -10,7 +10,6 @@ from PIL import Image
 from tensorflow import keras
 
 import tensorflow as tf
-from mediapipe.framework.formats import location_data_pb2
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
@@ -284,7 +283,6 @@ class Gesture():
         self.gesture_data.pop()
 
         # print(self.palm_data[0], self.finger_data[0], self.location_data[0])
-
         # print(handmark.palm_vector * 1000)
 
     # handmark지닌 10개의 프레임이 들어온다...
@@ -592,15 +590,18 @@ def inv_convert_off(x, y):
     return (x + x_size / 8) * 3 / 4, (y + y_size / 8) * 3 / 4
 
 
-def get_distance(p1, p2):
+def get_distance(p1, p2, mode='3d'):
     """
     :param p1: Mark_pixel() 객체
     :param p2: Mark_pixel() 객체
     :return: p1과 p2 사이의 거리, 3차원/2차원 mark pixel 모두 거리 반환
     """
-    try:
-        return math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2 + (p1.z - p2.z) ** 2)
-    except:
+    if mode == '3d':
+        try:
+            return math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2 + (p1.z - p2.z) ** 2)
+        except:
+            return math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2)
+    elif mode == '2d':
         return math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2)
 
 
@@ -736,6 +737,40 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # Color Set : R G B O
             # print(get_angle(finger, finger_vector_1), get_angle(finger, finger_vector_2))
+
+        def mode_3_ctrl_z(self, palm, finger, left, ctrl_z_check):
+            palm_th = np.array([-0.41607399, -0.20192736, 0.88662719])
+            finger_th = np.array([-0.08736683, -0.96164491, -0.26001175])
+            # print(ctrl_z_check, left)
+            parameter = get_angle(palm, palm_th) + get_angle(finger, finger_th)
+            if ctrl_z_check == 0 and left == 3 and parameter < 1:
+                print('되돌리기 (CTRL + Z)')
+                win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
+                win32api.keybd_event(0x5a, 0, 0, 0)  # Z 누르기.
+                time.sleep(0.1)
+                win32api.keybd_event(0xa2, 0, win32con.KEYEVENTF_KEYUP, 0)
+                win32api.keybd_event(0x5a, 0, win32con.KEYEVENTF_KEYUP, 0)
+                return 15
+            elif ctrl_z_check > 0:
+                return ctrl_z_check - 1
+            else:
+                return 0
+
+        def mode_2_pre(self, palm, finger, left, p_check):
+            palm_th = np.array([-0.41607399, -0.20192736, 0.88662719])
+            finger_th = np.array([-0.08736683, -0.96164491, -0.26001175])
+            # print(ctrl_z_check, left)
+            parameter = get_angle(palm, palm_th) + get_angle(finger, finger_th)
+            if p_check == 0 and left == 3 and parameter < 1:
+                print('이전 페이지 (P)')
+                win32api.keybd_event(0x25, 0, 0, 0)  # Left Arrow 누르기.
+                win32api.keybd_event(0x25, 0, win32con.KEYEVENTF_KEYUP, 0)
+                time.sleep(0.1)
+                return 15
+            elif p_check > 0:
+                return p_check - 1
+            else:
+                return 0
 
         @pyqtSlot(int, int)
         def mode_setting(self, mode, mode_before):  # 1
@@ -880,11 +915,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 global now_click
                 global straight_line
 
-                drag_threshold = 0.85
+                drag_threshold = 1
                 if straight_line:
                     drag_threshold = drag_threshold * 1.3
                 # print('s, d', straight_line, drag_threshold)
-                if get_distance(landmark[4], landmark[8]) < drag_threshold * get_distance(landmark[4], landmark[3]) \
+                if get_distance(landmark[4], landmark[8], mode='2d') < drag_threshold * get_distance(landmark[4], landmark[3], mode='2d') \
                         and now_click == False:
                     print('drag on')
                     pos = win32api.GetCursorPos()
@@ -919,6 +954,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     now_click2 = False
 
                 return 0
+
             """
             def blurFunction(src):
                 with mp_face_detection.FaceDetection(
@@ -972,6 +1008,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             gesture_time = time.time()
             gesture = Gesture()
             gesture_mode = Gesture_mode()
+
+            ctrl_z_check_number = 0
+            p_check_number = 0
 
             # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
             # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1440)
@@ -1144,6 +1183,15 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         if len(mark_p[-1]) == 5:
                             palm_vector = HM.get_palm_vector()
                             finger_vector = HM.get_finger_vector()
+
+                            # MODE 3 CTRL + Z
+                            if mode_global == 3:
+                                ctrl_z_check_number = self.mode_3_ctrl_z(palm_vector, finger_vector,
+                                                                         static_gesture_num_r, ctrl_z_check_number)
+                            if mode_global == 2:
+                                p_check_number = self.mode_2_pre(palm_vector, finger_vector,
+                                                                         static_gesture_num_r, p_check_number)
+
                             pixel_c = mark_p5
                             # gesture updating
                             if len(mark_p) == 22:
@@ -1165,6 +1213,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                 except:
                                     pass
 
+
+                        # MODE 3 색 변경
                         if len(mark_p[-1]) == 4:
                             gesture_mode.update_left(static_gesture_num_l, palm_vector, finger_vector)
 
@@ -1218,31 +1268,31 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                                                                         mark_p[5] - mark_p[12]) < 0.3:
                                 pixel_c.wheel(before_c)
 
-                        if mode_global == 1:
-                            """
-                            스파이더맨 손에서 접으면 p 버튼 이용해서 뒤로 가기 (p_key_ready 변수로 제어)
-                            """
-                            if finger_open_[2] != 1 and \
-                                    CLICK_USE == True and \
-                                    finger_open_[1] == 1 and \
-                                    len(mark_p[-1]) == 5 and \
-                                    sum(finger_open_[2:4]) == 0 and \
-                                    static_gesture_num_r == 12 and \
-                                    p_key_ready == False:
-                                p_key_ready = True
-
-                            if finger_open_[2] != 1 and \
-                                    CLICK_USE == True and \
-                                    finger_open_[1] == 1 and \
-                                    len(mark_p[-1]) == 5 and \
-                                    sum(finger_open_[2:4]) == 0 and \
-                                    static_gesture_num_r != 12 and \
-                                    p_key_ready == True:
-                                p_key_ready = False
-
-                                win32api.keybd_event(0x50, 0, 0, 0)  # P 누르기.
-                                win32api.keybd_event(0x50, 0, win32con.KEYEVENTF_KEYUP, 0)
-                                time.sleep(0.1)
+                        """
+                        NO USE : 스파이더맨 손에서 접으면 p 버튼 이용해서 뒤로 가기 (p_key_ready 변수로 제어)
+                        """
+                        # if mode_global == 1:
+                            # if finger_open_[2] != 1 and \
+                            #         CLICK_USE == True and \
+                            #         finger_open_[1] == 1 and \
+                            #         len(mark_p[-1]) == 5 and \
+                            #         sum(finger_open_[2:4]) == 0 and \
+                            #         static_gesture_num_r == 12 and \
+                            #         p_key_ready == False:
+                            #     p_key_ready = True
+                            #
+                            # if finger_open_[2] != 1 and \
+                            #         CLICK_USE == True and \
+                            #         finger_open_[1] == 1 and \
+                            #         len(mark_p[-1]) == 5 and \
+                            #         sum(finger_open_[2:4]) == 0 and \
+                            #         static_gesture_num_r != 12 and \
+                            #         p_key_ready == True:
+                            #     p_key_ready = False
+                            #
+                            #     win32api.keybd_event(0x50, 0, 0, 0)  # P 누르기.
+                            #     win32api.keybd_event(0x50, 0, win32con.KEYEVENTF_KEYUP, 0)
+                            #     time.sleep(0.1)
 
                         before_c = pixel_c
 
