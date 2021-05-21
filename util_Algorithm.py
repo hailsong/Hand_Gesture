@@ -762,7 +762,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # print(ctrl_z_check, left)
             parameter = get_angle(palm, palm_th) + get_angle(finger, finger_th)
             if p_check == 0 and left == 3 and parameter < 1:
-                print('이전 페이지 (P)')
+                print('이전 페이지 (Left Arrow)')
                 win32api.keybd_event(0x25, 0, 0, 0)  # Left Arrow 누르기.
                 win32api.keybd_event(0x25, 0, win32con.KEYEVENTF_KEYUP, 0)
                 time.sleep(0.1)
@@ -1188,6 +1188,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             if mode_global == 3:
                                 ctrl_z_check_number = self.mode_3_ctrl_z(palm_vector, finger_vector,
                                                                          static_gesture_num_r, ctrl_z_check_number)
+
+                            # MODE 2 LEFT ARROW
                             if mode_global == 2:
                                 p_check_number = self.mode_2_pre(palm_vector, finger_vector,
                                                                          static_gesture_num_r, p_check_number)
@@ -1212,7 +1214,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                         detect_signal = 0
                                 except:
                                     pass
-
 
                         # MODE 3 색 변경
                         if len(mark_p[-1]) == 4:
@@ -1272,27 +1273,27 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         NO USE : 스파이더맨 손에서 접으면 p 버튼 이용해서 뒤로 가기 (p_key_ready 변수로 제어)
                         """
                         # if mode_global == 1:
-                            # if finger_open_[2] != 1 and \
-                            #         CLICK_USE == True and \
-                            #         finger_open_[1] == 1 and \
-                            #         len(mark_p[-1]) == 5 and \
-                            #         sum(finger_open_[2:4]) == 0 and \
-                            #         static_gesture_num_r == 12 and \
-                            #         p_key_ready == False:
-                            #     p_key_ready = True
-                            #
-                            # if finger_open_[2] != 1 and \
-                            #         CLICK_USE == True and \
-                            #         finger_open_[1] == 1 and \
-                            #         len(mark_p[-1]) == 5 and \
-                            #         sum(finger_open_[2:4]) == 0 and \
-                            #         static_gesture_num_r != 12 and \
-                            #         p_key_ready == True:
-                            #     p_key_ready = False
-                            #
-                            #     win32api.keybd_event(0x50, 0, 0, 0)  # P 누르기.
-                            #     win32api.keybd_event(0x50, 0, win32con.KEYEVENTF_KEYUP, 0)
-                            #     time.sleep(0.1)
+                        #     if finger_open_[2] != 1 and \
+                        #             CLICK_USE == True and \
+                        #             finger_open_[1] == 1 and \
+                        #             len(mark_p[-1]) == 5 and \
+                        #             sum(finger_open_[2:4]) == 0 and \
+                        #             static_gesture_num_r == 12 and \
+                        #             p_key_ready == False:
+                        #         p_key_ready = True
+                        #
+                        #     if finger_open_[2] != 1 and \
+                        #             CLICK_USE == True and \
+                        #             finger_open_[1] == 1 and \
+                        #             len(mark_p[-1]) == 5 and \
+                        #             sum(finger_open_[2:4]) == 0 and \
+                        #             static_gesture_num_r != 12 and \
+                        #             p_key_ready == True:
+                        #         p_key_ready = False
+                        #
+                        #         win32api.keybd_event(0x50, 0, 0, 0)  # P 누르기.
+                        #         win32api.keybd_event(0x50, 0, win32con.KEYEVENTF_KEYUP, 0)
+                        #         time.sleep(0.1)
 
                         before_c = pixel_c
 
