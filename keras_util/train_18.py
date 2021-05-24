@@ -45,8 +45,11 @@ print(train_y)
 
 model = keras.Sequential([
     keras.layers.Dense(18, activation = 'relu'),
+    keras.layers.Dropout(0.2),
     keras.layers.Dense(70, activation = 'relu'),
+    keras.layers.Dropout(0.2),
     keras.layers.Dense(60, activation='relu'),
+    keras.layers.Dropout(0.2),
     #keras.layers.Dense(30, activation = 'relu'),
     keras.layers.Dense(15, activation='softmax')
 ])
@@ -64,8 +67,6 @@ print('\n테스트 정확도:', test_acc)
 prediction = model.predict(test_x[[5]])
 print(prediction[0])
 print(test_y[5])
-
-
 
 
 fig, loss_ax = plt.subplots()

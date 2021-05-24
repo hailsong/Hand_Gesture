@@ -17,15 +17,13 @@ from PyQt5.QtCore import QThread, QObject, QRect, pyqtSlot, pyqtSignal
 import datetime
 import sys
 
-from game.text import egg
-
 '''
 키 코드 링크 : https://lab.cliel.com/entry/%EA%B0%80%EC%83%81-Key-Code%ED%91%9C
 '''
-
-physical_devices = tf.config.list_physical_devices('GPU')
-# print(physical_devices)
-tf.config.experimental.set_memory_growth(physical_devices[0], True)
+tf.config.experimental.set_visible_devices([], 'GPU')
+# physical_devices = tf.config.list_physical_devices('GPU')
+# # print(physical_devices)
+# tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 # For webcam input:
 # hands = mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5)
@@ -37,10 +35,11 @@ mp_hands = mp.solutions.hands
 mp_face_detection = mp.solutions.face_detection
 mp_pose = mp.solutions.pose
 
-x_size, y_size = pyautogui.size().width, pyautogui.size().height
 now_click = False
 now_click2 = False
 straight_line = False
+rectangular = False
+circle = False
 
 gesture_int = 0
 
@@ -69,7 +68,6 @@ Gesture : 손의 제스처를 판단하기 위한 랜드마크들의 Queue
 
 # TODO 손가락 굽힘 판단, 손바닥 상태, 오른손 왼손 확인
 class Handmark():
-
     def __init__(self, mark_p):
         self._p_list = mark_p
         self.finger_state = [0 for _ in range(5)]
@@ -233,7 +231,7 @@ class Handmark():
 
 
 # TODO Gesture 판단, 일단은 15프레임 (0.5초)의 Queue로?
-class Gesture():
+class Gesture:
     Gesture_Array_size = 7
     Gesture_static_size = 30
 
@@ -285,7 +283,7 @@ class Gesture():
         # print(self.palm_data[0], self.finger_data[0], self.location_data[0])
         # print(handmark.palm_vector * 1000)
 
-    # handmark지닌 10개의 프레임이 들어온다...
+    # handmark 지닌 10개의 프레임이 들어온다...
     def detect_gesture(self):  # 이 최근꺼
         global gesture_check
         # print(self.gesture_data.count(6))
@@ -613,7 +611,7 @@ def process_static_gesture(array_for_static, value_for_static):
         input_ = input_[np.newaxis]
         try:
             prediction = MODEL_STATIC.predict(input_)
-            if np.max(prediction[0]) > 0.4:
+            if np.max(prediction[0]) > 0.9:
                 value_for_static.value = np.argmax(prediction[0])
             else:
                 value_for_static.value = 0
@@ -651,10 +649,10 @@ def process_static_gesture_mod(array_for_static, value_for_static, array_for_sta
 
 def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r):
     '''
-    :param array_for_static_l: static gesture 판별하는 process와 공유할 왼손 input data
-    :param value_for_static_l: static gesture 판별하는 process와 공유할 왼손 output data
-    :param array_for_static_r: static gesture 판별하는 process와 공유할 오른손 input data
-    :param value_for_static_r: static gesture 판별하는 process와 공유할 오른손 output data
+    :param array_for_static_l: static gesture 판별하는 process 와 공유할 왼손 input data
+    :param value_for_static_l: static gesture 판별하는 process 와 공유할 왼손 output data
+    :param array_for_static_r: static gesture 판별하는 process 와 공유할 오른손 input data
+    :param value_for_static_r: static gesture 판별하는 process 와 공유할 오른손 output data
     :return:
     '''
     global image
@@ -697,7 +695,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 win32api.keybd_event(0x1B, 0, 0, 0)  # ESC DOWN
                 win32api.keybd_event(0x1B, 0, win32con.KEYEVENTF_KEYUP, 0)  # ESC UP
 
-        def set_pen_color(self, palm, finger, image):
+        def mode_3_pen_color(self, palm, finger, image):
             global pen_color
 
             palm_standard = [-0.29779509, -0.56894808, 0.76656126]
@@ -913,13 +911,15 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 y = pixel.y
                 # print(x, y)
                 global now_click
-                global straight_line
+                global straight_line, rectangular, circle
 
                 drag_threshold = 1
-                if straight_line:
+                if straight_line or rectangular or circle:
                     drag_threshold = drag_threshold * 1.3
                 # print('s, d', straight_line, drag_threshold)
-                if get_distance(landmark[4], landmark[8], mode='2d') < drag_threshold * get_distance(landmark[4], landmark[3], mode='2d') \
+                if get_distance(landmark[4], landmark[8], mode='2d') < drag_threshold * get_distance(landmark[4],
+                                                                                                     landmark[3],
+                                                                                                     mode='2d') \
                         and now_click == False:
                     print('drag on')
                     pos = win32api.GetCursorPos()
@@ -927,7 +927,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     # ctypes.windll.user32.mouse_event(0x0002, 0, 0, 0, 0)
                     now_click = True
 
-                elif get_distance(landmark[4], landmark[8]) > drag_threshold * get_distance(landmark[4], landmark[3])\
+                elif get_distance(landmark[4], landmark[8]) > drag_threshold * get_distance(landmark[4], landmark[3]) \
                         and now_click == True:
                     print('drag off')
                     pos = win32api.GetCursorPos()
@@ -1024,6 +1024,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             global gesture_check
             global mode_global
             global straight_line
+            global rectangular
+            global circle
 
             # TODO 변화량 모니터링
             from matplotlib import pyplot as plt
@@ -1192,7 +1194,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             # MODE 2 LEFT ARROW
                             if mode_global == 2:
                                 p_check_number = self.mode_2_pre(palm_vector, finger_vector,
-                                                                         static_gesture_num_r, p_check_number)
+                                                                 static_gesture_num_r, p_check_number)
 
                             pixel_c = mark_p5
                             # gesture updating
@@ -1227,16 +1229,31 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             mode_before = mode
                             if not now_click:
                                 if mode_global == 3 and len(mark_p[-1]) == 4 and static_gesture_num_l == 6:
-                                    image = self.set_pen_color(palm_vector, finger_vector, image)
+                                    image = self.mode_3_pen_color(palm_vector, finger_vector, image)
 
                                 # 직선 그리기
                                 if mode_global == 3 and len(mark_p[-1]) == 4 and static_gesture_num_l == 13:
                                     straight_line = True
                                     win32api.keybd_event(0xA0, 0, 0, 0)  # LShift 누르기.
-
                                 else:
                                     win32api.keybd_event(0xA0, 0, win32con.KEYEVENTF_KEYUP, 0)
                                     straight_line = False
+
+                                # 네모 그리기
+                                if mode_global == 3 and len(mark_p[-1]) == 4 and static_gesture_num_l == 11:
+                                    rectangular = True
+                                    win32api.keybd_event(0xA2, 0, 0, 0)  # LCtrl 누르기.
+                                else:
+                                    win32api.keybd_event(0xA2, 0, win32con.KEYEVENTF_KEYUP, 0)
+                                    rectangular = False
+
+                                # 원 그리기
+                                if mode_global == 3 and len(mark_p[-1]) == 4 and static_gesture_num_l == 1:
+                                    circle = True
+                                    win32api.keybd_event(0x09, 0, 0, 0)  # TAB 누르기.
+                                else:
+                                    win32api.keybd_event(0x09, 0, win32con.KEYEVENTF_KEYUP, 0)
+                                    circle = False
 
                         if len(mark_p[-1]) == 5:
                             gesture_mode.update_right(static_gesture_num_r, palm_vector, finger_vector)
@@ -1491,7 +1508,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             self.label_2 = QtWidgets.QLabel(self.centralwidget)
             self.label_2.setGeometry(QRect(10, 20, 640, 480))
-            self.label_2.setPixmap(QtGui.QPixmap("./image/default.jpg"))  ## <-------------- 비디오 프레임이 들어가야함
+            self.label_2.setPixmap(QtGui.QPixmap("./image/default.jpg"))  # <-------------- 비디오 프레임이 들어가야함
             self.label_2.setScaledContents(True)
             self.label_2.setObjectName("label_2")
 
