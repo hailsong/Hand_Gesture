@@ -7,6 +7,10 @@ import matplotlib.pyplot as plt
 print(tf.__version__)
 
 df = pd.read_csv("../video_output/output_sum_18.csv")
+
+# TODO Gesture num 15 일단 제외하고 학습
+df = df[df['FILENAME'] < 15]
+
 df = df[1:]
 print(df.tail())
 size = df.shape[0]

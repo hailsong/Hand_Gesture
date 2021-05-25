@@ -48,6 +48,7 @@ CLICK_USE = False
 WHEEL_USE = False
 DRAG_USE = False
 USE_TENSORFLOW = True
+USE_DYNAMIC = False
 
 VISUALIZE_GRAPH = False
 
@@ -457,6 +458,9 @@ class Gesture_mode():
         self.right_finger_vector = [[0.] * 3] * self.QUEUE_SIZE
 
     def __str__(self):
+        """
+        :return: Monitoring to "string"
+        """
         return 'left : {}, right : {}, lpv : {}, lfv : {}, rpv : {}, rfv : {}'.format(
             self.left[-1], self.right[-1],
             self.left_palm_vector[-1], self.left_finger_vector[-1], self.right_palm_vector[-1],
@@ -566,7 +570,7 @@ def get_angle(l1, l2):
 
 def vector_magnitude(one_d_array):
     """
-    :param one_D_array: 1D Array
+    :param one_d_array: 1D Array
     :return: 크기 반환
     """
     return math.sqrt(np.sum(one_d_array * one_d_array))
@@ -581,10 +585,20 @@ def norm(p1):
 
 
 def convert_offset(x, y):
+    """
+    :param x: offset input X
+    :param y: offset input Y
+    :return: Modified x, y coordinates
+    """
     return x * 4 / 3 - x_size / 8, y * 4 / 3 - y_size / 8
 
 
 def inv_convert_off(x, y):
+    """
+    :param x: offset input X
+    :param y: offset input Y
+    :return: Inversed x, y coordinates (to unconverted coord)
+    """
     return (x + x_size / 8) * 3 / 4, (y + y_size / 8) * 3 / 4
 
 
@@ -605,6 +619,11 @@ def get_distance(p1, p2, mode='3d'):
 
 # TODO 프로세스 함수들
 def process_static_gesture(array_for_static, value_for_static):
+    """
+    :param array_for_static: shared array between main process and static gesture detection process
+    :param value_for_static: shared value between main process and static gesture detection process
+    :return: NO RETURN BUT IT MODIFY SHARED ARR AND VAL
+    """
     while True:
         input_ = np.copy(array_for_static[:])
         # print(input_)
@@ -912,14 +931,15 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 # print(x, y)
                 global now_click
                 global straight_line, rectangular, circle
-
+                # print(now_click, straight_line, rectangular, circle)
                 drag_threshold = 1
                 if straight_line or rectangular or circle:
                     drag_threshold = drag_threshold * 1.3
                 # print('s, d', straight_line, drag_threshold)
-                if get_distance(landmark[4], landmark[8], mode='2d') < drag_threshold * get_distance(landmark[4],
+                # print(now_click)
+                if get_distance(landmark[4], landmark[8], mode='3d') < drag_threshold * get_distance(landmark[4],
                                                                                                      landmark[3],
-                                                                                                     mode='2d') \
+                                                                                                     mode='3d') \
                         and now_click == False:
                     print('drag on')
                     pos = win32api.GetCursorPos()
@@ -927,7 +947,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     # ctypes.windll.user32.mouse_event(0x0002, 0, 0, 0, 0)
                     now_click = True
 
-                elif get_distance(landmark[4], landmark[8]) > drag_threshold * get_distance(landmark[4], landmark[3]) \
+                elif get_distance(landmark[4], landmark[8], mode='3d') > drag_threshold * get_distance(landmark[4],
+                                                                                                       landmark[3],
+                                                                                                       mode='3d') \
                         and now_click == True:
                     print('drag off')
                     pos = win32api.GetCursorPos()
@@ -941,7 +963,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 global now_click2
 
                 if get_distance(landmark[4], landmark[10]) < get_distance(landmark[7],
-                                                                          landmark[8]) and now_click2 == False:
+                                                                           landmark[8]) and now_click2 == False:
                     print('click')
                     pos = win32api.GetCursorPos()
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, pos[0], pos[1], 0, 0)
@@ -954,7 +976,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     now_click2 = False
 
                 return 0
-
+            """
+            
+            """
             """
             def blurFunction(src):
                 with mp_face_detection.FaceDetection(
@@ -1208,7 +1232,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                     # print(LRUD)
                                     # print(gesture.gesture_data)
                                     # print(6. in gesture.gesture_data)
-                                    if time.time() - gesture_time > 0.5:
+                                    if time.time() - gesture_time > 0.5 and USE_DYNAMIC == True:
                                         # 다이나믹 제스처
                                         detect_signal = gesture.detect_gesture()
                                     if detect_signal == -1:  # 디텍트했을때!
@@ -1227,33 +1251,37 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             mode = gesture_mode.select_mode(pixel_c)
                             self.mode_setting(mode, mode_before)
                             mode_before = mode
+
+                            #print(static_gesture_num_l)
+
+                            # 직선 그리기
+                            if mode_global == 3 and len(mark_p[-1]) == 4 and static_gesture_num_l == 13:
+                                straight_line = True
+                                win32api.keybd_event(0xA0, 0, 0, 0)  # LShift 누르기.
+                            else:
+                                win32api.keybd_event(0xA0, 0, win32con.KEYEVENTF_KEYUP, 0)
+                                straight_line = False
+
+                            # 네모 그리기
+                            if mode_global == 3 and len(mark_p[-1]) == 4 and static_gesture_num_l == 11:
+                                rectangular = True
+                                win32api.keybd_event(0xA2, 0, 0, 0)  # LCtrl 누르기.
+                            else:
+                                win32api.keybd_event(0xA2, 0, win32con.KEYEVENTF_KEYUP, 0)
+                                rectangular = False
+
+                            # 원 그리기
+                            if mode_global == 3 and len(mark_p[-1]) == 4 and static_gesture_num_l == 1:
+                                circle = True
+                                win32api.keybd_event(0x09, 0, 0, 0)  # TAB 누르기.
+                            else:
+                                win32api.keybd_event(0x09, 0, win32con.KEYEVENTF_KEYUP, 0)
+                                circle = False
+
+                            # 펜 색 변경
                             if not now_click:
                                 if mode_global == 3 and len(mark_p[-1]) == 4 and static_gesture_num_l == 6:
                                     image = self.mode_3_pen_color(palm_vector, finger_vector, image)
-
-                                # 직선 그리기
-                                if mode_global == 3 and len(mark_p[-1]) == 4 and static_gesture_num_l == 13:
-                                    straight_line = True
-                                    win32api.keybd_event(0xA0, 0, 0, 0)  # LShift 누르기.
-                                else:
-                                    win32api.keybd_event(0xA0, 0, win32con.KEYEVENTF_KEYUP, 0)
-                                    straight_line = False
-
-                                # 네모 그리기
-                                if mode_global == 3 and len(mark_p[-1]) == 4 and static_gesture_num_l == 11:
-                                    rectangular = True
-                                    win32api.keybd_event(0xA2, 0, 0, 0)  # LCtrl 누르기.
-                                else:
-                                    win32api.keybd_event(0xA2, 0, win32con.KEYEVENTF_KEYUP, 0)
-                                    rectangular = False
-
-                                # 원 그리기
-                                if mode_global == 3 and len(mark_p[-1]) == 4 and static_gesture_num_l == 1:
-                                    circle = True
-                                    win32api.keybd_event(0x09, 0, 0, 0)  # TAB 누르기.
-                                else:
-                                    win32api.keybd_event(0x09, 0, win32con.KEYEVENTF_KEYUP, 0)
-                                    circle = False
 
                         if len(mark_p[-1]) == 5:
                             gesture_mode.update_right(static_gesture_num_r, palm_vector, finger_vector)
@@ -1271,6 +1299,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                 len(mark_p[-1]) == 5 and \
                                 MOUSE_USE == True:
                             pixel_c.mousemove()
+
+                            # print(click_tr[2])
 
                             if finger_open_[2] != 1 and click_tr > -1 and DRAG_USE == True:
                                 hand_drag(hand_landmarks.landmark, pixel_c)
@@ -1315,16 +1345,12 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         before_c = pixel_c
 
                 FPS = round(1 / (time.time() - before_time), 2)
-                # print(FPS)
+
                 before_time = time.time()
                 image = cv2.putText(image, str(FPS), (10, 30), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 0), 2, cv2.LINE_AA)
-                # test_np_array = np.array(image).tolist()
-                # print(image.shape)
-                # print(np.array(image).shape)
-                # print(len(test_np_array[0]))
-                # print(len(test_np_array))
+
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-                # cv2.imshow('Gesture_Detection_Hail Song', image)
+
                 self.change_pixmap_signal.emit(image)
                 if cv2.waitKey(5) & 0xFF == 27:
                     print('exitcode : 100')

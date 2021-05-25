@@ -5,7 +5,7 @@ import time
 
 path=os.getcwd()
 
-FOLDER_NAME = '0322_김수영/RIGHT/'
+FOLDER_NAME = '0322_/LEFT/'
 
 split_list = FOLDER_NAME.split('/')
 dir_1 = split_list[0]
