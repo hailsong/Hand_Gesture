@@ -5,9 +5,11 @@ import tensorflow as tf
 from multiprocessing import Process, Value, Array
 import os
 import ctypes
+import win32gui, win32console
 
 if __name__ == "__main__":
 
+    win32gui.ShowWindow(win32console.GetConsoleWindow(), 0)
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
     print("Copyright 2021. INBODY inc. all rights reserved")
