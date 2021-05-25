@@ -86,6 +86,9 @@ class Handmark():
         self._p_list = new_p
 
     def return_flatten_p_list(self):
+        """
+        :return: flatten p_list information
+        """
         output = []
         for local_mark_p in self._p_list:
             # print('type', type(local_mark_p))
@@ -103,6 +106,11 @@ class Handmark():
 
     @staticmethod
     def get_angle(l1, l2):
+        """
+        :param l1: numpy_vector 1
+        :param l2: numpy_vector 2
+        :return: angle between l1 and l2
+        """
         l1_ = np.array([l1[0], l1[1], l1[2]])
         l2_ = np.array([l2[0], l2[1], l2[2]])
         return np.arccos(np.dot(l1_, l2_) / (norm(l1) * norm(l2)))
@@ -1252,7 +1260,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             self.mode_setting(mode, mode_before)
                             mode_before = mode
 
-                            #print(static_gesture_num_l)
+                            # 입력 모양 모니터링
+                            # print(static_gesture_num_l, straight_line, rectangular, circle)
 
                             # 직선 그리기
                             if mode_global == 3 and len(mark_p[-1]) == 4 and static_gesture_num_l == 13:
