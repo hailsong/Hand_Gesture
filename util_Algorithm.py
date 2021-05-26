@@ -49,6 +49,7 @@ WHEEL_USE = False
 DRAG_USE = False
 USE_TENSORFLOW = True
 USE_DYNAMIC = False
+REVERSE_MODE = False
 
 VISUALIZE_GRAPH = False
 
@@ -747,7 +748,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         elif remove_check == REMOVE_THRESHOLD:
             # N 프레임 쌓이면 전체 지움
             print('Remove all (E)')
-            win32api.keybd_event(0x45, 0, 0, 0)  #E 누르기.
+            win32api.keybd_event(0x45, 0, 0, 0)  # E 누르기.
             time.sleep(0.03)
             win32api.keybd_event(0x45, 0, win32con.KEYEVENTF_KEYUP, 0)
             return 0
@@ -1087,6 +1088,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             global straight_line
             global rectangular
             global circle
+            global REVERSE_MODE
 
             # TODO 변화량 모니터링
             from matplotlib import pyplot as plt
@@ -1196,6 +1198,12 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         image = cv2.putText(image, LR_idx[:], (
                             int(mark_p_list[i][17].x * image.shape[1]), int(mark_p_list[i][17].y * image.shape[0])),
                                             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
+                        if REVERSE_MODE == True:
+                            if len(LR_idx) == 4:
+                                LR_idx = 'Right'
+                            elif len(LR_idx) == 5:
+                                LR_idx = 'Left'
+
                         mark_p_list[i].append(LR_idx)
 
                         mark_p = mark_p_list[i]
@@ -1311,7 +1319,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         if len(mark_p[-1]) == 4:
                             gesture_mode.update_left(static_gesture_num_l, palm_vector, finger_vector)
 
-                            # 색 변경
+                            # MODE CHANGE
                             palm_vector = HM.get_palm_vector()
                             finger_vector = HM.get_finger_vector()
                             mode = gesture_mode.select_mode(pixel_c)
