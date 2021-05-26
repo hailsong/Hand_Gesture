@@ -5,7 +5,7 @@ import time
 
 path=os.getcwd()
 
-FOLDER_NAME = '0322_/LEFT/'
+FOLDER_NAME = '0323_송하일/LEFT/'
 
 split_list = FOLDER_NAME.split('/')
 dir_1 = split_list[0]
@@ -40,7 +40,7 @@ def file_convert(i):
 if __name__ == '__main__':
     start_time = time.time()
     pool = multiprocessing.Pool(processes=8)
-    num = range(1,16)
+    num = range(1,15)
     pool.map(file_convert, num)
     print(time.time()-start_time)
 

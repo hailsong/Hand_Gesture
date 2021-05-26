@@ -30,7 +30,6 @@ print(col_name)
 print(train['FILENAME'].to_numpy())
 
 
-
 train_x = train[col_name].to_numpy()
 train_y = train['FILENAME'].to_numpy()
 train_y = train_y.astype(np.int64)
@@ -70,7 +69,7 @@ model.compile(optimizer='adam',
 
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 early_stop = EarlyStopping(monitor='val_loss', patience=5)
-filename = 'model_save/my_model_21.h5'
+filename = 'model_save/my_model_18.h5'
 checkpoint = ModelCheckpoint(filename, monitor='val_loss', verbose=1, save_best_only=True, mode='auto')
 
 hist = model.fit(train_x, train_y, epochs=100, batch_size=10, validation_data=(valid_x, valid_y),

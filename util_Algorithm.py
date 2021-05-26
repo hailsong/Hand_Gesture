@@ -690,6 +690,70 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     global pen_color
 
     # GUI Part
+    def mode_2_pre(palm, finger, left, p_check):
+        palm_th = np.array([-0.41607399, -0.20192736, 0.88662719])
+        finger_th = np.array([-0.08736683, -0.96164491, -0.26001175])
+        # print(ctrl_z_check, left)
+        parameter = get_angle(palm, palm_th) + get_angle(finger, finger_th)
+        if p_check == 0 and left == 3 and parameter < 1:
+            print('이전 페이지 (Left Arrow)')
+            win32api.keybd_event(0x25, 0, 0, 0)  # Left Arrow 누르기.
+            win32api.keybd_event(0x25, 0, win32con.KEYEVENTF_KEYUP, 0)
+            time.sleep(0.1)
+            return 15
+        elif p_check > 0:
+            return p_check - 1
+        else:
+            return 0
+
+    def mode_3_interrupt(mode_global):
+        if mode_global == 3:
+            # win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
+            # win32api.keybd_event(0x31, 0, 0, 0)  # 1 누르기.
+            # time.sleep(0.1)
+            # win32api.keybd_event(0xa2, 0, win32con.KEYEVENTF_KEYUP, 0)
+            # win32api.keybd_event(0x31, 0, win32con.KEYEVENTF_KEYUP, 0)
+            win32api.keybd_event(0x1B, 0, 0, 0)  # ESC DOWN
+            win32api.keybd_event(0x1B, 0, win32con.KEYEVENTF_KEYUP, 0)  # ESC UP
+
+    def mode_3_ctrl_z(palm, finger, left, ctrl_z_check):
+        palm_th = np.array([-0.41607399, -0.20192736, 0.88662719])
+        finger_th = np.array([-0.08736683, -0.96164491, -0.26001175])
+        # print(ctrl_z_check, left)
+        parameter = get_angle(palm, palm_th) + get_angle(finger, finger_th)
+        if ctrl_z_check == 0 and left == 3 and parameter < 1:
+            print('되돌리기 (CTRL + Z)')
+            win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
+            win32api.keybd_event(0x5a, 0, 0, 0)  # Z 누르기.
+            time.sleep(0.1)
+            win32api.keybd_event(0xa2, 0, win32con.KEYEVENTF_KEYUP, 0)
+            win32api.keybd_event(0x5a, 0, win32con.KEYEVENTF_KEYUP, 0)
+            # 최소 N 프레임마다 Control + Z 상황과 가까운지 확인
+            return 15
+        elif ctrl_z_check > 0:
+            return ctrl_z_check - 1
+        else:
+            return 0
+
+    def mode_3_remove_all(palm, finger, left, remove_check):
+        # 60 means 60 frames to trigger 'REMOVE ALL'
+        REMOVE_THRESHOLD = 60
+        palm_th = np.array([-0.41607399, -0.20192736, 0.88662719])
+        finger_th = np.array([-0.08736683, -0.96164491, -0.26001175])
+        # print(ctrl_z_check, left)
+        parameter = get_angle(palm, palm_th) + get_angle(finger, finger_th)
+        if left == 3 and parameter < 1 and remove_check < REMOVE_THRESHOLD:
+            return remove_check + 1
+        elif remove_check == REMOVE_THRESHOLD:
+            # N 프레임 쌓이면 전체 지움
+            print('Remove all (E)')
+            win32api.keybd_event(0x45, 0, 0, 0)  #E 누르기.
+            time.sleep(0.03)
+            win32api.keybd_event(0x45, 0, win32con.KEYEVENTF_KEYUP, 0)
+            return 0
+        else:
+            return 0
+
     class opcv(QThread):
         change_pixmap_signal = pyqtSignal(np.ndarray)
         mode_signal = pyqtSignal(int)
@@ -711,16 +775,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
         def __init__(self):
             super().__init__()
-
-        def mode_3_interrupt(self, mode_global):
-            if mode_global == 3:
-                # win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
-                # win32api.keybd_event(0x31, 0, 0, 0)  # 1 누르기.
-                # time.sleep(0.1)
-                # win32api.keybd_event(0xa2, 0, win32con.KEYEVENTF_KEYUP, 0)
-                # win32api.keybd_event(0x31, 0, win32con.KEYEVENTF_KEYUP, 0)
-                win32api.keybd_event(0x1B, 0, 0, 0)  # ESC DOWN
-                win32api.keybd_event(0x1B, 0, win32con.KEYEVENTF_KEYUP, 0)  # ESC UP
 
         def mode_3_pen_color(self, palm, finger, image):
             global pen_color
@@ -763,40 +817,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # Color Set : R G B O
             # print(get_angle(finger, finger_vector_1), get_angle(finger, finger_vector_2))
 
-        def mode_3_ctrl_z(self, palm, finger, left, ctrl_z_check):
-            palm_th = np.array([-0.41607399, -0.20192736, 0.88662719])
-            finger_th = np.array([-0.08736683, -0.96164491, -0.26001175])
-            # print(ctrl_z_check, left)
-            parameter = get_angle(palm, palm_th) + get_angle(finger, finger_th)
-            if ctrl_z_check == 0 and left == 3 and parameter < 1:
-                print('되돌리기 (CTRL + Z)')
-                win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
-                win32api.keybd_event(0x5a, 0, 0, 0)  # Z 누르기.
-                time.sleep(0.1)
-                win32api.keybd_event(0xa2, 0, win32con.KEYEVENTF_KEYUP, 0)
-                win32api.keybd_event(0x5a, 0, win32con.KEYEVENTF_KEYUP, 0)
-                return 15
-            elif ctrl_z_check > 0:
-                return ctrl_z_check - 1
-            else:
-                return 0
-
-        def mode_2_pre(self, palm, finger, left, p_check):
-            palm_th = np.array([-0.41607399, -0.20192736, 0.88662719])
-            finger_th = np.array([-0.08736683, -0.96164491, -0.26001175])
-            # print(ctrl_z_check, left)
-            parameter = get_angle(palm, palm_th) + get_angle(finger, finger_th)
-            if p_check == 0 and left == 3 and parameter < 1:
-                print('이전 페이지 (Left Arrow)')
-                win32api.keybd_event(0x25, 0, 0, 0)  # Left Arrow 누르기.
-                win32api.keybd_event(0x25, 0, win32con.KEYEVENTF_KEYUP, 0)
-                time.sleep(0.1)
-                return 15
-            elif p_check > 0:
-                return p_check - 1
-            else:
-                return 0
-
         @pyqtSlot(int, int)
         def mode_setting(self, mode, mode_before):  # 1
             global MOUSE_USE, CLICK_USE, DRAG_USE, WHEEL_USE, mode_global
@@ -809,7 +829,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     WHEEL_USE = False
                     print('MODE 1, 대기 모드')
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 100, 100, 0, 0)
-                    self.mode_3_interrupt(mode_global)
+                    mode_3_interrupt(mode_global)
                     mode_global = mode
 
                 if mode == 2 and mode_global != mode:
@@ -826,7 +846,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         win32api.keybd_event(0x1B, 0, 0, 0)  # ESC DOWN
                         win32api.keybd_event(0x1B, 0, win32con.KEYEVENTF_KEYUP, 0)  # ESC UP
                     print('MODE 2, 기본 발표 모드')
-                    self.mode_3_interrupt(mode_global)
+                    mode_3_interrupt(mode_global)
                     mode_global = mode
 
                 if mode == 3 and mode_global != mode:
@@ -850,7 +870,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     DRAG_USE = True
                     WHEEL_USE = True
                     print('MODE 4, 웹서핑 발표 모드')
-                    self.mode_3_interrupt(mode_global)
+                    mode_3_interrupt(mode_global)
                     mode_global = mode
 
         @pyqtSlot(bool)
@@ -861,10 +881,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             hands = mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.8)
             # pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5, upper_body_only=True)
 
-            global width, height
+            global width, height, static_gesture_num_l
 
-            # TODO landmark를 대응 인스턴스로 저장
-            class Mark_pixel():
+            # TODO landmark 를 대응 인스턴스로 저장
+            class Mark_pixel:
                 def __init__(self, x, y, z=0, LR=0):
                     self.x = x
                     self.y = y
@@ -875,6 +895,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     return str(self.x) + '   ' + str(self.y) + '   ' + str(self.z)
 
                 def to_list(self):
+                    """
+                    :return: converted mark_pixel to list
+                    """
                     return [self.x, self.y, self.z]
 
                 def to_pixel(self):
@@ -885,7 +908,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 def __sub__(self, other):
                     return self.x - other.x, self.y - other.y, self.z - other.z
 
-            class Mark_2d():
+            class Mark_2d:
                 def __init__(self, x, y):
                     self.x = x
                     self.y = y
@@ -895,6 +918,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                 @staticmethod
                 def mod_cursor_position(pos: tuple):
+                    """
+                    :param pos: position data (tuple)
+                    :return: modified cursor position x, y (tuple)
+                    """
                     x, y = pos[0], pos[1]
                     FULLSIZE = 1920, 1080
                     MOD_SIZE = 1600, 640
@@ -908,7 +935,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                 def mousemove(self):
                     if now_click == True:
-                        cv2.circle(image, (int(self.x / 3), int(self.y / 2.25)), 5, (0, 0, 255), -1)
+                        cv2.circle(image, (int(self.x / 3), int(self.y / 2.25)), 5, (255, 0, 255), -1)
                     else:
                         cv2.circle(image, (int(self.x / 3), int(self.y / 2.25)), 5, (255, 255, 0), -1)
                     # self.x, self.y = convert_offset(self.x, self.y)
@@ -933,18 +960,23 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # def get_center(p1, p2):
             #     return Mark_pixel((p1.x + p2.x) / 2, (p1.y + p2.y) / 2, (p1.z + p2.z) / 2)
 
-            def hand_drag(landmark, pixel):
-                x = pixel.x
-                y = pixel.y
-                # print(x, y)
+            def hand_drag(landmark):
+                """
+                :param landmark: landmark or mark_p
+                :return: nothing, but it change mouse position and click statement
+                """
                 global now_click
                 global straight_line, rectangular, circle
                 # print(now_click, straight_line, rectangular, circle)
                 drag_threshold = 1
                 if straight_line or rectangular or circle:
                     drag_threshold = drag_threshold * 1.3
-                # print('s, d', straight_line, drag_threshold)
-                # print(now_click)
+
+                # print(get_distance(landmark[4], landmark[8], mode='3d') < drag_threshold * get_distance(landmark[4],
+                #                                                                                      landmark[3],
+                #                                                                                      mode='3d'),
+                #       now_click)
+
                 if get_distance(landmark[4], landmark[8], mode='3d') < drag_threshold * get_distance(landmark[4],
                                                                                                      landmark[3],
                                                                                                      mode='3d') \
@@ -966,12 +998,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     now_click = False
 
             def hand_click(landmark, pixel):
-                x = pixel.x
-                y = pixel.y
                 global now_click2
 
                 if get_distance(landmark[4], landmark[10]) < get_distance(landmark[7],
-                                                                           landmark[8]) and now_click2 == False:
+                                                                          landmark[8]) and now_click2 == False:
                     print('click')
                     pos = win32api.GetCursorPos()
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, pos[0], pos[1], 0, 0)
@@ -984,9 +1014,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     now_click2 = False
 
                 return 0
-            """
-            
-            """
+
             """
             def blurFunction(src):
                 with mp_face_detection.FaceDetection(
@@ -1042,6 +1070,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             gesture_mode = Gesture_mode()
 
             ctrl_z_check_number = 0
+            remove_all_number = 0
             p_check_number = 0
 
             # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
@@ -1220,12 +1249,14 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                             # MODE 3 CTRL + Z
                             if mode_global == 3:
-                                ctrl_z_check_number = self.mode_3_ctrl_z(palm_vector, finger_vector,
+                                ctrl_z_check_number = mode_3_ctrl_z(palm_vector, finger_vector,
                                                                          static_gesture_num_r, ctrl_z_check_number)
+                                remove_all_number = mode_3_remove_all(palm_vector, finger_vector,
+                                                                         static_gesture_num_r, remove_all_number)
 
                             # MODE 2 LEFT ARROW
                             if mode_global == 2:
-                                p_check_number = self.mode_2_pre(palm_vector, finger_vector,
+                                p_check_number = mode_2_pre(palm_vector, finger_vector,
                                                                  static_gesture_num_r, p_check_number)
 
                             pixel_c = mark_p5
@@ -1248,6 +1279,33 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                         detect_signal = 0
                                 except:
                                     pass
+
+                        if len(mark_p[-1]) == 5:
+                            gesture_mode.update_right(static_gesture_num_r, palm_vector, finger_vector)
+
+                        # 마우스 움직임, 드래그
+                        if (get_distance(pixel_c, before_c) < get_distance(mark_p0, mark_p5)) and \
+                                sum(finger_open_[3:]) == 0 and \
+                                finger_open_[1] == 1 and \
+                                len(mark_p[-1]) == 5 and \
+                                MOUSE_USE == True:
+                            pixel_c.mousemove()
+
+                            # print(click_tr[2])
+
+                            if finger_open_[2] != 1 and click_tr > -1 and DRAG_USE == True:
+                                hand_drag(mark_p)
+
+                            if finger_open_[2] != 1 and CLICK_USE == True:
+                                if not now_click:
+                                    click_tr = hand_click(mark_p, pixel_c)
+                            # else:
+                            # win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, int(pixel_c.x), int(pixel_c.y), 0, 0)
+
+                            # 마우스 휠
+                            if finger_open_[2] == 1 and WHEEL_USE == True and get_angle(mark_p[5] - mark_p[8],
+                                                                                        mark_p[5] - mark_p[12]) < 0.3:
+                                pixel_c.wheel(before_c)
 
                         # MODE 3 색 변경
                         if len(mark_p[-1]) == 4:
@@ -1291,39 +1349,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             if not now_click:
                                 if mode_global == 3 and len(mark_p[-1]) == 4 and static_gesture_num_l == 6:
                                     image = self.mode_3_pen_color(palm_vector, finger_vector, image)
-
-                        if len(mark_p[-1]) == 5:
-                            gesture_mode.update_right(static_gesture_num_r, palm_vector, finger_vector)
-
-                        # mode2 = self.inv_push_button()
-                        # if mode2 != None :
-                        #     mode_setting(mode2, mode_before)
-                        #     mode_before = mode2
-                        pixel_c_mod = pixel_c
-
-                        # 마우스 움직임, 드래그
-                        if (get_distance(pixel_c, before_c) < get_distance(mark_p0, mark_p5)) and \
-                                sum(finger_open_[3:]) == 0 and \
-                                finger_open_[1] == 1 and \
-                                len(mark_p[-1]) == 5 and \
-                                MOUSE_USE == True:
-                            pixel_c.mousemove()
-
-                            # print(click_tr[2])
-
-                            if finger_open_[2] != 1 and click_tr > -1 and DRAG_USE == True:
-                                hand_drag(hand_landmarks.landmark, pixel_c)
-
-                            if finger_open_[2] != 1 and CLICK_USE == True:
-                                if not now_click:
-                                    click_tr = hand_click(hand_landmarks.landmark, pixel_c)
-                            # else:
-                            # win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, int(pixel_c.x), int(pixel_c.y), 0, 0)
-
-                            # 마우스 휠
-                            if finger_open_[2] == 1 and WHEEL_USE == True and get_angle(mark_p[5] - mark_p[8],
-                                                                                        mark_p[5] - mark_p[12]) < 0.3:
-                                pixel_c.wheel(before_c)
 
                         """
                         NO USE : 스파이더맨 손에서 접으면 p 버튼 이용해서 뒤로 가기 (p_key_ready 변수로 제어)
