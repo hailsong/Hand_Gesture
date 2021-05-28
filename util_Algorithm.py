@@ -49,7 +49,10 @@ WHEEL_USE = False
 DRAG_USE = False
 USE_TENSORFLOW = True
 USE_DYNAMIC = False
+# 왼손잡이 모드 개발 중
 REVERSE_MODE = False
+BOARD_COLOR = 'w'
+THEME = 'w'
 
 VISUALIZE_GRAPH = False
 
@@ -69,7 +72,7 @@ Gesture : 손의 제스처를 판단하기 위한 랜드마크들의 Queue
 
 
 # TODO 손가락 굽힘 판단, 손바닥 상태, 오른손 왼손 확인
-class Handmark():
+class Handmark:
     def __init__(self, mark_p):
         self._p_list = mark_p
         self.finger_state = [0 for _ in range(5)]
@@ -451,7 +454,7 @@ class Gesture:
         return output
 
 
-class Gesture_mode():
+class Gesture_mode:
     """
     전체 MODE 결정하기 위한 Class
     """
@@ -743,7 +746,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         finger_th = np.array([-0.08736683, -0.96164491, -0.26001175])
         # print(ctrl_z_check, left)
         parameter = get_angle(palm, palm_th) + get_angle(finger, finger_th)
-        if left == 3 and parameter < 1 and remove_check < REMOVE_THRESHOLD:
+        if left == 3 and parameter < 2 and remove_check < REMOVE_THRESHOLD:
             return remove_check + 1
         elif remove_check == REMOVE_THRESHOLD:
             # N 프레임 쌓이면 전체 지움
@@ -752,6 +755,35 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             time.sleep(0.03)
             win32api.keybd_event(0x45, 0, win32con.KEYEVENTF_KEYUP, 0)
             return 0
+        else:
+            return max(0, remove_check - 1)
+
+
+    def mode_3_board(palm, finger, left, remove_check):
+        # 60 means 60 frames to trigger 'REMOVE ALL'
+        REMOVE_THRESHOLD = 30
+        palm_th = np.array([-0.15196232, 0.23579129, -0.9598489])
+        finger_th = np.array([-0.36294722, -0.91659405, -0.16770409])
+        global BOARD_COLOR
+
+        # print(ctrl_z_check, left)
+        parameter = get_angle(palm, palm_th) + get_angle(finger, finger_th)
+        if left == 7 and parameter < 1 and remove_check < REMOVE_THRESHOLD:
+            return remove_check + 1
+        elif remove_check == REMOVE_THRESHOLD:
+            # N 프레임 쌓이면 전체 지움
+            if BOARD_COLOR == 'b':
+                print('BOARD ON (K)')
+                win32api.keybd_event(0x4B, 0, 0, 0)  # K 누르기.
+                time.sleep(0.03)
+                win32api.keybd_event(0x4B, 0, win32con.KEYEVENTF_KEYUP, 0)
+                return 0
+            elif BOARD_COLOR == 'w':
+                print('BOARD ON (W)')
+                win32api.keybd_event(0x57, 0, 0, 0)  # W 누르기.
+                time.sleep(0.03)
+                win32api.keybd_event(0x57, 0, win32con.KEYEVENTF_KEYUP, 0)
+                return 0
         else:
             return 0
 
@@ -1072,6 +1104,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             ctrl_z_check_number = 0
             remove_all_number = 0
+            board_num = 0
             p_check_number = 0
 
             # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
@@ -1261,6 +1294,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                                                          static_gesture_num_r, ctrl_z_check_number)
                                 remove_all_number = mode_3_remove_all(palm_vector, finger_vector,
                                                                          static_gesture_num_r, remove_all_number)
+                                board_num = mode_3_board(palm_vector, finger_vector,
+                                                                      static_gesture_num_r, board_num)
 
                             # MODE 2 LEFT ARROW
                             if mode_global == 2:
@@ -1407,6 +1442,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         button6_checked = pyqtSignal(bool)
 
         def setupUi(self):
+            global THEME
             self.MainWindow = MyWindow()
             MainWindow = self.MainWindow
             MainWindow.setObjectName("MainWindow")
@@ -1418,7 +1454,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             self.groupBox = QtWidgets.QGroupBox(self.centralwidget)
             self.groupBox.setGeometry(QRect(660, 20, 81, 301))
-            self.groupBox.setStyleSheet("color: rgb(255, 255, 255);")
+            if THEME == 'B':
+                self.groupBox.setStyleSheet("color: rgb(255, 255, 255);")
+            elif THEME == 'W':
+                self.groupBox.setStyleSheet("color: rgb(0, 0, 0);")
             self.groupBox.setAlignment(QtCore.Qt.AlignCenter)
             self.groupBox.setObjectName("groupBox")
 
@@ -1488,7 +1527,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             self.groupBox_2 = QtWidgets.QGroupBox(self.centralwidget)
             self.groupBox_2.setGeometry(QRect(750, 20, 111, 301))
-            self.groupBox_2.setStyleSheet("color: rgb(255, 255, 255);")
+            if THEME == 'b':
+                self.groupBox_2.setStyleSheet("color: rgb(255, 255, 255);")
+            elif THEME == 'w':
+                self.groupBox_2.setStyleSheet("color: rgb(0, 0, 0);")
             self.groupBox_2.setAlignment(QtCore.Qt.AlignCenter)
             self.groupBox_2.setObjectName("groupBox_2")
 
@@ -1750,8 +1792,12 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         def __init__(self):
             super().__init__()
             # self.setStyleSheet('''QMainWindow{background-color : rgb(0, 255, 0);}''')
-            self.setStyleSheet('''QMessageBox{background-color: rgb(225, 225, 225);}''')
-            self.setStyleSheet('''QMainWindow{background-color : rgb(0, 0, 0);}''')
+            if THEME == 'b':
+                self.setStyleSheet('''QMessageBox{background-color: rgb(225, 225, 225);}''')
+                self.setStyleSheet('''QMainWindow{background-color : rgb(0, 0, 0);}''')
+            elif THEME == 'w':
+                self.setStyleSheet('''QMessageBox{background-color: rgb(0, 0, 0);}''')
+                self.setStyleSheet('''QMainWindow{background-color : rgb(255, 255, 255);}''')
             self.msg = QMessageBox()
 
         def closeEvent(self, event):
