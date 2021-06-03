@@ -1,5 +1,5 @@
 cd "%~dp0"
-cd Hand_Gesture
+ZoomIt.exe
 cd venv\Scripts
 call activate.bat
 cd ..

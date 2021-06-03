@@ -51,8 +51,8 @@ USE_TENSORFLOW = True
 USE_DYNAMIC = False
 # 왼손잡이 모드 개발 중
 REVERSE_MODE = False
+THEME = 'b'
 BOARD_COLOR = 'w'
-THEME = 'w'
 
 VISUALIZE_GRAPH = False
 
@@ -63,6 +63,8 @@ MODEL_STATIC = keras.models.load_model(
 gesture_check = False
 mode_global = 0
 pen_color = ''
+laser_state = False
+laser_num = 0
 
 '''
 mark_pixel : 각각의 랜드마크
@@ -245,16 +247,16 @@ class Handmark:
 
 # TODO Gesture 판단, 일단은 15프레임 (0.5초)의 Queue로?
 class Gesture:
-    Gesture_Array_size = 7
-    Gesture_static_size = 30
+    GESTURE_ARRAY_SIZE = 7
+    GESTURE_STATIC_SIZE = 30
 
     def __init__(self):
-        self.palm_data = [np.array([0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]
-        self.d_palm_data = [np.array([0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]  # palm_data의 차이를 기록할 list
+        self.palm_data = [np.array([0, 0, 0]) for _ in range(Gesture.GESTURE_ARRAY_SIZE)]
+        self.d_palm_data = [np.array([0, 0, 0]) for _ in range(Gesture.GESTURE_ARRAY_SIZE)]  # palm_data의 차이를 기록할 list
 
-        self.location_data = [[0.1, 0.1, 0.1] for _ in range(Gesture.Gesture_Array_size)]
-        self.finger_data = [np.array([0, 0, 0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]
-        self.gesture_data = [0] * Gesture.Gesture_static_size
+        self.location_data = [[0.1, 0.1, 0.1] for _ in range(Gesture.GESTURE_ARRAY_SIZE)]
+        self.finger_data = [np.array([0, 0, 0, 0, 0]) for _ in range(Gesture.GESTURE_ARRAY_SIZE)]
+        self.gesture_data = [0] * Gesture.GESTURE_STATIC_SIZE
 
     @staticmethod
     def get_location(p):  # p는 프레임 수 * 좌표 세개
@@ -328,15 +330,12 @@ class Gesture:
         # 동적 제스처 - LEFT
         if y_mean != 0:
             if x_mean / abs(y_mean) < -1.3:
-                condition1 = 0
-                condition2 = 0
-                condition3 = 0
-                condition4 = 0
+                condition1 = condition2 = condition3 = condition4 = 0
 
                 angle_threshold = [-1., 0., 0.]
                 angle_min = 3
 
-                for i in range(Gesture.Gesture_Array_size - 1):
+                for i in range(Gesture.GESTURE_ARRAY_SIZE - 1):
                     angle = get_angle(self.palm_data[-1], angle_threshold)
                     if angle < angle_min:
                         angle_min = angle
@@ -358,14 +357,11 @@ class Gesture:
 
             # 동적 제스처 - RIGHT
             if x_mean / abs(y_mean) > 1.5:
-                condition1 = 0
-                condition2 = 0
-                condition3 = 0
-                condition4 = 0
+                condition1 = condition2 = condition3 = condition4 = 0
 
                 angle_threshold = [-1., 0., 0.]
                 angle_min = 3
-                for i in range(Gesture.Gesture_Array_size - 1):
+                for i in range(Gesture.GESTURE_ARRAY_SIZE - 1):
                     angle = get_angle(self.palm_data[-1], angle_threshold)
                     if angle < angle_min:
                         angle_min = angle
@@ -387,14 +383,12 @@ class Gesture:
 
             # 동적 제스처 - UP
             if y_mean / abs(x_mean) < -1.5:
-                condition1 = 0
-                condition2 = 0
-                condition3 = 0
-                condition4 = 0
+                condition1 = condition2 = condition3 = condition4 = 0
+
                 # i가 작을수록 더 최신 것
                 angle_threshold = [0., -1., 0.]
                 angle_min = 3
-                for i in range(Gesture.Gesture_Array_size - 1):
+                for i in range(Gesture.GESTURE_ARRAY_SIZE - 1):
                     angle = get_angle(self.palm_data[-1], angle_threshold)
                     if angle < angle_min:
                         angle_min = angle
@@ -414,14 +408,12 @@ class Gesture:
 
             # 동적 제스처 - DOWN
             if y_mean / abs(x_mean) > 1.5:
-                condition1 = 0
-                condition2 = 0
-                condition3 = 0
-                condition4 = 0
+                condition1 = condition2 = condition3 = condition4 = 0
+
                 # i가 작을수록 더 최신 것
                 angle_threshold = [0., 1., 0.]
                 angle_min = 3
-                for i in range(Gesture.Gesture_Array_size - 1):
+                for i in range(Gesture.GESTURE_ARRAY_SIZE - 1):
                     angle = get_angle(self.palm_data[-1], angle_threshold)
                     if angle < angle_min:
                         angle_min = angle
@@ -710,6 +702,32 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         else:
             return 0
 
+    def mode_2_laser(state, num, right):
+        LASER_CHANGE_TIME = 6
+        # print(state, num, right)
+        if right:
+            num = max(num + 1, 0)
+        else:
+            num = min(num - 1, LASER_CHANGE_TIME)
+
+        if not state and num > LASER_CHANGE_TIME and right:
+            # state = True
+            win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
+            win32api.keybd_event(0x4C, 0, 0, 0)  # L 누르기.
+            win32api.keybd_event(0xa2, 0, win32con.KEYEVENTF_KEYUP, 0)
+            win32api.keybd_event(0x4C, 0, win32con.KEYEVENTF_KEYUP, 0)
+            state = True
+            return state, num
+        elif state and num < - 2 and not right:
+            # state = False
+            win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
+            win32api.keybd_event(0x4C, 0, 0, 0)  # L 누르기.
+            win32api.keybd_event(0xa2, 0, win32con.KEYEVENTF_KEYUP, 0)
+            win32api.keybd_event(0x4C, 0, win32con.KEYEVENTF_KEYUP, 0)
+            state = False
+            return state, num
+        return state, num
+
     def mode_3_interrupt(mode_global):
         if mode_global == 3:
             # win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
@@ -719,6 +737,19 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # win32api.keybd_event(0x31, 0, win32con.KEYEVENTF_KEYUP, 0)
             win32api.keybd_event(0x1B, 0, 0, 0)  # ESC DOWN
             win32api.keybd_event(0x1B, 0, win32con.KEYEVENTF_KEYUP, 0)  # ESC UP
+
+    def mode_2_off(mode_before, laser_state):
+        """
+        :param mode_before:
+        :param laser_state:
+        :return: mode 2 끝날때 레이저 켜져있으면 꺼주기
+        """
+        if mode_before == 2 and laser_state:
+            win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
+            win32api.keybd_event(0x4C, 0, 0, 0)  # L 누르기.
+            win32api.keybd_event(0xa2, 0, win32con.KEYEVENTF_KEYUP, 0)
+            win32api.keybd_event(0x4C, 0, win32con.KEYEVENTF_KEYUP, 0)
+            return False
 
     def mode_3_ctrl_z(palm, finger, left, ctrl_z_check):
         palm_th = np.array([-0.41607399, -0.20192736, 0.88662719])
@@ -850,19 +881,28 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # Color Set : R G B O
             # print(get_angle(finger, finger_vector_1), get_angle(finger, finger_vector_2))
 
+
+
         @pyqtSlot(int, int)
         def mode_setting(self, mode, mode_before):  # 1
-            global MOUSE_USE, CLICK_USE, DRAG_USE, WHEEL_USE, mode_global
+            global MOUSE_USE, CLICK_USE, DRAG_USE, WHEEL_USE, mode_global, laser_state
             if mode != mode_before:
                 self.mode_signal.emit(int(mode - 1))  # 2 / #2-4
+
                 if mode == 1 and mode_global != mode:
                     MOUSE_USE = False
                     CLICK_USE = False
                     DRAG_USE = False
                     WHEEL_USE = False
+                    laser_state = mode_2_off(mode_global, laser_state)
                     print('MODE 1, 대기 모드')
-                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 100, 100, 0, 0)
+                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 2020, 100, 0, 0)
+
+                    # win32api.keybd_event(0x74, 0, 0, 0)  # F5 DOWN
+                    # win32api.keybd_event(0x74, 0, win32con.KEYEVENTF_KEYUP, 0)  # F5 UP
+
                     mode_3_interrupt(mode_global)
+
                     mode_global = mode
 
                 if mode == 2 and mode_global != mode:
@@ -870,6 +910,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     CLICK_USE = True
                     DRAG_USE = False
                     WHEEL_USE = False
+
                     if mode_global == 3:
                         # win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
                         # win32api.keybd_event(0x31, 0, 0, 0)  # 1 누르기.
@@ -887,7 +928,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     CLICK_USE = False
                     DRAG_USE = True
                     WHEEL_USE = False
-
+                    laser_state = mode_2_off(mode_global, laser_state)
                     # win32api.SetCursorPos((200, 200))
                     win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
                     win32api.keybd_event(0x32, 0, 0, 0)  # 2 누르기.
@@ -902,6 +943,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     CLICK_USE = True
                     DRAG_USE = True
                     WHEEL_USE = True
+                    laser_state = mode_2_off(mode_global, laser_state)
                     print('MODE 4, 웹서핑 발표 모드')
                     mode_3_interrupt(mode_global)
                     mode_global = mode
@@ -964,7 +1006,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     mod_y = y * FULLSIZE[1] / MOD_SIZE[1] - (FULLSIZE[1] - MOD_SIZE[1]) / 2
                     mod_y = max(0, mod_y);
                     mod_y = min(FULLSIZE[1], mod_y)
-                    return int(mod_x), int(mod_y)
+                    # print(mod_x, mod_y)
+                    return int(mod_x) + 1920, int(mod_y)
 
                 def mousemove(self):
                     if now_click == True:
@@ -974,6 +1017,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     # self.x, self.y = convert_offset(self.x, self.y)
                     cursor_position = (int(self.x), int(self.y))
                     m_cursor_position = self.mod_cursor_position(cursor_position)
+                    # print(m_cursor_position)
                     win32api.SetCursorPos(m_cursor_position)
 
                 def wheel_up(self):
@@ -1122,6 +1166,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             global rectangular
             global circle
             global REVERSE_MODE
+            global laser_num, laser_state
 
             # TODO 변화량 모니터링
             from matplotlib import pyplot as plt
@@ -1288,6 +1333,14 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             palm_vector = HM.get_palm_vector()
                             finger_vector = HM.get_finger_vector()
 
+                            if mode_global == 2:
+                                # MODE 2 LEFT ARROW
+                                p_check_number = mode_2_pre(palm_vector, finger_vector,
+                                                                 static_gesture_num_r, p_check_number)
+                                # MODE 2 LASER POINTER
+                                laser_hand = np.all(finger_open_ == np.array([1, 1, 1, 0, 0]))
+                                laser_state, laser_num = mode_2_laser(laser_state, laser_num, laser_hand)
+
                             # MODE 3 CTRL + Z
                             if mode_global == 3:
                                 ctrl_z_check_number = mode_3_ctrl_z(palm_vector, finger_vector,
@@ -1296,11 +1349,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                                                          static_gesture_num_r, remove_all_number)
                                 board_num = mode_3_board(palm_vector, finger_vector,
                                                                       static_gesture_num_r, board_num)
-
-                            # MODE 2 LEFT ARROW
-                            if mode_global == 2:
-                                p_check_number = mode_2_pre(palm_vector, finger_vector,
-                                                                 static_gesture_num_r, p_check_number)
 
                             pixel_c = mark_p5
                             # gesture updating
