@@ -18,6 +18,9 @@ from PyQt5.QtCore import QThread, QObject, QRect, pyqtSlot, pyqtSignal
 import datetime
 import sys
 
+import matplotlib.pyplot as plt
+from matplotlib import animation
+
 try:
     physical_devices = tf.config.list_physical_devices('GPU')
     #print(physical_devices)
@@ -33,7 +36,6 @@ x_size, y_size = pyautogui.size().width, pyautogui.size().height
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
 mp_face_detection = mp.solutions.face_detection
-mp_pose = mp.solutions.pose
 
 x_size, y_size = pyautogui.size().width, pyautogui.size().height
 nowclick = False
@@ -48,10 +50,10 @@ DRAG_USE = False
 USE_TENSORFLOW = True
 
 MODEL_STATIC = keras.models.load_model(
-    'keras_util/model_save/my_model_21.h5'
+    '../keras_util/model_save/my_model_21.h5'
 )
 MODEL_DYNAMIC = keras.models.load_model(
-    'keras_util/model_save/my_model_63_BODY.h5'
+    '../keras_util/model_save/my_model_63.h5'
 )
 
 '''
@@ -76,7 +78,7 @@ class Handmark():
 
     def return_flatten_p_list(self):
         output = []
-        for local_mark_p in self._p_list:
+        for local_mark_p in self._p_list[:-1]:
             #print('type', type(local_mark_p))
             output.extend(local_mark_p.to_list())
         return output
@@ -210,6 +212,93 @@ class Handmark():
         output = self.return_finger_info()
         output = np.concatenate((output, self.palm_vector, self.finger_vector))
         return output
+
+    # def predict_static(self):
+    #     self.input = self.input[np.newaxis]
+    #     # print(input.shape)
+    #     # print(input)
+    #     prediction = model.predict(self.input)
+    #     if np.max(prediction[0]) > 0.75:
+    #         return np.argmax(prediction[0])
+    #     else:
+    #         return 0
+
+#TODO Gesture 판단, 일단은 15프레임 (0.5초)의 Queue로?
+# class Gesture():
+#     Gesture_Array_size = 15
+#
+#     def __init__(self):
+#         self.palm_data = [np.array([0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]
+#         self.d_palm_data = [np.array([0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)] #palm_data의 차이를 기록할 list
+#
+#         self.location_data = [np.array([0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]
+#         self.finger_data  = [np.array([0, 0, 0, 0, 0]) for _ in range(Gesture.Gesture_Array_size)]
+#
+#     def update(self, handmark):
+#         self.palm_data.insert(0, handmark.palm_vector)
+#         self.d_palm_data.insert(0, (self.palm_data[1] - handmark.palm_vector) * 1000)
+#         self.location_data.insert(0, handmark._p_list)
+#         self.finger_data.insert(0, handmark.finger_state)
+#         #print(self.palm_data)
+#         #print(self.location_data)
+#         #print(self.finger_data)
+#         self.palm_data.pop()
+#         self.d_palm_data.pop()
+#         self.location_data.pop()
+#         self.finger_data.pop()
+#         self.fv = handmark.finger_vector
+#
+#         #print(handmark.palm_vector * 1000)
+#
+#     # handmark지닌 10개의 프레임이 들어온다...
+#     def gesture_detect(self): #이 최근꺼
+#         hand_open_frame = 0
+#         Z_rotate = 0
+#         Z_rotate_inv = 0
+#         x_diff = 0
+#         global gesture_int
+#         global gesture_time
+#         global image
+#
+#         #print(self.d_palm_data[0], self.finger_data[0], self.location_data[0])
+#
+#         for i in range(Gesture.Gesture_Array_size - 1):
+#             if sum(self.finger_data[i]) > 4:
+#                 hand_open_frame += 1
+#             if self.d_palm_data[i][2] > 1.5:
+#                 Z_rotate += 1
+#             if self.d_palm_data[i][2] < -1.5:
+#                 Z_rotate_inv += 1
+#             #if self.location_data[i+1][1] - self.location_data[i][1]
+#             try:
+#                 if self.location_data[i+1][5].x - self.location_data[i][5].x > 0.005:
+#                     x_diff += 1
+#                 elif self.location_data[i+1][5].x - self.location_data[i][5].x < -0.005:
+#                     x_diff -= 1
+#
+#             except:
+#                 pass
+#             if gesture_int == 0 and abs(self.fv[1]) < 100:
+#                 if Z_rotate > 2 and hand_open_frame > 6 and x_diff < -3:
+#                     print('To Right Sign!!')
+#                     #image = cv2.putText(image, 'To right', (80, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
+#
+#                     win32api.keybd_event(0x27, 0, 0, 0)
+#                     gesture_int += 1
+#                     gesture_time = time.time()
+#
+#                 elif Z_rotate_inv > 2 and hand_open_frame > 6 and x_diff > 3:
+#                     print('To Left Sign!!')
+#                     #image = cv2.putText(image, 'To left', (80, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
+#
+#                     win32api.keybd_event(0x25, 0, 0, 0)
+#                     gesture_int += 1
+#                     gesture_time = time.time()
+#                     break
+#
+#
+#         #print(Z_rotate, Z_rotate_inv, hand_open_frame, x_diff, self.fv[1])
+#         # print(np.array(self.d_palm_data)[:][2])
 
 class Gesture_mode():
     QUEUE_SIZE = 10
@@ -378,17 +467,15 @@ class Gesture():
     GESTURE_ARRAY_SIZE = 45
 
     def __init__(self):
-        self.data = [[0.] * 75] * Gesture.GESTURE_ARRAY_SIZE
+        self.data = [[0.] * 63] * Gesture.GESTURE_ARRAY_SIZE
 
     @staticmethod
     def norm_df(df):  # df는 numpy array
         new_df = df.copy()
-        #print('shape', new_df.shape)
         for data in new_df:
-            standard = data[:, 12 * 3 + 0: 12 * 3 + 3].mean(axis=0)  # numpy array [0., 0., 0.]
-            for i in range(75):
+            standard = data[:, 0:3].mean(axis=0)  # numpy array [0., 0., 0.]
+            for i in range(21):
                 for j in range(data.shape[0]):
-                    #print(data[j][i * 3: i * 3 + 3])
                     data[j][i * 3: i * 3 + 3] = data[j][i * 3: i * 3 + 3] - standard
         return new_df
 
@@ -411,37 +498,77 @@ class Gesture():
         self.data.insert(0, handmark)
         self.data.pop()
 
-    def set_zero(self):
-        self.data = [[0.] * 75] * Gesture.GESTURE_ARRAY_SIZE
+
 
     def gesture_detect(self): #이 최근꺼
         input_ = np.array([self.data])
-        #input_ = self.norm_df(input_)
+        input_ = self.norm_df(input_)
         input_ = self.derivative(input_)
         # print(input_.shape)
         prediction = MODEL_DYNAMIC.predict(input_)
         try:
-            if np.max(prediction[0]) > 0.995:
-                print(np.argmax(prediction[0]))
+            if np.max(prediction[0]) > 0.95:
+                #print(np.argmax(prediction[0]))
                 return np.argmax(prediction[0])
             else:
+                #print('중복')
                 return -1
         except:
             print('LSTM error')
 
+
 def process_dynamic_gesture(shared_array_dynamic, dynamic_value):
     gesture = Gesture()
+    starttime = time.time()
+    mark_before = [0.]*63
+
+    # fig = plt.figure()  # figure(도표) 생성
+    # ax = plt.subplot(211, xlim=(0, 50), ylim=(-5, 5))
+    input_ = np.copy(shared_array_dynamic[:])
+    gesture.update(list(input_))
+
+    gesture_trigger_queue = [0.] * 5
+
     while True:
         #print(type(shared_array_dynamic[:]), type(gesture.data[0]))
+
+        #input_ = np.copy(shared_array_dynamic[:])
+        #abs_size = shared_array_dynamic[i]
+        plot_x, plot_y, plot_z = 0, 0, 0
+        t = time.time() - starttime
+
+        for i in range(63):
+            point_num = i//3
+            xyz = i%3
+            if xyz == 0:
+                plot_x += abs(shared_array_dynamic[i] - mark_before[i])
+            if xyz == 1:
+                plot_y += abs(shared_array_dynamic[i] - mark_before[i])
+            if xyz == 2:
+                plot_z += abs(shared_array_dynamic[i] - mark_before[i])
+        result = gesture.gesture_detect()
+        print('{0:0.3f}, {1:0.3f}, {2:0.3f}, {3:0.3f}, {4:4d}'.format(t, plot_x, plot_y, plot_z, result))
+        gesture_trigger_queue.append(plot_x + plot_y + plot_z)
+        gesture_trigger_queue.pop(0)
+
+        mark_before = input_
+        time.sleep(0.1)
+
+        gesture_trigger_frame = 0
+
+        for i in gesture_trigger_queue:
+            if i > 0.75:
+                gesture_trigger_frame += 1
         if not shared_array_dynamic[:] == gesture.data[0]:
             input_ = np.copy(shared_array_dynamic[:])
             gesture.update(list(input_))
-            result = gesture.gesture_detect()
-            dynamic_value = result
-    #print(11)
-'''
+            if gesture_trigger_frame > 3:
+                print('triggerd')
 
-'''
+                result = gesture.gesture_detect()
+                #print(result)
+                dynamic_value = result
+
 def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r, shared_array_dynamic, dynamic_value = 0):
 
     global image
@@ -504,7 +631,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             cap = self.capture
             # For webcam input:
             hands = mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.6)
-            pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5, upper_body_only=True)
 
             global width, height
 
@@ -629,6 +755,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                     pill_image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
                     draw = ImageDraw.Draw(pill_image)
+
                     # print(LR_index, type(LR_index))
                     if len(LR_index) == 4:
                         x1, y1 = 30, 30
@@ -733,6 +860,13 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             p_key_ready = False
             mode = 0
 
+            mark_p_before = [0. for _ in range(22)], \
+                            [0. for _ in range(22)], \
+                            [0. for _ in range(22)]
+            starttime = time.time()
+
+
+
             while bool_state and cap.isOpened():
                 #print('cam')
                 success, image = cap.read()
@@ -752,42 +886,21 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 # pass by reference.
                 image.flags.writeable = False
                 results = hands.process(image)
-                results_body = pose.process(image)
 
                 # Draw the hand annotations on the image.
                 image.flags.writeable = True
                 image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
-                # 몸!!
-                if results_body.pose_landmarks:
-                    mark_b = []
-                    body_landmark = results_body.pose_landmarks.landmark
-                    mp_drawing.draw_landmarks(
-                        image, results_body.pose_landmarks, mp_pose.UPPER_BODY_POSE_CONNECTIONS)
-
-                    for i in range(25):
-                        mark_b.append(Mark_pixel(body_landmark[i].x, body_landmark[i].y,
-                                                 body_landmark[i].z))
-                    #print(mark_b_list)
-                    #print(mark_b)
-                    BM = Handmark(mark_b)  # BODYMARK
-                    #print(len(BM.return_flatten_p_list()))
-                    shared_array_dynamic[:] = BM.return_flatten_p_list()
-                    dynamic_gesture_num = dynamic_value.value
-
-                # 손!!
                 if results.multi_hand_landmarks:
                     mark_p_list = []
-
                     for hand_landmarks in results.multi_hand_landmarks:  # hand_landmarks는 감지된 손의 갯수만큼의 원소 수를 가진 list 자료구조
                         mark_p = []
                         mp_drawing.draw_landmarks(
                             image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+
                         for i in range(21):
                             mark_p.append(Mark_pixel(hand_landmarks.landmark[i].x, hand_landmarks.landmark[i].y, hand_landmarks.landmark[i].z))
                         mark_p_list.append(mark_p)
-
-
 
                     # TODO 지금 API에서 사용하는 자료형때문에 살짝 꼬였는데 mark_p(list)의 마지막 원소를 lR_idx(left or right)로 표현해놨음.
                     for i in range(len(mark_p_list)):  # for문 한 번 도는게 한 손에 대한 것임
@@ -825,16 +938,13 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                     # print(array_for_static)
                                     static_gesture_num = value_for_static_r.value
 
+                                    shared_array_dynamic[:] = HM.return_flatten_p_list()
+                                    dynamic_gesture_num = dynamic_value.value
 
-                                # try:
-                                #     static_gesture_drawing(static_gesture_num, mark_p[-1])
-                                # except:
-                                #     print('static_drawing error')
-                                # print(static_gesture_num)
-                            else:
-                                finger_open_for_ml = np.ndarray.tolist(HM.return_finger_state())
-                                # 정지 제스쳐 확인
-                                #static_gesture_detect(finger_open_for_ml, mark_p[-1])
+                                    # 일단 X, Y, Z 변화량 플롯해볼 것
+
+
+
                             finger_open_ = HM.return_finger_state()
 
                         mark_p0 = mark_p[0].to_pixel()
@@ -1099,13 +1209,13 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.label = QtWidgets.QLabel(self.centralwidget)
             self.label.setGeometry(QRect(660, 430, 200, 60))
             self.label.setText("")
-            self.label.setPixmap(QtGui.QPixmap("./image/인바디.png"))
+            self.label.setPixmap(QtGui.QPixmap("../image/인바디.png"))
             self.label.setScaledContents(True)
             self.label.setObjectName("label")
 
             self.label_2 = QtWidgets.QLabel(self.centralwidget)
             self.label_2.setGeometry(QRect(10, 20, 640, 480))
-            self.label_2.setPixmap(QtGui.QPixmap("./image/default.jpg"))  ## <-------------- 비디오 프레임이 들어가야함
+            self.label_2.setPixmap(QtGui.QPixmap("../image/default.jpg"))  ## <-------------- 비디오 프레임이 들어가야함
             self.label_2.setScaledContents(True)
             self.label_2.setObjectName("label_2")
 
@@ -1271,7 +1381,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     if button.isChecked():
                         button.toggle()
                 self.button6_checked.emit(False)
-                self.label_2.setPixmap(QtGui.QPixmap("./image/default.jpg"))
+                self.label_2.setPixmap(QtGui.QPixmap("../image/default.jpg"))
 
     class MyWindow(QtWidgets.QMainWindow):
 
@@ -1304,6 +1414,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 if __name__ == '__main__':
     print("This is util set program, it works well... maybe... XD")
 
-    print('Running main_18input_BODY.py...')
+    print('Running main_18input_DG.py...')
     from os import system
-    system('python main_18input_BODY.py')
+    system('python main_18input_DG.py')

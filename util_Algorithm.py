@@ -20,6 +20,7 @@ import sys
 '''
 키 코드 링크 : https://lab.cliel.com/entry/%EA%B0%80%EC%83%81-Key-Code%ED%91%9C
 '''
+
 tf.config.experimental.set_visible_devices([], 'GPU')
 # physical_devices = tf.config.list_physical_devices('GPU')
 # # print(physical_devices)
@@ -515,7 +516,7 @@ class Gesture_mode:
         for right in self.right:
             if right == 6:
                 right_idx_1 += 1
-        if mode_result < 10 and left_idx_1 == 10 and right_idx_1 == 10:
+        if mode_result < 20 and left_idx_1 == 10 and right_idx_1 == 10:
             mode = 1
 
         # 탈모빔 자세
@@ -527,7 +528,7 @@ class Gesture_mode:
         for right in self.right:
             if right == 3:
                 right_idx_1 += 1
-        if mode_result < 17 and left_idx_1 == 10 and right_idx_1 == 10:
+        if mode_result < 23 and left_idx_1 == 10 and right_idx_1 == 10:
             mode = 2
 
         # 손모양 삼 자세
@@ -539,7 +540,7 @@ class Gesture_mode:
         for right in self.right:
             if right == 4:
                 right_idx_1 += 1
-        if mode_result < 17 and left_idx_1 == 10 and right_idx_1 == 10:
+        if mode_result < 23 and left_idx_1 == 10 and right_idx_1 == 10:
             pixel.mousemove()
             mode = 3
 
@@ -552,7 +553,7 @@ class Gesture_mode:
         for right in self.right:
             if right == 7:
                 right_idx_1 += 1
-        if mode_result < 17 and left_idx_1 == 10 and right_idx_1 == 10:
+        if mode_result < 23 and left_idx_1 == 10 and right_idx_1 == 10:
             mode = 4
         return mode
 
@@ -880,8 +881,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # Color Set : R G B O
             # print(get_angle(finger, finger_vector_1), get_angle(finger, finger_vector_2))
-
-
 
         @pyqtSlot(int, int)
         def mode_setting(self, mode, mode_before):  # 1
