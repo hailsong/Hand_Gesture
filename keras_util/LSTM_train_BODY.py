@@ -171,7 +171,6 @@ print(df.shape) # 82 * 46 * 63
 test_ratio = 0.2
 test_num = int(len(df) * 0.2)
 
-#df = df
 
 index = []
 for i in range(len(df)):
