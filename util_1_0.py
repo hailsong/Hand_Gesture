@@ -52,7 +52,7 @@ USE_TENSORFLOW = True
 USE_DYNAMIC = False
 # 왼손잡이 모드 개발 중
 REVERSE_MODE = False
-THEME = 'b'
+
 BOARD_COLOR = 'w'
 
 VISUALIZE_GRAPH = False
@@ -639,34 +639,6 @@ def process_static_gesture(array_for_static, value_for_static):
                 value_for_static.value = np.argmax(prediction[0])
             else:
                 value_for_static.value = 0
-        except:
-            pass
-
-
-def process_static_gesture_mod(array_for_static, value_for_static, array_for_static2, value_for_static2):
-    while True:
-        input_ = np.copy(array_for_static[:])
-        # print(input_)
-        input_ = input_[np.newaxis]
-        # time.sleep(0.033)
-        try:
-            prediction = MODEL_STATIC.predict(input_)
-            if np.max(prediction[0]) > 0.8:
-                value_for_static.value = np.argmax(prediction[0])
-            else:
-                value_for_static.value = 0
-        except:
-            pass
-
-        input_2 = np.copy(array_for_static2[:])
-        # print(input_)
-        input_2 = input_2[np.newaxis]
-        try:
-            prediction2 = MODEL_STATIC.predict(input_2)
-            if np.max(prediction2[0]) > 0.8:
-                value_for_static2.value = np.argmax(prediction2[0])
-            else:
-                value_for_static2.value = 0
         except:
             pass
 
@@ -1458,354 +1430,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             hands.close()
             self.capture.release()
 
-    class Ui_MainWindow(QObject):
-        click_mode = pyqtSignal(int, int)
-        button6_checked = pyqtSignal(bool)
-
-        def setupUi(self):
-            global THEME
-            self.MainWindow = MyWindow()
-            MainWindow = self.MainWindow
-            MainWindow.setObjectName("MainWindow")
-            MainWindow.resize(870, 550)
-            self.From_button = False
-
-            self.centralwidget = QtWidgets.QWidget(MainWindow)
-            self.centralwidget.setObjectName("centralwidget")
-
-            self.groupBox = QtWidgets.QGroupBox(self.centralwidget)
-            self.groupBox.setGeometry(QRect(660, 20, 81, 301))
-            if THEME == 'B':
-                self.groupBox.setStyleSheet("color: rgb(255, 255, 255);")
-            elif THEME == 'W':
-                self.groupBox.setStyleSheet("color: rgb(0, 0, 0);")
-            self.groupBox.setAlignment(QtCore.Qt.AlignCenter)
-            self.groupBox.setObjectName("groupBox")
-
-            self.pushButton = QtWidgets.QPushButton(self.groupBox)
-            self.pushButton.setGeometry(QRect(10, 20, 61, 61))
-            font = QtGui.QFont()
-            font.setBold(True)
-            font.setWeight(75)
-            self.pushButton.setFont(font)
-            self.pushButton.setStyleSheet("border-radius : 30; border : 2px solid white")
-            self.pushButton.setStyleSheet(
-                '''
-                QPushButton{image:url(./image/Mode1.png); border:0px;}
-                QPushButton:hover{image:url(./image/Mode1hover.png); border:0px;}
-                QPushButton:checked{image:url(./image/Mode1ing.png); border:0px;}
-                ''')
-            self.pushButton.setCheckable(True)
-            self.pushButton.setObjectName("pushButton")
-
-            self.pushButton_2 = QtWidgets.QPushButton(self.groupBox)
-            self.pushButton_2.setGeometry(QRect(10, 90, 61, 61))
-            font = QtGui.QFont()
-            font.setBold(True)
-            font.setWeight(75)
-            self.pushButton_2.setFont(font)
-            self.pushButton_2.setStyleSheet("border-radius : 30; border : 2px solid white")
-            self.pushButton_2.setStyleSheet(
-                '''
-                QPushButton{image:url(./image/Mode2.png); border:0px;}
-                QPushButton:hover{image:url(./image/Mode2hover.png); border:0px;}
-                QPushButton:checked{image:url(./image/Mode2ing.png); border:0px;}
-                ''')
-            self.pushButton_2.setCheckable(True)
-            self.pushButton_2.setObjectName("pushButton_2")
-
-            self.pushButton_3 = QtWidgets.QPushButton(self.groupBox)
-            self.pushButton_3.setGeometry(QRect(10, 160, 61, 61))
-            font = QtGui.QFont()
-            font.setBold(True)
-            font.setWeight(75)
-            self.pushButton_3.setFont(font)
-            self.pushButton_3.setStyleSheet("border-radius : 30; border : 2px solid white")
-            self.pushButton_3.setStyleSheet(
-                '''
-                QPushButton{image:url(./image/Mode3.png); border:0px;}
-                QPushButton:hover{image:url(./image/Mode3hover.png); border:0px;}
-                QPushButton:checked{image:url(./image/Mode3ing.png); border:0px;}
-                ''')
-            self.pushButton_3.setCheckable(True)
-            self.pushButton_3.setObjectName("pushButton_3")
-
-            self.pushButton_4 = QtWidgets.QPushButton(self.groupBox)
-            self.pushButton_4.setGeometry(QRect(10, 230, 61, 61))
-            font = QtGui.QFont()
-            font.setBold(True)
-            font.setWeight(75)
-            self.pushButton_4.setFont(font)
-            self.pushButton_4.setStyleSheet("border-radius : 30; border : 2px solid white")
-            self.pushButton_4.setStyleSheet(
-                '''
-                QPushButton{image:url(./image/Mode4.png); border:0px;}
-                QPushButton:hover{image:url(./image/Mode4hover.png); border:0px;}
-                QPushButton:checked{image:url(./image/Mode4ing.png); border:0px;}
-                ''')
-            self.pushButton_4.setCheckable(True)
-            self.pushButton_4.setObjectName("pushButton_4")
-
-            self.groupBox_2 = QtWidgets.QGroupBox(self.centralwidget)
-            self.groupBox_2.setGeometry(QRect(750, 20, 111, 301))
-            if THEME == 'b':
-                self.groupBox_2.setStyleSheet("color: rgb(255, 255, 255);")
-            elif THEME == 'w':
-                self.groupBox_2.setStyleSheet("color: rgb(0, 0, 0);")
-            self.groupBox_2.setAlignment(QtCore.Qt.AlignCenter)
-            self.groupBox_2.setObjectName("groupBox_2")
-
-            self.checkBox = QtWidgets.QCheckBox(self.groupBox_2)
-            self.checkBox.setGeometry(QRect(10, 40, 95, 16))
-            self.checkBox.setObjectName("checkBox")
-
-            self.checkBox_2 = QtWidgets.QCheckBox(self.groupBox_2)
-            self.checkBox_2.setGeometry(QRect(10, 110, 81, 16))
-            self.checkBox_2.setObjectName("checkBox_2")
-
-            self.checkBox_3 = QtWidgets.QCheckBox(self.groupBox_2)
-            self.checkBox_3.setGeometry(QRect(10, 180, 81, 16))
-            self.checkBox_3.setObjectName("checkBox_3")
-
-            self.checkBox_4 = QtWidgets.QCheckBox(self.groupBox_2)
-            self.checkBox_4.setGeometry(QRect(10, 250, 81, 16))
-            self.checkBox_4.setObjectName("checkBox_4")
-
-            self.checkBox.setEnabled(False)
-            self.checkBox_2.setEnabled(False)
-            self.checkBox_3.setEnabled(False)
-            self.checkBox_4.setEnabled(False)
-
-            self.checkBox.setStyleSheet('''QCheckBox::indicator:checked { background-color: rgb(0,255,0) }''')
-            self.checkBox_2.setStyleSheet('''QCheckBox::indicator:checked { background-color: rgb(0,255,0) }''')
-            self.checkBox_3.setStyleSheet('''QCheckBox::indicator:checked { background-color: rgb(0,255,0) }''')
-            self.checkBox_4.setStyleSheet('''QCheckBox::indicator:checked { background-color: rgb(0,255,0) }''')
-
-            self.frame_2 = QtWidgets.QFrame(self.centralwidget)
-            self.frame_2.setGeometry(QRect(660, 330, 201, 80))
-            self.frame_2.setFrameShape(QtWidgets.QFrame.StyledPanel)
-            self.frame_2.setFrameShadow(QtWidgets.QFrame.Raised)
-            self.frame_2.setObjectName("frame_2")
-            self.pushButton_5 = QtWidgets.QPushButton(self.frame_2)
-            self.pushButton_5.setGeometry(QRect(110, 10, 60, 60))
-            self.pushButton_5.setStyleSheet("border-radius : 30; border : 2px solid white")
-            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
-            sizePolicy.setHorizontalStretch(0)
-            sizePolicy.setVerticalStretch(0)
-            sizePolicy.setHeightForWidth(self.pushButton_5.sizePolicy().hasHeightForWidth())
-            self.pushButton_5.setSizePolicy(sizePolicy)
-            self.pushButton_5.setStyleSheet(
-                '''
-                QPushButton{image:url(./image/screenshots.png); border:0px;}
-                QPushButton:hover{image:url(./image/screenshotshover.png); border:0px;}
-                #QPushButton:checked{image:url(./image/screenshotsing.png); border:0px;}
-                ''')
-            self.pushButton_5.setCheckable(False)
-            self.pushButton_5.setObjectName("pushButton_5")
-
-            self.pushButton_6 = QtWidgets.QPushButton(self.frame_2)
-            self.pushButton_6.setGeometry(QRect(20, 10, 60, 60))
-            self.pushButton_6.setStyleSheet("border-radius : 30; border : 2px solid white")
-            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
-            sizePolicy.setHorizontalStretch(0)
-            sizePolicy.setVerticalStretch(0)
-            sizePolicy.setHeightForWidth(self.pushButton_6.sizePolicy().hasHeightForWidth())
-            self.pushButton_6.setSizePolicy(sizePolicy)
-            self.pushButton_6.setStyleSheet(
-                '''
-                QPushButton{image:url(./image/power.png); border:0px;}
-                QPushButton:hover{image:url(./image/powerhover.png); border:0px;}
-                QPushButton:checked{image:url(./image/powering.png); border:0px;}
-                ''')
-            self.pushButton_6.setCheckable(True)
-            self.pushButton_6.setObjectName("pushButton_6")
-            self.pushButton_6.raise_()
-
-            self.pushButton_5.clicked.connect(self.screenshot)
-            self.pushButton_5.raise_()
-
-            self.pushButton.setEnabled(False)
-            self.pushButton_2.setEnabled(False)
-            self.pushButton_3.setEnabled(False)
-            self.pushButton_4.setEnabled(False)
-            self.pushButton_5.setEnabled(False)
-
-            self.label = QtWidgets.QLabel(self.centralwidget)
-            self.label.setGeometry(QRect(660, 430, 200, 60))
-            self.label.setText("")
-            self.label.setPixmap(QtGui.QPixmap("./image/인바디.png"))
-            self.label.setScaledContents(True)
-            self.label.setObjectName("label")
-
-            self.label_2 = QtWidgets.QLabel(self.centralwidget)
-            self.label_2.setGeometry(QRect(10, 20, 640, 480))
-            self.label_2.setPixmap(QtGui.QPixmap("./image/default.jpg"))  # <-------------- 비디오 프레임이 들어가야함
-            self.label_2.setScaledContents(True)
-            self.label_2.setObjectName("label_2")
-
-            MainWindow.setCentralWidget(self.centralwidget)
-
-            self.menubar = QtWidgets.QMenuBar(MainWindow)
-            self.menubar.setGeometry(QRect(0, 0, 870, 21))
-            self.menubar.setObjectName("menubar")
-            self.MainWindow.setMenuBar(self.menubar)
-
-            self.statusbar = QtWidgets.QStatusBar(MainWindow)
-            self.statusbar.setObjectName("statusbar")
-            MainWindow.setStatusBar(self.statusbar)
-
-            self.pushButton.toggled.connect(lambda: self.togglebutton(MainWindow, integer=0))
-            self.pushButton_2.toggled.connect(lambda: self.togglebutton(MainWindow, integer=1))
-            self.pushButton_3.toggled.connect(lambda: self.togglebutton(MainWindow, integer=2))
-            self.pushButton_4.toggled.connect(lambda: self.togglebutton(MainWindow, integer=3))
-
-            self.thread = opcv()
-
-            self.pushButton_6.toggled.connect(lambda: self.checked(MainWindow))
-            self.click_mode.connect(self.thread.mode_setting)
-            self.button6_checked.connect(self.thread.send_img)
-            MainWindow.power_off_signal.connect(self.thread.send_img)
-            self.thread.change_pixmap_signal.connect(self.update_img)
-            self.thread.mode_signal.connect(self.push_button)
-
-            self.thread.start()
-            self.retranslateUi(MainWindow)
-            QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
-        def retranslateUi(self, MainWindow):
-            _translate = QtCore.QCoreApplication.translate
-            MainWindow.setWindowTitle(_translate("MainWindow", "Handtracking"))
-            self.groupBox.setTitle(_translate("MainWindow", "모드선택"))
-            # M
-            self.groupBox_2.setTitle(_translate("MainWindow", "활성 기능"))
-            self.checkBox.setText(_translate("MainWindow", "마우스 움직임"))
-            self.checkBox_2.setText(_translate("MainWindow", "마우스 클릭"))
-            self.checkBox_3.setText(_translate("MainWindow", "드래그"))
-            self.checkBox_4.setText(_translate("MainWindow", "스크롤"))
-
-        @pyqtSlot(int)
-        def push_button(self, integer):  # 2-1
-            if integer != -1:
-                B_list = [self.pushButton, self.pushButton_2,
-                          self.pushButton_3, self.pushButton_4]
-                if not B_list[integer].isChecked():
-                    self.From_button = True
-                    B_list[integer].toggle()  # #2-2
-            else:
-                self.From_button = False
-                pass
-
-        def togglebutton(self, MainWindow, integer):
-            Button_list = [self.pushButton, self.pushButton_2,
-                           self.pushButton_3, self.pushButton_4]
-            Before_mode_list = []
-            self.checkBox.setEnabled(True)
-            self.checkBox_2.setEnabled(True)
-            self.checkBox_3.setEnabled(True)
-            self.checkBox_4.setEnabled(True)
-            if Button_list[integer].isChecked():  # 2-3
-                Button_list.pop(integer)
-                for button in Button_list:
-                    if button.isChecked():
-                        button.toggle()
-                        Before_mode_list.append(button)
-                if integer == 0:
-                    self.checkBox.setChecked(False)
-                    self.checkBox_2.setChecked(False)
-                    self.checkBox_3.setChecked(False)
-                    self.checkBox_4.setChecked(False)
-                elif integer == 1:
-                    self.checkBox.setChecked(True)
-                    self.checkBox_2.setChecked(True)
-                    self.checkBox_3.setChecked(False)
-                    self.checkBox_4.setChecked(False)
-                elif integer == 2:
-                    self.checkBox.setChecked(True)
-                    self.checkBox_2.setChecked(False)
-                    self.checkBox_3.setChecked(True)
-                    self.checkBox_4.setChecked(False)
-                elif integer == 3:
-                    self.checkBox.setChecked(True)
-                    self.checkBox_2.setChecked(True)
-                    self.checkBox_3.setChecked(True)
-                    self.checkBox_4.setChecked(True)
-                else:
-                    pass
-
-                if len(Before_mode_list) != 0:
-                    if self.From_button == False:
-                        if Before_mode_list[0] == self.pushButton:
-                            self.click_mode.emit(integer + 1, 1)
-                        elif Before_mode_list[0] == self.pushButton_2:
-                            self.click_mode.emit(integer + 1, 2)
-                        elif Before_mode_list[0] == self.pushButton_3:
-                            self.click_mode.emit(integer + 1, 3)
-                        elif Before_mode_list[0] == self.pushButton_4:
-                            self.click_mode.emit(integer + 1, 4)
-                    else:
-                        self.click_mode.emit(integer + 1, integer + 1)
-                else:
-                    if self.From_button == False:
-                        self.click_mode.emit(integer + 1, 0)
-                    else:
-                        self.click_mode.emit(integer + 1, integer + 1)
-            else:
-                self.checkBox.setChecked(False)
-                self.checkBox_2.setChecked(False)
-                self.checkBox_3.setChecked(False)
-                self.checkBox_4.setChecked(False)
-            self.checkBox.setEnabled(False)
-            self.checkBox_2.setEnabled(False)
-            self.checkBox_3.setEnabled(False)
-            self.checkBox_4.setEnabled(False)
-
-        def screenshot(self):
-            print('clicked')
-            now = datetime.datetime.now().strftime("%d_%H-%M-%S")
-            filename = './screenshot/' + str(now) + ".jpg"
-            print(filename)
-            image = self.label_2.pixmap()
-            image.save(filename, 'jpg')
-
-        def cvt_qt(self, img):
-            # rgb_image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # cv 이미지 파일 rgb 색계열로 바꿔주기
-            h, w, ch = img.shape  # image 쉐입 알기
-            bytes_per_line = ch * w  # 차원?
-            convert_to_Qt_format = QtGui.QImage(img.data, w, h, bytes_per_line,
-                                                QtGui.QImage.Format_RGB888)  # qt 포맷으로 바꾸기
-            p = convert_to_Qt_format.scaled(640, 480, QtCore.Qt.KeepAspectRatio)  # 디스클레이 크기로 바꿔주기.
-
-            return QtGui.QPixmap.fromImage(p)  # 진정한 qt 이미지 생성
-
-        @pyqtSlot(np.ndarray)
-        def update_img(self, img):
-            qt_img = self.cvt_qt(img)
-            self.label_2.setPixmap(qt_img)
-
-        def checked(self, MainWindow):
-            if self.pushButton_6.isChecked():
-                print('checked')
-                self.pushButton.setEnabled(True)
-                self.pushButton_2.setEnabled(True)
-                self.pushButton_3.setEnabled(True)
-                self.pushButton_4.setEnabled(True)
-                self.pushButton_5.setEnabled(True)
-                self.button6_checked.emit(True)
-            else:
-                self.pushButton.setEnabled(False)
-                self.pushButton_2.setEnabled(False)
-                self.pushButton_3.setEnabled(False)
-                self.pushButton_4.setEnabled(False)
-                self.pushButton_5.setEnabled(False)
-                self.button6_checked.emit(False)
-                Button_list = [self.pushButton, self.pushButton_2,
-                               self.pushButton_3, self.pushButton_4]
-                for button in Button_list:
-                    if button.isChecked():
-                        button.toggle()
-                self.button6_checked.emit(False)
-                self.label_2.setPixmap(QtGui.QPixmap("./image/default.jpg"))
-
     class Setting_window(QtWidgets.QDialog):
         # def __init__(self):
         #     self.setupUI()
@@ -1814,7 +1438,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             Dialog.setObjectName("Setting")
             Dialog.resize(400, 100)
             icon = QtGui.QIcon()
-            icon.addPixmap(QtGui.QPixmap("Image/setting.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            icon.addPixmap(QtGui.QPixmap("image/setting.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             Dialog.setWindowIcon(icon)
             self.buttonBox = QtWidgets.QDialogButtonBox(Dialog)
             self.buttonBox.setGeometry(QtCore.QRect(30, 240, 341, 32))
@@ -1841,48 +1465,470 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
         def retranslateUi(self, Dialog):
             _translate = QtCore.QCoreApplication.translate
-            Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
+            Dialog.setWindowTitle(_translate("Setting Window", "Setting Window"))
             self.comboBox.setItemText(0, _translate("Dialog", "영어(English)"))
             self.comboBox.setItemText(1, _translate("Dialog", "한국어(Korean)"))
             self.label.setText(_translate("Dialog", "언어 선택(Language Selection)"))
 
-    class MyWindow(QtWidgets.QMainWindow):
+    class Grabber(QtWidgets.QWidget):
+        click_mode = pyqtSignal(int, int)
+        button6_checked = pyqtSignal(bool)
 
-        power_off_signal = pyqtSignal(bool)
+        dirty = True
 
         def __init__(self):
-            super().__init__()
-            # self.setStyleSheet('''QMainWindow{background-color : rgb(0, 255, 0);}''')
-            if THEME == 'b':
-                self.setStyleSheet('''QMessageBox{background-color: rgb(225, 225, 225);}''')
-                self.setStyleSheet('''QMainWindow{background-color : rgb(0, 0, 0);}''')
-            elif THEME == 'w':
-                self.setStyleSheet('''QMessageBox{background-color: rgb(0, 0, 0);}''')
-                self.setStyleSheet('''QMainWindow{background-color : rgb(255, 255, 255);}''')
-            self.msg = QMessageBox()
+            super(Grabber, self).__init__()
+            # self.showMaximized()
+            self.setGeometry(0, 0, 1920, 1080)
+            self.setWindowTitle('Screen grabber')
+            # ensure that the widget always stays on top, no matter what
+            self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
+            layout = QtWidgets.QVBoxLayout()
 
-        def closeEvent(self, event):
-            result = self.msg.question(self,
-                                       "Confirm Exit...",
-                                       "Are you sure you want to exit ?",
-                                       self.msg.Yes | self.msg.No)
-            if result == self.msg.Yes:
-                self.power_off_signal.emit(False)
-                event.accept()
+            self.setLayout(layout)
+            # limit widget AND layout margins
+            layout.setGeometry(QtCore.QRect(0, 0, 1328, 147))
+            layout.setContentsMargins(0, 0, 0, 0)  # left, top, right, bottom
+            self.setContentsMargins(0, 0, 0, 0)
+            layout.setSpacing(0)
 
+            # create a "placeholder" widget for the screen grab geometry
+            self.grabWidget = QtWidgets.QWidget()
+            # self.grabWidget.setGeometry(0, 0, 100, 100)
+            self.grabWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+            layout.addWidget(self.grabWidget)
+
+            # let's add a configuration panel
+            self.panel = QtWidgets.QWidget()
+            layout.addWidget(self.panel)
+
+            panelLayout = QtWidgets.QHBoxLayout()
+            self.panel.setLayout(panelLayout)
+            panelLayout.setContentsMargins(0, 0, 0, 0)  # 틀 너비 바꾸는 느낌
+            self.setContentsMargins(0, 0, 0, 0)
+
+            # self.configButton = QtWidgets.QPushButton(self.style().standardIcon(QtWidgets.QStyle.SP_ComputerIcon), '')
+            # self.configButton.setFlat(True)
+            # panelLayout.addWidget(self.configButton)
+
+            # panelLayout.addWidget(VLine())
+
+            # self.fpsSpinBox = QtWidgets.QSpinBox()
+            # panelLayout.addWidget(self.fpsSpinBox)
+            # self.fpsSpinBox.setRange(1, 50)
+            # self.fpsSpinBox.setValue(15)
+            # panelLayout.addWidget(QtWidgets.QLabel('fps'))
+
+            # panelLayout.addWidget(VLine())
+
+            self.widthLabel = QtWidgets.QLabel()
+            # panelLayout.addWidget(self.widthLabel)
+            self.widthLabel.setFrameShape(QtWidgets.QLabel.StyledPanel | QtWidgets.QLabel.Sunken)
+
+            # panelLayout.addWidget(QtWidgets.QLabel('x'))
+
+            self.heightLabel = QtWidgets.QLabel()
+            # panelLayout.addWidget(self.heightLabel)
+            self.heightLabel.setFrameShape(QtWidgets.QLabel.StyledPanel | QtWidgets.QLabel.Sunken)
+            # panelLayout.addWidget(QtWidgets.QLabel('px'))
+            #
+            # panelLayout.addWidget(VLine())
+
+            # self.recButton = QtWidgets.QPushButton('rec')
+            # panelLayout.addWidget(self.recButton)
+            #
+            # self.playButton = QtWidgets.QPushButton('play')
+            # panelLayout.addWidget(self.playButton)
+
+            # panelLayout.addStretch(0)
+
+        def setupUi(self, Form):
+
+            Form.setObjectName("Form")
+            Form.resize(1920, 1080)
+            self.From_button = False
+
+            Form.setStyleSheet("background-color : #EDECEA;")
+
+            self.label = QtWidgets.QLabel(Form)
+            self.label.setGeometry(QtCore.QRect(30, 52, 271, 41))
+            font = QtGui.QFont()
+            font.setFamily("서울남산 장체B")
+            font.setPointSize(36)
+            self.label.setFont(font)
+            self.label.setStyleSheet("color : #ACCCC4")
+            self.label.setObjectName("label")
+
+            self.label_2 = QtWidgets.QLabel(Form)
+            self.label_2.setGeometry(QtCore.QRect(30, 100, 341, 41))
+            font = QtGui.QFont()
+            font.setFamily("서울남산 장체B")
+            font.setPointSize(36)
+            self.label_2.setFont(font)
+            self.label_2.setStyleSheet("color : #C4BCB8;")
+            self.label_2.setObjectName("label_2")
+
+            self.label_3 = QtWidgets.QLabel(Form)
+            self.label_3.setGeometry(QtCore.QRect(370, 90, 56, 41))
+            font = QtGui.QFont()
+            font.setFamily("서울남산 장체B")
+            font.setPointSize(18)
+            self.label_3.setFont(font)
+            self.label_3.setStyleSheet("color : #ACCCC4;")
+            self.label_3.setObjectName("label_3")
+
+            self.pushButton = QtWidgets.QPushButton(Form)
+            self.pushButton.setGeometry(QtCore.QRect(30, 190, 200, 120))
+            self.pushButton.setStyleSheet(
+                '''
+                QPushButton{image:url(./image/1-1 copy.png); border:0px;}
+                QPushButton:hover{image:url(./image/1-3 copy.png); border:0px;}
+                QPushButton:checked{image:url(./image/1-2 copy.png); border:0px;}
+                ''')
+            self.pushButton.setCheckable(True)
+            self.pushButton.setObjectName("pushButton")
+
+            self.pushButton_2 = QtWidgets.QPushButton(Form)
+            self.pushButton_2.setGeometry(QtCore.QRect(270, 190, 200, 120))
+            self.pushButton_2.setStyleSheet(
+                '''
+                QPushButton{image:url(./image/3-1 copy.png); border:0px;}
+                QPushButton:hover{image:url(./image/3-3 copy.png); border:0px;}
+                QPushButton:checked{image:url(./image/3-2 copy.png); border:0px;}
+                ''')
+            self.pushButton_2.setObjectName("pushButton_2")
+            self.pushButton_2.setCheckable(True)
+            self.pushButton_3 = QtWidgets.QPushButton(Form)
+            self.pushButton_3.setGeometry(QtCore.QRect(30, 370, 200, 120))
+            self.pushButton_3.setStyleSheet(
+                '''
+                QPushButton{image:url(./image/2-1 copy.png); border:0px;}
+                QPushButton:hover{image:url(./image/2-3 copy.png); border:0px;}
+                QPushButton:checked{image:url(./image/2-2 copy.png); border:0px;}
+                ''')
+            self.pushButton_3.setCheckable(True)
+            self.pushButton_3.setObjectName("pushButton_3")
+            self.pushButton_4 = QtWidgets.QPushButton(Form)
+            self.pushButton_4.setGeometry(QtCore.QRect(270, 370, 200, 120))
+            self.pushButton_4.setStyleSheet(
+                '''
+                QPushButton{image:url(./image/4-1 copy.png); border:0px;}
+                QPushButton:hover{image:url(./image/4-3 copy.png); border:0px;}
+                QPushButton:checked{image:url(./image/4-2 copy.png); border:0px;}
+                ''')
+            self.pushButton_4.setCheckable(True)
+            self.pushButton_4.setObjectName("pushButton_4")
+
+            self.pushButton_7 = QtWidgets.QPushButton(Form)
+            self.pushButton_7.setGeometry(QtCore.QRect(380, 650, 111, 111))
+            self.pushButton_7.setStyleSheet("border-radius : 55; border : 2px;")
+            self.pushButton_7.setStyleSheet(
+                '''
+                QPushButton{image:url(./image/cam.png); border:0px;}
+                QPushButton:hover{image:url(./image/cam-hover.png); border:0px;}
+                ''')
+            self.pushButton_7.setObjectName("pushButton_7")
+
+            # Button 5 : Power
+            self.pushButton_5 = QtWidgets.QPushButton(Form)
+            self.pushButton_5.setGeometry(QtCore.QRect(160, 560, 201, 201))
+            self.pushButton_5.setStyleSheet("border-radius : 100; border : 2px;")
+            self.pushButton_5.setStyleSheet(
+                '''
+                QPushButton{image:url(./image/Power.png); border:0px;}
+                QPushButton:hover{image:url(./image/Power-hover.png); border:0px;}
+                QPushButton:checked{image:url(./image/Power-on.png); border:0px;}
+                ''')
+            self.pushButton_5.setObjectName("pushButton_5")
+            self.pushButton_5.setCheckable(True)
+            self.pushButton_5.raise_()
+
+            # Button 6 : Question Mark
+            self.pushButton_6 = QtWidgets.QPushButton(Form)
+            self.pushButton_6.setGeometry(QtCore.QRect(30, 650, 111, 111))
+            self.pushButton_6.setStyleSheet("border-radius : 55; border : 2px;")
+            self.pushButton_6.setStyleSheet(
+                '''
+                QPushButton{image:url(./Image/qmark.png); border:0px;}
+                QPushButton:hover{image:url(./Image/qmark-hover.png); border:0px;}
+                ''')
+            self.pushButton_6.setObjectName("pushButton_6")
+
+            self.pushButton_7.clicked.connect(self.screenshot)
+            self.pushButton_7.raise_()
+
+            # self.pushButton.setEnabled(False)
+            # self.pushButton_2.setEnabled(False)
+            # self.pushButton_3.setEnabled(False)
+            # self.pushButton_4.setEnabled(False)
+            # self.pushButton_7.setEnabled(False)
+
+            self.pushButton_9 = QtWidgets.QPushButton(Form)
+            self.pushButton_9.setGeometry(QtCore.QRect(30, 860, 480, 131))
+            self.pushButton_9.setStyleSheet(
+                '''
+                QPushButton{image:url(./image/inbody.png); border:0px;}
+                QPushButton:hover{image:url(./image/인바디.png); border:0px;}
+                ''')
+            self.pushButton_9.setObjectName("pushButton_9")
+
+            self.frame = QtWidgets.QFrame(Form)
+            self.frame.setGeometry(QtCore.QRect(530, 62, 1328, 747))
+            self.frame.setAutoFillBackground(False)
+            self.frame.setStyleSheet("background-color : #C6DFD6;")
+            self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
+            self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
+            self.frame.setObjectName("frame")
+            self.label_6 = QtWidgets.QLabel(self.frame)
+            self.label_6.setGeometry(QtCore.QRect(166, 0, 996, 747))
+            self.label_6.setStyleSheet("background-color : white;")
+            self.label_6.setObjectName("label_6")
+            self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
+
+            # MainWindow.setCentralWidget(self.centralwidget)
+
+            self.line = QtWidgets.QFrame(Form)
+            self.line.setGeometry(QtCore.QRect(40, 340, 130, 16))
+            self.line.setStyleSheet("color : #C4BCB8;")
+            self.line.setFrameShadow(QtWidgets.QFrame.Plain)
+            self.line.setLineWidth(10)
+            self.line.setFrameShape(QtWidgets.QFrame.HLine)
+            self.line.setObjectName("line")
+            self.line_2 = QtWidgets.QFrame(Form)
+            self.line_2.setGeometry(QtCore.QRect(350, 340, 130, 16))
+            self.line_2.setStyleSheet("color : #C4BCB8;")
+            self.line_2.setFrameShadow(QtWidgets.QFrame.Plain)
+            self.line_2.setLineWidth(10)
+            self.line_2.setFrameShape(QtWidgets.QFrame.HLine)
+            self.line_2.setObjectName("line_2")
+            self.line_3 = QtWidgets.QFrame(Form)
+            self.line_3.setGeometry(QtCore.QRect(250, 220, 20, 100))
+            self.line_3.setStyleSheet("color : #C4BCB8;")
+            self.line_3.setFrameShadow(QtWidgets.QFrame.Plain)
+            self.line_3.setLineWidth(10)
+            self.line_3.setFrameShape(QtWidgets.QFrame.VLine)
+            self.line_3.setObjectName("line_3")
+            self.line_4 = QtWidgets.QFrame(Form)
+            self.line_4.setGeometry(QtCore.QRect(250, 376, 20, 100))
+            self.line_4.setStyleSheet("color : #C4BCB8;")
+            self.line_4.setFrameShadow(QtWidgets.QFrame.Plain)
+            self.line_4.setLineWidth(10)
+            self.line_4.setFrameShape(QtWidgets.QFrame.VLine)
+            self.line_4.setObjectName("line_4")
+            self.label_4 = QtWidgets.QLabel(Form)
+            self.label_4.setGeometry(QtCore.QRect(210, 320, 100, 56))
+            font = QtGui.QFont()
+            font.setFamily("서울남산 장체B")
+            font.setPointSize(28)
+            self.label_4.setFont(font)
+            self.label_4.setLayoutDirection(QtCore.Qt.LayoutDirectionAuto)
+            self.label_4.setStyleSheet("color : #ACCCC4;")
+            self.label_4.setObjectName("label_4")
+
+            self.menubar = QtWidgets.QMenuBar(Form)
+            self.menubar.setGeometry(QRect(0, 0, 870, 21))
+            self.menubar.setObjectName("menubar")
+            # self.MainWindow.setMenuBar(self.menubar)
+
+            # self.statusbar = QtWidgets.QStatusBar(Form)
+            # self.statusbar.setObjectName("statusbar")
+            # Form.setStatusBar(self.statusbar)
+
+            self.pushButton.toggled.connect(lambda: self.togglebutton(Form, integer=0))
+            self.pushButton_2.toggled.connect(lambda: self.togglebutton(Form, integer=1))
+            self.pushButton_3.toggled.connect(lambda: self.togglebutton(Form, integer=2))
+            self.pushButton_4.toggled.connect(lambda: self.togglebutton(Form, integer=3))
+
+            self.thread = opcv()
+
+            self.pushButton_5.toggled.connect(lambda: self.checked(Form))
+            self.click_mode.connect(self.thread.mode_setting)
+            self.button6_checked.connect(self.thread.send_img)
+            # self.power_off_signal.connect(self.thread.send_img)
+            self.thread.change_pixmap_signal.connect(self.update_img)
+            self.thread.mode_signal.connect(self.push_button)
+
+            self.thread.start()
+            self.retranslateUi(Form)
+            QtCore.QMetaObject.connectSlotsByName(Form)
+
+        def retranslateUi(self, Form):
+            _translate = QtCore.QCoreApplication.translate
+            Form.setWindowTitle(_translate("Form", "Hand Gesture Presentation Tool V 1.0"))
+            self.label_2.setText(_translate("Form", "Presentation Tool"))
+            self.label_3.setText(_translate("Form", "1.0"))
+            # 여기다가
+            self.label.setText(_translate("Form", "Hand Gesture"))
+            self.label_4.setText(_translate("Form", "MODE"))
+
+        @pyqtSlot(int)
+        def push_button(self, integer):  # 2-1
+            if integer != -1:
+                B_list = [self.pushButton, self.pushButton_2,
+                          self.pushButton_3, self.pushButton_4]
+                if not B_list[integer].isChecked():
+                    self.From_button = True
+                    B_list[integer].toggle()  # #2-2
             else:
-                event.ignore()
+                self.From_button = False
+                pass
 
-    # app = QtWidgets.QApplication(sys.argv)
-    # Form = QtWidgets.QWidget()
-    # grabber = Grabber()
-    # grabber.setupUi(grabber)
-    # grabber.show()
+        def togglebutton(self, Form, integer):
+            Button_list = [self.pushButton, self.pushButton_2,
+                           self.pushButton_3, self.pushButton_4]
+            Before_mode_list = []
+            if Button_list[integer].isChecked():  # 2-3
+                Button_list.pop(integer)
+                for button in Button_list:
+                    if button.isChecked():
+                        button.toggle()
+                        Before_mode_list.append(button)
+
+                if len(Before_mode_list) != 0:
+                    if self.From_button == False:
+                        if Before_mode_list[0] == self.pushButton:
+                            self.click_mode.emit(integer + 1, 1)
+                        elif Before_mode_list[0] == self.pushButton_2:
+                            self.click_mode.emit(integer + 1, 2)
+                        elif Before_mode_list[0] == self.pushButton_3:
+                            self.click_mode.emit(integer + 1, 3)
+                        elif Before_mode_list[0] == self.pushButton_4:
+                            self.click_mode.emit(integer + 1, 4)
+                    else:
+                        self.click_mode.emit(integer + 1, integer + 1)
+                else:
+                    if self.From_button == False:
+                        self.click_mode.emit(integer + 1, 0)
+                    else:
+                        self.click_mode.emit(integer + 1, integer + 1)
+            else:
+                pass
+
+        def screenshot(self):
+            print('clicked')
+            now = datetime.datetime.now().strftime("%d_%H-%M-%S")
+            filename = './screenshots/' + str(now) + ".jpg"
+            print(filename)
+            image = self.label_6.pixmap()
+            image.save(filename, 'jpg')
+
+        def cvt_qt(self, img):
+            # rgb_image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # cv 이미지 파일 rgb 색계열로 바꿔주기
+            h, w, ch = img.shape  # image 쉐입 알기
+            bytes_per_line = ch * w  # 차원?
+            convert_to_Qt_format = QtGui.QImage(img.data, w, h, bytes_per_line,
+                                                QtGui.QImage.Format_RGB888)  # qt 포맷으로 바꾸기
+            p = convert_to_Qt_format.scaled(996, 747, QtCore.Qt.KeepAspectRatio)  # 디스클레이 크기로 바꿔주기.
+
+            return QtGui.QPixmap.fromImage(p)  # 진정한 qt 이미지 생성
+
+        @pyqtSlot(np.ndarray)
+        def update_img(self, img):
+            qt_img = self.cvt_qt(img)
+            self.label_6.setPixmap(qt_img)
+
+        def checked(self, Form):
+            if self.pushButton_5.isChecked():
+                print('checked')
+                self.pushButton.setEnabled(True)
+                self.pushButton_2.setEnabled(True)
+                self.pushButton_3.setEnabled(True)
+                self.pushButton_4.setEnabled(True)
+                self.pushButton_7.setEnabled(True)
+                self.button6_checked.emit(True)
+            else:
+                self.pushButton.setEnabled(False)
+                self.pushButton_2.setEnabled(False)
+                self.pushButton_3.setEnabled(False)
+                self.pushButton_4.setEnabled(False)
+                self.pushButton_7.setEnabled(False)
+                self.button6_checked.emit(False)
+                Button_list = [self.pushButton, self.pushButton_2,
+                               self.pushButton_3, self.pushButton_4]
+                for button in Button_list:
+                    if button.isChecked():
+                        button.toggle()
+                self.button6_checked.emit(False)
+                self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
+
+        def updateMask(self):
+            # get the *whole* window geometry, including its titlebar and borders
+            frameRect = self.frameGeometry()
+            print(frameRect)
+            # get the grabWidget geometry and remap it to global coordinates
+            grabGeometry = self.grabWidget.geometry()
+            grabGeometry = QtCore.QRect(0, 0, 1328, 147)
+            grabGeometry.moveTopLeft(self.grabWidget.mapToGlobal(QtCore.QPoint(530, 871)))
+
+            # get the actual margins between the grabWidget and the window margins
+            left = frameRect.left() - grabGeometry.left()
+            top = frameRect.top() - grabGeometry.top()
+            right = frameRect.right() - grabGeometry.right()
+            bottom = frameRect.bottom() - grabGeometry.bottom()
+
+            # reset the geometries to get "0-point" rectangles for the mask
+            frameRect.moveTopLeft(QtCore.QPoint(530, 871))
+            grabGeometry.moveTopLeft(QtCore.QPoint(530, 871))
+
+            # create the base mask region, adjusted to the margins between the
+            # grabWidget and the window as computed above
+            region = QtGui.QRegion(frameRect.adjusted(left, top, right, bottom))
+
+            # "subtract" the grabWidget rectangle to get a mask that only contains
+            # the window titlebar, margins and panel
+            region -= QtGui.QRegion(grabGeometry)
+            self.setMask(region)
+
+            # update the grab size according to grabWidget geometry
+            self.widthLabel.setText(str(self.grabWidget.width()))
+            self.heightLabel.setText(str(self.grabWidget.height()))
+
+        def paintEvent(self, event):
+            super(Grabber, self).paintEvent(event)
+            # on Linux the frameGeometry is actually updated "sometime" after show()
+            # is called; on Windows and MacOS it *should* happen as soon as the first
+            # non-spontaneous showEvent is called (programmatically called: showEvent
+            # is also called whenever a window is restored after it has been
+            # minimized); we can assume that all that has already happened as soon as
+            # the first paintEvent is called; before then the window is flagged as
+            # "dirty", meaning that there's no need to update its mask yet.
+            # Once paintEvent has been called the first time, the geometries should
+            # have been already updated, we can mark the geometries "clean" and then
+            # actually apply the mask.
+            if self.dirty:
+                self.updateMask()
+                self.dirty = False
+
+    # class MyWindow(QtWidgets.QMainWindow):
+    #
+    #     power_off_signal = pyqtSignal(bool)
+    #
+    #     def __init__(self):
+    #         super().__init__()
+    #         # self.setStyleSheet('''QMainWindow{background-color : rgb(0, 255, 0);}''')
+    #
+    #         self.setStyleSheet('''QMessageBox{background-color: rgb(225, 225, 225);}''')
+    #         self.setStyleSheet('''QMainWindow{background-color : rgb(0, 0, 0);}''')
+    #
+    #         self.msg = QMessageBox()
+    #
+    #     def closeEvent(self, event):
+    #         result = self.msg.question(self,
+    #                                    "Confirm Exit...",
+    #                                    "Are you sure you want to exit ?",
+    #                                    self.msg.Yes | self.msg.No)
+    #         if result == self.msg.Yes:
+    #             self.power_off_signal.emit(False)
+    #             event.accept()
+    #
+    #         else:
+    #             event.ignore()
 
     app = QtWidgets.QApplication(sys.argv)
-    ui = Ui_MainWindow()
-    ui.setupUi()
-    ui.MainWindow.show()
+    ui = Grabber()
+    ui.setupUi(ui)
+    ui.show()
+    # ui.MainWindow.show()
     sys.exit(app.exec_())
 
 
