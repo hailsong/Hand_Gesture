@@ -1420,6 +1420,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 image = cv2.putText(image, str(FPS), (10, 30), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 0), 2, cv2.LINE_AA)
 
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                image = cv2.resize(image, (943, 707))
 
                 self.change_pixmap_signal.emit(image)
                 if cv2.waitKey(5) & 0xFF == 27:
@@ -1569,7 +1570,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.label_2.setObjectName("label_2")
 
             self.label_3 = QtWidgets.QLabel(Form)
-            self.label_3.setGeometry(QtCore.QRect(370, 90, 56, 41))
+            self.label_3.setGeometry(QtCore.QRect(373, 88, 56, 41))
             font = QtGui.QFont()
             font.setFamily("서울남산 장체B")
             font.setPointSize(18)
@@ -1673,14 +1674,14 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_9.setObjectName("pushButton_9")
 
             self.frame = QtWidgets.QFrame(Form)
-            self.frame.setGeometry(QtCore.QRect(530, 62, 1328, 747))
+            self.frame.setGeometry(QtCore.QRect(530, 62, 1328, 707))
             self.frame.setAutoFillBackground(False)
             self.frame.setStyleSheet("background-color : #C6DFD6;")
             self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
             self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
             self.frame.setObjectName("frame")
             self.label_6 = QtWidgets.QLabel(self.frame)
-            self.label_6.setGeometry(QtCore.QRect(166, 0, 996, 747))
+            self.label_6.setGeometry(QtCore.QRect(192, 0, 943, 707))
             self.label_6.setStyleSheet("background-color : white;")
             self.label_6.setObjectName("label_6")
             self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
@@ -1716,7 +1717,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.line_4.setFrameShape(QtWidgets.QFrame.VLine)
             self.line_4.setObjectName("line_4")
             self.label_4 = QtWidgets.QLabel(Form)
-            self.label_4.setGeometry(QtCore.QRect(210, 320, 100, 56))
+            self.label_4.setGeometry(QtCore.QRect(214, 320, 100, 56))
             font = QtGui.QFont()
             font.setFamily("서울남산 장체B")
             font.setPointSize(28)
@@ -1818,7 +1819,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             bytes_per_line = ch * w  # 차원?
             convert_to_Qt_format = QtGui.QImage(img.data, w, h, bytes_per_line,
                                                 QtGui.QImage.Format_RGB888)  # qt 포맷으로 바꾸기
-            p = convert_to_Qt_format.scaled(996, 747, QtCore.Qt.KeepAspectRatio)  # 디스클레이 크기로 바꿔주기.
+            p = convert_to_Qt_format.scaled(943, 707, QtCore.Qt.KeepAspectRatio)  # 디스클레이 크기로 바꿔주기.
 
             return QtGui.QPixmap.fromImage(p)  # 진정한 qt 이미지 생성
 
@@ -1854,11 +1855,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         def updateMask(self):
             # get the *whole* window geometry, including its titlebar and borders
             frameRect = self.frameGeometry()
-            print(frameRect)
+
             # get the grabWidget geometry and remap it to global coordinates
             grabGeometry = self.grabWidget.geometry()
-            grabGeometry = QtCore.QRect(0, 0, 1328, 147)
-            grabGeometry.moveTopLeft(self.grabWidget.mapToGlobal(QtCore.QPoint(530, 871)))
+            grabGeometry = QtCore.QRect(0, 0, 1328, 187)
+            grabGeometry.moveTopLeft(self.grabWidget.mapToGlobal(QtCore.QPoint(530, 831)))
 
             # get the actual margins between the grabWidget and the window margins
             left = frameRect.left() - grabGeometry.left()
@@ -1867,8 +1868,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             bottom = frameRect.bottom() - grabGeometry.bottom()
 
             # reset the geometries to get "0-point" rectangles for the mask
-            frameRect.moveTopLeft(QtCore.QPoint(530, 871))
-            grabGeometry.moveTopLeft(QtCore.QPoint(530, 871))
+            frameRect.moveTopLeft(QtCore.QPoint(530, 831))
+            grabGeometry.moveTopLeft(QtCore.QPoint(530, 831))
 
             # create the base mask region, adjusted to the margins between the
             # grabWidget and the window as computed above
