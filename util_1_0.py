@@ -16,7 +16,7 @@ from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtCore import QThread, QObject, QRect, pyqtSlot, pyqtSignal
 import datetime
 import sys
-
+import os
 '''
 키 코드 링크 : https://lab.cliel.com/entry/%EA%B0%80%EC%83%81-Key-Code%ED%91%9C
 '''
@@ -52,6 +52,7 @@ USE_TENSORFLOW = True
 USE_DYNAMIC = False
 # 왼손잡이 모드 개발 중
 REVERSE_MODE = False
+language_setting = "한국어(Korean)"
 
 BOARD_COLOR = 'w'
 
@@ -657,6 +658,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     global WHEEL_USE
     global DRAG_USE
     global pen_color
+
 
     # GUI Part
     def mode_2_pre(palm, finger, left, p_check):
@@ -1420,7 +1422,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 image = cv2.putText(image, str(FPS), (10, 30), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 0), 2, cv2.LINE_AA)
 
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-                image = cv2.resize(image, (943, 707))
 
                 self.change_pixmap_signal.emit(image)
                 if cv2.waitKey(5) & 0xFF == 27:
@@ -1432,25 +1433,27 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.capture.release()
 
     class Setting_window(QtWidgets.QDialog):
-        # def __init__(self):
-        #     self.setupUI()
-
         def setupUi(self, Dialog):
+            global language_setting
             Dialog.setObjectName("Setting")
-            Dialog.resize(400, 100)
+            Dialog.resize(400, 120)
             icon = QtGui.QIcon()
             icon.addPixmap(QtGui.QPixmap("image/setting.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             Dialog.setWindowIcon(icon)
             self.buttonBox = QtWidgets.QDialogButtonBox(Dialog)
-            self.buttonBox.setGeometry(QtCore.QRect(30, 240, 341, 32))
+            self.buttonBox.setGeometry(QtCore.QRect(30, 80, 341, 32))
             self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
             self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Ok)
             self.buttonBox.setObjectName("buttonBox")
             self.comboBox = QtWidgets.QComboBox(Dialog)
             self.comboBox.setGeometry(QtCore.QRect(230, 40, 121, 21))
             self.comboBox.setObjectName("comboBox")
-            self.comboBox.addItem("")
-            self.comboBox.addItem("")
+            if language_setting == '한국어(Korean)':
+                self.comboBox.addItem("한국어(Korean)")
+                self.comboBox.addItem("영어(English)")
+            elif language_setting == '영어(English)':
+                self.comboBox.addItem("영어(English)")
+                self.comboBox.addItem("한국어(Korean)")
             self.label = QtWidgets.QLabel(Dialog)
             self.label.setGeometry(QtCore.QRect(50, 40, 181, 16))
             font = QtGui.QFont()
@@ -1461,15 +1464,25 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             self.retranslateUi(Dialog)
             self.buttonBox.accepted.connect(Dialog.accept)
+            self.buttonBox.accepted.connect(self.getComboBoxItem)
             self.buttonBox.rejected.connect(Dialog.reject)
             QtCore.QMetaObject.connectSlotsByName(Dialog)
 
         def retranslateUi(self, Dialog):
             _translate = QtCore.QCoreApplication.translate
             Dialog.setWindowTitle(_translate("Setting Window", "Setting Window"))
-            self.comboBox.setItemText(0, _translate("Dialog", "영어(English)"))
-            self.comboBox.setItemText(1, _translate("Dialog", "한국어(Korean)"))
             self.label.setText(_translate("Dialog", "언어 선택(Language Selection)"))
+
+        def getComboBoxItem(self):
+            global language_setting
+            crnttxt = self.comboBox.currentText()
+            # print(crnttxt)
+            if crnttxt != language_setting:
+                language_setting = crnttxt
+                # print("Set Language : ", crnttxt)
+                ui.setupLanguage(ui, crnttxt)
+
+
 
     class Grabber(QtWidgets.QWidget):
         click_mode = pyqtSignal(int, int)
@@ -1582,9 +1595,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton.setGeometry(QtCore.QRect(30, 190, 200, 120))
             self.pushButton.setStyleSheet(
                 '''
-                QPushButton{image:url(./image/1-1 copy.png); border:0px;}
-                QPushButton:hover{image:url(./image/1-3 copy.png); border:0px;}
-                QPushButton:checked{image:url(./image/1-2 copy.png); border:0px;}
+                QPushButton{image:url(./image/KOR/1-1.png); border:0px;}
+                QPushButton:hover{image:url(./image/KOR/1-3.png); border:0px;}
+                QPushButton:checked{image:url(./image/KOR/1-2.png); border:0px;}
                 ''')
             self.pushButton.setCheckable(True)
             self.pushButton.setObjectName("pushButton")
@@ -1593,9 +1606,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_2.setGeometry(QtCore.QRect(270, 190, 200, 120))
             self.pushButton_2.setStyleSheet(
                 '''
-                QPushButton{image:url(./image/3-1 copy.png); border:0px;}
-                QPushButton:hover{image:url(./image/3-3 copy.png); border:0px;}
-                QPushButton:checked{image:url(./image/3-2 copy.png); border:0px;}
+                QPushButton{image:url(./image/KOR/3-1.png); border:0px;}
+                QPushButton:hover{image:url(./image/KOR/3-3.png); border:0px;}
+                QPushButton:checked{image:url(./image/KOR/3-2.png); border:0px;}
                 ''')
             self.pushButton_2.setObjectName("pushButton_2")
             self.pushButton_2.setCheckable(True)
@@ -1603,9 +1616,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_3.setGeometry(QtCore.QRect(30, 370, 200, 120))
             self.pushButton_3.setStyleSheet(
                 '''
-                QPushButton{image:url(./image/2-1 copy.png); border:0px;}
-                QPushButton:hover{image:url(./image/2-3 copy.png); border:0px;}
-                QPushButton:checked{image:url(./image/2-2 copy.png); border:0px;}
+                QPushButton{image:url(./image/KOR/2-1.png); border:0px;}
+                QPushButton:hover{image:url(./image/KOR/2-3.png); border:0px;}
+                QPushButton:checked{image:url(./image/KOR/2-2.png); border:0px;}
                 ''')
             self.pushButton_3.setCheckable(True)
             self.pushButton_3.setObjectName("pushButton_3")
@@ -1613,9 +1626,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_4.setGeometry(QtCore.QRect(270, 370, 200, 120))
             self.pushButton_4.setStyleSheet(
                 '''
-                QPushButton{image:url(./image/4-1 copy.png); border:0px;}
-                QPushButton:hover{image:url(./image/4-3 copy.png); border:0px;}
-                QPushButton:checked{image:url(./image/4-2 copy.png); border:0px;}
+                QPushButton{image:url(./image/KOR/4-1.png); border:0px;}
+                QPushButton:hover{image:url(./image/KOR/4-3.png); border:0px;}
+                QPushButton:checked{image:url(./image/KOR/4-2.png); border:0px;}
                 ''')
             self.pushButton_4.setCheckable(True)
             self.pushButton_4.setObjectName("pushButton_4")
@@ -1629,6 +1642,18 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 QPushButton:hover{image:url(./image/cam-hover.png); border:0px;}
                 ''')
             self.pushButton_7.setObjectName("pushButton_7")
+
+            # Button 8 : Language Setting
+            self.pushButton_8 = QtWidgets.QPushButton(Form)
+            self.pushButton_8.setGeometry(QtCore.QRect(1820, 13, 35, 35))
+            self.pushButton_8.setStyleSheet("border-radius : 20;")
+            self.pushButton_8.setStyleSheet(
+                '''
+                QPushButton{image:url(./Image/setting.png); border:0px;}
+                QPushButton:hover{image:url(./Image/setting-hover.png); border:0px;}
+                ''')
+            self.pushButton_8.setObjectName("pushButton_8")
+            self.pushButton_8.clicked.connect(self.settingwindow)
 
             # Button 5 : Power
             self.pushButton_5 = QtWidgets.QPushButton(Form)
@@ -1658,21 +1683,27 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_7.clicked.connect(self.screenshot)
             self.pushButton_7.raise_()
 
-            # self.pushButton.setEnabled(False)
-            # self.pushButton_2.setEnabled(False)
-            # self.pushButton_3.setEnabled(False)
-            # self.pushButton_4.setEnabled(False)
-            # self.pushButton_7.setEnabled(False)
-
             self.pushButton_9 = QtWidgets.QPushButton(Form)
             self.pushButton_9.setGeometry(QtCore.QRect(30, 860, 480, 131))
             self.pushButton_9.setStyleSheet(
                 '''
                 QPushButton{image:url(./image/inbody.png); border:0px;}
                 QPushButton:hover{image:url(./image/인바디.png); border:0px;}
+                
                 ''')
             self.pushButton_9.setObjectName("pushButton_9")
-
+            self.pushButton_9.clicked.connect(self.Go_to_inbody)
+            self.pushButton_10 = QtWidgets.QPushButton(Form)
+            self.pushButton_10.setGeometry(QtCore.QRect(1870, 10, 38, 38))
+            self.pushButton_10.setStyleSheet("border-radius : 20;")
+            self.pushButton_10.setStyleSheet(
+                '''
+                QPushButton{image:url(./image/exit.png); border:0px;}
+                QPushButton:hover{image:url(./image/exit-hover.png); border:0px;}
+                ''')
+            self.pushButton_10.setObjectName("pushButton_10")
+            self.pushButton_10.clicked.connect(self.exitDialog)
+            # Qmessagebox 나가는 버튼
             self.frame = QtWidgets.QFrame(Form)
             self.frame.setGeometry(QtCore.QRect(530, 62, 1328, 707))
             self.frame.setAutoFillBackground(False)
@@ -1753,6 +1784,59 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.retranslateUi(Form)
             QtCore.QMetaObject.connectSlotsByName(Form)
 
+        def setupLanguage(self, Form, language):
+            print('setupLanguage')
+            if language == '한국어(Korean)':
+                self.pushButton.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/KOR/1-1.png); border:0px;}
+                    QPushButton:hover{image:url(./image/KOR/1-3.png); border:0px;}
+                    QPushButton:checked{image:url(./image/KOR/1-2.png); border:0px;}
+                    ''')
+                self.pushButton_2.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/KOR/3-1.png); border:0px;}
+                    QPushButton:hover{image:url(./image/KOR/3-3.png); border:0px;}
+                    QPushButton:checked{image:url(./image/KOR/3-2.png); border:0px;}
+                    ''')
+                self.pushButton_3.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/KOR/2-1.png); border:0px;}
+                    QPushButton:hover{image:url(./image/KOR/2-3.png); border:0px;}
+                    QPushButton:checked{image:url(./image/KOR/2-2.png); border:0px;}
+                    ''')
+                self.pushButton_4.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/KOR/4-1.png); border:0px;}
+                    QPushButton:hover{image:url(./image/KOR/4-3.png); border:0px;}
+                    QPushButton:checked{image:url(./image/KOR/4-2.png); border:0px;}
+                    ''')
+            elif language == '영어(English)':
+                self.pushButton.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/ENG/1-1.png); border:0px;}
+                    QPushButton:hover{image:url(./image/ENG/1-3.png); border:0px;}
+                    QPushButton:checked{image:url(./image/ENG/1-2.png); border:0px;}
+                    ''')
+                self.pushButton_2.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/ENG/3-1.png); border:0px;}
+                    QPushButton:hover{image:url(./image/ENG/3-3.png); border:0px;}
+                    QPushButton:checked{image:url(./image/ENG/3-2.png); border:0px;}
+                    ''')
+                self.pushButton_3.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/ENG/2-1.png); border:0px;}
+                    QPushButton:hover{image:url(./image/ENG/2-3.png); border:0px;}
+                    QPushButton:checked{image:url(./image/ENG/2-2.png); border:0px;}
+                    ''')
+                self.pushButton_4.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/ENG/4-1.png); border:0px;}
+                    QPushButton:hover{image:url(./image/ENG/4-3.png); border:0px;}
+                    QPushButton:checked{image:url(./image/ENG/4-2.png); border:0px;}
+                    ''')
+
         def retranslateUi(self, Form):
             _translate = QtCore.QCoreApplication.translate
             Form.setWindowTitle(_translate("Form", "Hand Gesture Presentation Tool V 1.0"))
@@ -1761,6 +1845,20 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # 여기다가
             self.label.setText(_translate("Form", "Hand Gesture"))
             self.label_4.setText(_translate("Form", "MODE"))
+
+        def exitDialog(self):
+            msgBox = QMessageBox()
+            msgBox.setIcon(QMessageBox.Information)
+            font = QtGui.QFont()
+            font.setFamily("서울남산 장체B")
+            font.setPointSize(12)
+            msgBox.setFont(font)
+            msgBox.setText("프로그램을 종료하시겠습니까?")
+            msgBox.setWindowTitle("Exit?")
+            msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+            returnValue = msgBox.exec()
+            if returnValue == QMessageBox.Ok:
+                sys.exit()
 
         @pyqtSlot(int)
         def push_button(self, integer):  # 2-1
@@ -1852,14 +1950,19 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 self.button6_checked.emit(False)
                 self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
 
+        def settingwindow(self):
+            dlg = Setting_window()
+            dlg.setupUi(dlg)
+            dlg.exec_()
+
         def updateMask(self):
             # get the *whole* window geometry, including its titlebar and borders
             frameRect = self.frameGeometry()
-
+            # print(frameRect)
             # get the grabWidget geometry and remap it to global coordinates
             grabGeometry = self.grabWidget.geometry()
             grabGeometry = QtCore.QRect(0, 0, 1328, 187)
-            grabGeometry.moveTopLeft(self.grabWidget.mapToGlobal(QtCore.QPoint(530, 831)))
+            grabGeometry.moveTopLeft(self.grabWidget.mapToGlobal(QtCore.QPoint(530, 871)))
 
             # get the actual margins between the grabWidget and the window margins
             left = frameRect.left() - grabGeometry.left()
@@ -1900,30 +2003,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 self.updateMask()
                 self.dirty = False
 
-    # class MyWindow(QtWidgets.QMainWindow):
-    #
-    #     power_off_signal = pyqtSignal(bool)
-    #
-    #     def __init__(self):
-    #         super().__init__()
-    #         # self.setStyleSheet('''QMainWindow{background-color : rgb(0, 255, 0);}''')
-    #
-    #         self.setStyleSheet('''QMessageBox{background-color: rgb(225, 225, 225);}''')
-    #         self.setStyleSheet('''QMainWindow{background-color : rgb(0, 0, 0);}''')
-    #
-    #         self.msg = QMessageBox()
-    #
-    #     def closeEvent(self, event):
-    #         result = self.msg.question(self,
-    #                                    "Confirm Exit...",
-    #                                    "Are you sure you want to exit ?",
-    #                                    self.msg.Yes | self.msg.No)
-    #         if result == self.msg.Yes:
-    #             self.power_off_signal.emit(False)
-    #             event.accept()
-    #
-    #         else:
-    #             event.ignore()
+        def Go_to_inbody(self):
+            os.system('explorer https://www.inbody.com/kr/')
 
     app = QtWidgets.QApplication(sys.argv)
     ui = Grabber()
