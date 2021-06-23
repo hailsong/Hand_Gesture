@@ -1715,7 +1715,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.label_6.setGeometry(QtCore.QRect(192, 0, 943, 707))
             self.label_6.setStyleSheet("background-color : white;")
             self.label_6.setObjectName("label_6")
-            self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
+            self.label_6.setPixmap(QtGui.QPixmap("./image/default2.jpg"))
 
             # MainWindow.setCentralWidget(self.centralwidget)
 
@@ -1948,7 +1948,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     if button.isChecked():
                         button.toggle()
                 self.button6_checked.emit(False)
-                self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
+                self.label_6.setPixmap(QtGui.QPixmap("./image/default2.jpg"))
 
         def settingwindow(self):
             dlg = Setting_window()
