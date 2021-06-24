@@ -12,7 +12,7 @@ from tensorflow import keras
 import tensorflow as tf
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QWidget, QTabWidget, QVBoxLayout
 from PyQt5.QtCore import QThread, QObject, QRect, pyqtSlot, pyqtSignal
 import datetime
 import sys
@@ -1420,7 +1420,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                 before_time = time.time()
                 image = cv2.putText(image, str(FPS), (10, 30), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 0), 2, cv2.LINE_AA)
-
+                image = cv2.resize(image, (943, 707))
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
                 self.change_pixmap_signal.emit(image)
@@ -1482,7 +1482,27 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 # print("Set Language : ", crnttxt)
                 ui.setupLanguage(ui, crnttxt)
 
+    class Guide_window(QWidget):
+        def __init__(self):
+            super().__init__()
 
+        def setupUi(self):
+            print('aa')
+            tab1 = QWidget()
+            tab2 = QWidget()
+
+            tabs = QTabWidget()
+            tabs.addTab(tab1, 'Tab1')
+            tabs.addTab(tab2, 'Tab2')
+
+            vbox = QVBoxLayout()
+            vbox.addWidget(tabs)
+
+            self.setLayout(vbox)
+
+            self.setWindowTitle('QTabWidget')
+            self.setGeometry(300, 300, 300, 200)
+            self.show()
 
     class Grabber(QtWidgets.QWidget):
         click_mode = pyqtSignal(int, int)
@@ -1679,6 +1699,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 QPushButton:hover{image:url(./Image/qmark-hover.png); border:0px;}
                 ''')
             self.pushButton_6.setObjectName("pushButton_6")
+            # self.pushButton_6.clicked.connect(self.guidewindow)
 
             self.pushButton_7.clicked.connect(self.screenshot)
             self.pushButton_7.raise_()
@@ -1954,6 +1975,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             dlg = Setting_window()
             dlg.setupUi(dlg)
             dlg.exec_()
+
+        def guidewindow(self):
+            guide = Guide_window()
+            guide.setupUi(guide)
+            guide.exec_()
 
         def updateMask(self):
             # get the *whole* window geometry, including its titlebar and borders
