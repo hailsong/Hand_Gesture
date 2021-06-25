@@ -1781,11 +1781,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.menubar = QtWidgets.QMenuBar(Form)
             self.menubar.setGeometry(QRect(0, 0, 870, 21))
             self.menubar.setObjectName("menubar")
-            # self.MainWindow.setMenuBar(self.menubar)
 
-            # self.statusbar = QtWidgets.QStatusBar(Form)
-            # self.statusbar.setObjectName("statusbar")
-            # Form.setStatusBar(self.statusbar)
 
             self.pushButton.toggled.connect(lambda: self.togglebutton(Form, integer=0))
             self.pushButton_2.toggled.connect(lambda: self.togglebutton(Form, integer=1))
