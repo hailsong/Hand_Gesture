@@ -926,7 +926,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.capture = cv2.VideoCapture(0, cv2.CAP_DSHOW)
             cap = self.capture
             # For webcam input:
-            hands = mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.8)
+            hands = mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.7)
             # pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5, upper_body_only=True)
 
             global width, height, static_gesture_num_l
