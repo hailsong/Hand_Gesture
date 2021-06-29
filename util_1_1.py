@@ -1885,9 +1885,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
         def retranslateUi(self, Form):
             _translate = QtCore.QCoreApplication.translate
-            Form.setWindowTitle(_translate("Form", "Hand Gesture Presentation Tool V 1.0"))
+            Form.setWindowTitle(_translate("Form", "Hand Gesture Presentation Tool V 1.1"))
             self.label_2.setText(_translate("Form", "Presentation Tool"))
-            self.label_3.setText(_translate("Form", "1.0"))
+            self.label_3.setText(_translate("Form", "1.1"))
             # 여기다가
             self.label.setText(_translate("Form", "Hand Gesture"))
             self.label_4.setText(_translate("Form", "MODE"))
