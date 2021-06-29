@@ -1,5 +1,5 @@
 import numpy as np
-from util_Algorithm import process_static_gesture, initialize
+from util_1_1 import process_static_gesture, initialize
 import tensorflow as tf
 
 from multiprocessing import Process, Value, Array
