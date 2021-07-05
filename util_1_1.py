@@ -311,7 +311,7 @@ class Gesture:
         if (gesture_check == True) or (self.gesture_signal.count(True) < 8):
             # print(self.gesture_data)
             return -1
-        print(self.gesture_signal)
+        # print(self.gesture_signal)
 
         # print('swipe')
         # i가 작을수록 더 최신 것
@@ -335,44 +335,40 @@ class Gesture:
         # print(x_mean, y_mean)
 
         # 동적 제스처 - LEFT
-        print(x_mean)
+        # print(x_mean)
         if y_mean != 0:
             if x_mean / abs(y_mean) < -1.5 and x_mean < -0.03:
-                print('LEFT')
+                # print('LEFT')
                 condition1 = condition2 = condition3 = 0
                 angle_threshold = [0., 0., -1.]
                 angle_min = 3
 
                 for i in range(Gesture.GESTURE_ARRAY_SIZE - 1):
-                    if get_angle(self.palm_data[i], angle_threshold) < 0.8:
+                    # print(get_angle(self.palm_data[i], angle_threshold) < 1.5)
+                    if get_angle(self.palm_data[i], angle_threshold) < 1.5:
                         condition1 += 1
 
-
-                # print('LEFT', condition1)
                 condition_sum = condition1
-                angle_threshold = [-1., 0., 0.]
-                # print(get_angle(self.palm_data[-1], angle_threshold))
-                if condition_sum > 10 and angle_min < 0.8:
+
+                if condition_sum > 4:
                     print("LEFT")
                     # win32api.keybd_event(0x27, 0, 0, 0)
                     return -1
 
             # 동적 제스처 - RIGHT
             if x_mean / abs(y_mean) > 1.5 and x_mean > 0.03:
-                print('RIGHT')
+                # print('RIGHT')
                 condition1 = condition2 = condition3 = 0
 
                 angle_threshold = [0., 0., -1.]
-                angle_min = 3
                 for i in range(Gesture.GESTURE_ARRAY_SIZE - 1):
-                    if get_angle(self.palm_data[i], angle_threshold) < 0.8:
+                    if get_angle(self.palm_data[i], angle_threshold) < 1.5:
                         condition1 += 1
 
-                # print('RIGHT', condition1)
+
                 condition_sum = condition1
-                angle_threshold = [-1., 0., 0.]
-                # print(get_angle(self.palm_data[-1], angle_threshold))
-                if condition_sum > 10 and angle_min < 0.8:
+
+                if condition_sum > 4:
                     print("RIGHT")
                     # win32api.keybd_event(0x27, 0, 0, 0)
                     return -1
@@ -869,7 +865,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             cap = self.capture
             # For webcam input:
             hands = mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.7)
-            # pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5, upper_body_only=True)
+            pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5, upper_body_only=True)
 
             global width, height, static_gesture_num_l
 
@@ -1173,7 +1169,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 # pass by reference.
                 image.flags.writeable = False
                 results = hands.process(image)
-                # results_body = pose.process(image)
+                results_body = pose.process(image)
 
                 # Draw the hand annotations on the image.
                 image.flags.writeable = True
@@ -1959,6 +1955,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             guide.setupUi(guide)
             guide.exec_()
 
+        # 대본영역
         def updateMask(self):
             # get the *whole* window geometry, including its titlebar and borders
             frameRect = self.frameGeometry()
