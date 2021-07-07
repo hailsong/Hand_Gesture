@@ -1519,9 +1519,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.panel.setLayout(panelLayout)
             panelLayout.setContentsMargins(0, 0, 0, 0)  # 틀 너비 바꾸는 느낌
             self.setContentsMargins(0, 0, 0, 0)
-            '''
-            
-            '''
+
             # self.configButton = QtWidgets.QPushButton(self.style().standardIcon(QtWidgets.QStyle.SP_ComputerIcon), '')
             # self.configButton.setFlat(True)
             # panelLayout.addWidget(self.configButton)
@@ -2023,7 +2021,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 if __name__ == '__main__':
     print("This is util set program, it works well... maybe... XD")
 
-    print('Running main_1_1.py...')
+    print('Running main_1_2.py...')
     from os import system
 
-    system('python main_1_1.py')
+    system('python main_1_2.py')
