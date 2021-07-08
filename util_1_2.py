@@ -1400,7 +1400,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                 before_time = time.time()
                 image = cv2.putText(image, str(FPS), (10, 30), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 0), 2, cv2.LINE_AA)
-                image = cv2.resize(image, (943, 707))
+                image = cv2.resize(image, (811, 608))
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
                 self.change_pixmap_signal.emit(image)
@@ -1435,10 +1435,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 self.comboBox.addItem("영어(English)")
                 self.comboBox.addItem("한국어(Korean)")
             self.label = QtWidgets.QLabel(Dialog)
-            self.label.setGeometry(QtCore.QRect(50, 40, 181, 16))
+            self.label.setGeometry(QtCore.QRect(50, 30, 350, 16))
             font = QtGui.QFont()
             font.setFamily("서울남산 장체B")
-            font.setPointSize(10)
+            font.setPointSize(13)
             self.label.setFont(font)
             self.label.setObjectName("label")
 
@@ -1555,96 +1555,55 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # panelLayout.addStretch(0)
 
+        def setButtonStyle(self, pushButton):
+            pushButton.setStyleSheet(
+                '''
+                QPushButton{image:url(./image/KOR/2-1.png); border:0px;}
+                QPushButton:hover{image:url(./image/KOR/2-3.png); border:0px;}
+                QPushButton:checked{image:url(./image/KOR/2-2.png); border:0px;}
+
+                ''')
+            return pushButton
+
         def setupUi(self, Form):
 
             Form.setObjectName("Form")
             Form.resize(1920, 1080)
             self.From_button = False
 
-            Form.setStyleSheet("background-color : #EDECEA;")
+            Form.setStyleSheet("background-color : rgb(248, 249, 251);")
 
             self.label = QtWidgets.QLabel(Form)
-            self.label.setGeometry(QtCore.QRect(30, 52, 271, 41))
-            font = QtGui.QFont()
-            font.setFamily("서울남산 장체B")
-            font.setPointSize(36)
-            self.label.setFont(font)
-            self.label.setStyleSheet("color : #ACCCC4")
-            self.label.setObjectName("label")
-
-            self.label_2 = QtWidgets.QLabel(Form)
-            self.label_2.setGeometry(QtCore.QRect(30, 100, 341, 41))
-            font = QtGui.QFont()
-            font.setFamily("서울남산 장체B")
-            font.setPointSize(36)
-            self.label_2.setFont(font)
-            self.label_2.setStyleSheet("color : #C4BCB8;")
-            self.label_2.setObjectName("label_2")
-
-            self.label_3 = QtWidgets.QLabel(Form)
-            self.label_3.setGeometry(QtCore.QRect(373, 88, 56, 41))
+            self.label.setGeometry(QtCore.QRect(272, 72, 271, 41))
             font = QtGui.QFont()
             font.setFamily("서울남산 장체B")
             font.setPointSize(18)
-            self.label_3.setFont(font)
-            self.label_3.setStyleSheet("color : #ACCCC4;")
-            self.label_3.setObjectName("label_3")
+            self.label.setFont(font)
+            self.label.setStyleSheet("color : rgb(32, 36, 47)")
+            self.label.setObjectName("label")
 
-            self.pushButton = QtWidgets.QPushButton(Form)
-            self.pushButton.setGeometry(QtCore.QRect(30, 190, 200, 120))
-            self.pushButton.setStyleSheet(
-                '''
-                QPushButton{image:url(./image/KOR/1-1.png); border:0px;}
-                QPushButton:hover{image:url(./image/KOR/1-3.png); border:0px;}
-                QPushButton:checked{image:url(./image/KOR/1-2.png); border:0px;}
-                ''')
-            self.pushButton.setCheckable(True)
-            self.pushButton.setObjectName("pushButton")
+            # self.label_2 = QtWidgets.QLabel(Form)
+            # self.label_2.setGeometry(QtCore.QRect(30, 100, 341, 41))
+            # font = QtGui.QFont()
+            # font.setFamily("서울남산 장체B")
+            # font.setPointSize(36)
+            # self.label_2.setFont(font)
+            # self.label_2.setStyleSheet("color : #C4BCB8;")
+            # self.label_2.setObjectName("label_2")
 
-            self.pushButton_2 = QtWidgets.QPushButton(Form)
-            self.pushButton_2.setGeometry(QtCore.QRect(270, 190, 200, 120))
-            self.pushButton_2.setStyleSheet(
-                '''
-                QPushButton{image:url(./image/KOR/3-1.png); border:0px;}
-                QPushButton:hover{image:url(./image/KOR/3-3.png); border:0px;}
-                QPushButton:checked{image:url(./image/KOR/3-2.png); border:0px;}
-                ''')
-            self.pushButton_2.setObjectName("pushButton_2")
-            self.pushButton_2.setCheckable(True)
-            self.pushButton_3 = QtWidgets.QPushButton(Form)
-            self.pushButton_3.setGeometry(QtCore.QRect(30, 370, 200, 120))
-            self.pushButton_3.setStyleSheet(
-                '''
-                QPushButton{image:url(./image/KOR/2-1.png); border:0px;}
-                QPushButton:hover{image:url(./image/KOR/2-3.png); border:0px;}
-                QPushButton:checked{image:url(./image/KOR/2-2.png); border:0px;}
-                ''')
-            self.pushButton_3.setCheckable(True)
-            self.pushButton_3.setObjectName("pushButton_3")
-            self.pushButton_4 = QtWidgets.QPushButton(Form)
-            self.pushButton_4.setGeometry(QtCore.QRect(270, 370, 200, 120))
-            self.pushButton_4.setStyleSheet(
-                '''
-                QPushButton{image:url(./image/KOR/4-1.png); border:0px;}
-                QPushButton:hover{image:url(./image/KOR/4-3.png); border:0px;}
-                QPushButton:checked{image:url(./image/KOR/4-2.png); border:0px;}
-                ''')
-            self.pushButton_4.setCheckable(True)
-            self.pushButton_4.setObjectName("pushButton_4")
+            # self.label_3 = QtWidgets.QLabel(Form)
+            # self.label_3.setGeometry(QtCore.QRect(373, 88, 56, 41))
+            # font = QtGui.QFont()
+            # font.setFamily("서울남산 장체B")
+            # font.setPointSize(18)
+            # self.label_3.setFont(font)
+            # self.label_3.setStyleSheet("color : #ACCCC4;")
+            # self.label_3.setObjectName("label_3")
 
-            self.pushButton_7 = QtWidgets.QPushButton(Form)
-            self.pushButton_7.setGeometry(QtCore.QRect(380, 650, 111, 111))
-            self.pushButton_7.setStyleSheet("border-radius : 55; border : 2px;")
-            self.pushButton_7.setStyleSheet(
-                '''
-                QPushButton{image:url(./image/cam.png); border:0px;}
-                QPushButton:hover{image:url(./image/cam-hover.png); border:0px;}
-                ''')
-            self.pushButton_7.setObjectName("pushButton_7")
 
             # Button 8 : Language Setting
             self.pushButton_8 = QtWidgets.QPushButton(Form)
-            self.pushButton_8.setGeometry(QtCore.QRect(1820, 13, 35, 35))
+            self.pushButton_8.setGeometry(QtCore.QRect(950, 80, 30, 30))
             self.pushButton_8.setStyleSheet("border-radius : 20;")
             self.pushButton_8.setStyleSheet(
                 '''
@@ -1655,46 +1614,71 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_8.clicked.connect(self.settingwindow)
 
             # Button 5 : Power
-            self.pushButton_5 = QtWidgets.QPushButton(Form)
-            self.pushButton_5.setGeometry(QtCore.QRect(160, 560, 201, 201))
+            self.pushButton_5 = QtWidgets.QPushButton('&카메라 켜기', Form)
+            self.pushButton_5.setGeometry(QtCore.QRect(30, 538, 502, 100))
             self.pushButton_5.setStyleSheet("border-radius : 100; border : 2px;")
-            self.pushButton_5.setStyleSheet(
-                '''
-                QPushButton{image:url(./image/Power.png); border:0px;}
+            '''
+                            QPushButton{image:url(./image/Power.png); border:0px;}
                 QPushButton:hover{image:url(./image/Power-hover.png); border:0px;}
                 QPushButton:checked{image:url(./image/Power-on.png); border:0px;}
+            '''
+            self.pushButton_5.setStyleSheet(
+                '''
+                QPushButton{
+                    color: white;
+                    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                    stop:0 rgba(226, 0, 46, 255),
+                    stop:1 rgba(144, 61, 167, 255));
+                    border-radius: 30px;
+                }
+                QPushButton:hover {
+                    background-color: rgb(246, 20, 66); border-radius: 30px;
+                }
                 ''')
             self.pushButton_5.setObjectName("pushButton_5")
             self.pushButton_5.setCheckable(True)
             self.pushButton_5.raise_()
 
             # Button 6 : Question Mark
-            self.pushButton_6 = QtWidgets.QPushButton(Form)
-            self.pushButton_6.setGeometry(QtCore.QRect(30, 650, 111, 111))
+            self.pushButton_6 = QtWidgets.QPushButton('&가이드 열기', Form)
+            self.pushButton_6.setGeometry(QtCore.QRect(547, 538, 502, 100))
             self.pushButton_6.setStyleSheet("border-radius : 55; border : 2px;")
-            self.pushButton_6.setStyleSheet(
-                '''
+            '''
                 QPushButton{image:url(./Image/qmark.png); border:0px;}
                 QPushButton:hover{image:url(./Image/qmark-hover.png); border:0px;}
+                
+            '''
+            self.pushButton_6.setStyleSheet(
+                '''
+                QPushButton{
+                    color: white;
+                    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                    stop:0 rgba(0, 160, 182, 255),
+                    stop:1 rgba(144, 61, 167, 255));
+                    border-radius: 30px;
+                }
+                QPushButton:hover {
+                    background-color: rgb(20, 180, 202); border-radius: 30px;
+                }
                 ''')
             self.pushButton_6.setObjectName("pushButton_6")
             # self.pushButton_6.clicked.connect(self.guidewindow)
 
-            self.pushButton_7.clicked.connect(self.screenshot)
-            self.pushButton_7.raise_()
+
 
             self.pushButton_9 = QtWidgets.QPushButton(Form)
-            self.pushButton_9.setGeometry(QtCore.QRect(30, 860, 480, 131))
+            self.pushButton_9.setGeometry(QtCore.QRect(30, 50, 230, 60))
             self.pushButton_9.setStyleSheet(
                 '''
                 QPushButton{image:url(./image/inbody.png); border:0px;}
                 QPushButton:hover{image:url(./image/인바디.png); border:0px;}
                 
                 ''')
+
             self.pushButton_9.setObjectName("pushButton_9")
             self.pushButton_9.clicked.connect(self.Go_to_inbody)
             self.pushButton_10 = QtWidgets.QPushButton(Form)
-            self.pushButton_10.setGeometry(QtCore.QRect(1870, 10, 38, 38))
+            self.pushButton_10.setGeometry(QtCore.QRect(1000, 79, 30, 30))
             self.pushButton_10.setStyleSheet("border-radius : 20;")
             self.pushButton_10.setStyleSheet(
                 '''
@@ -1703,59 +1687,190 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 ''')
             self.pushButton_10.setObjectName("pushButton_10")
             self.pushButton_10.clicked.connect(self.exitDialog)
-            # Qmessagebox 나가는 버튼
+
+            # 카메라 모니터링
             self.frame = QtWidgets.QFrame(Form)
-            self.frame.setGeometry(QtCore.QRect(530, 62, 1328, 707))
+            self.frame.setGeometry(QtCore.QRect(1079, 30, 811, 608))
             self.frame.setAutoFillBackground(False)
-            self.frame.setStyleSheet("background-color : #C6DFD6;")
+            self.frame.setStyleSheet("background-color : rgba(0, 0, 0, 0%); border-radius: 30px;")
             self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
             self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
             self.frame.setObjectName("frame")
             self.label_6 = QtWidgets.QLabel(self.frame)
-            self.label_6.setGeometry(QtCore.QRect(192, 0, 943, 707))
-            self.label_6.setStyleSheet("background-color : white;")
+            self.label_6.setGeometry(QtCore.QRect(0, 0, 811, 608))
+            self.label_6.setStyleSheet("background-color : white; border-radius: 30px;", )
             self.label_6.setObjectName("label_6")
             self.label_6.setPixmap(QtGui.QPixmap("./image/default2.jpg"))
 
+            self.cam_frame = QtWidgets.QLabel(self.frame)
+            self.cam_frame.setGeometry(QtCore.QRect(0, 0, 811, 608))
+            self.cam_frame.setStyleSheet("background-color : rgba(0,0,0,0%);")
+            self.cam_frame.setObjectName("cam_frame")
+            self.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame.png"))
+            # # original
+            # pixmap = QtGui.QPixmap("./image/default2.jpg")
+            # pixmap = pixmap.scaledToWidth(811)
+            # pixmap = pixmap.scaledToHeight(608)
+            # radius = 30
+            #
+            # # create empty pixmap of same size as original
+            # rounded = QtGui.QPixmap(pixmap.size())
+            # rounded.fill(QtGui.QColor("transparent"))
+            #
+            # # draw rounded rect on new pixmap using original pixmap as brush
+            # painter = QtGui.QPainter(rounded)
+            # painter.setRenderHint(QtGui.QPainter.Antialiasing)
+            # painter.setBrush(QtGui.QBrush(pixmap))
+            # painter.setPen(QtCore.Qt.NoPen)
+            # painter.drawRoundedRect(pixmap.rect(), radius, radius)
+            #
+            # # set pixmap of label
+            # self.label_6.setPixmap(rounded)
+
+            self.pushButton_7 = QtWidgets.QPushButton(self.frame)
+            self.pushButton_7.setGeometry(QtCore.QRect(576, 528, 200, 60))
+            self.pushButton_7.setStyleSheet("border-radius : 55; border : 2px;")
+            self.pushButton_7.setStyleSheet("background-color : rgba( 255, 255, 255, 0% );, ")
+            self.pushButton_7.setStyleSheet(
+                '''
+                QPushButton{image:url(./image/cam.png); border:0px;}
+                QPushButton:hover{image:url(./image/cam-hover.png); border:0px;}
+                ''')
+            self.pushButton_7.setObjectName("pushButton_7")
+
+            self.pushButton_7.clicked.connect(self.screenshot)
+            self.pushButton_7.raise_()
+
+            # 모드제어 프레임
+            self.frame_mode = QtWidgets.QFrame(Form)
+            self.frame_mode.setGeometry(QtCore.QRect(30, 188, 1019, 320))
+            self.frame_mode.setAutoFillBackground(False)
+            self.frame_mode.setStyleSheet("background-color : rgba(0, 0, 0, 0%)")
+            self.frame_mode.setFrameShape(QtWidgets.QFrame.StyledPanel)
+            self.frame_mode.setFrameShadow(QtWidgets.QFrame.Raised)
+            self.frame_mode.setObjectName("frame_mode")
+
+            self.pushButton = QtWidgets.QPushButton(self.frame_mode)
+            self.pushButton.setGeometry(QtCore.QRect(0, 0, 244, 325))
+            self.pushButton.setStyleSheet("background-color : #FFFFFF;")
+            self.pushButton.setStyleSheet(
+                '''
+                QPushButton{image:url(./image/KOR/1-1.png); border:0px;}
+                QPushButton:hover{image:url(./image/KOR/1-3.png); border:0px;}
+                QPushButton:checked{image:url(./image/KOR/1-2.png); border:0px;}
+                QPushButton{
+                    background-color: rgb(233, 236, 241); border-radius: 30px;
+                }
+                QPushButton:hover {
+                    background-color: rgb(220, 223, 228); border-radius: 30px;
+                }
+                QPushButton:checked {
+                    background-color: rgb(0, 217, 104); border-radius: 30px;
+                }
+                '''
+            )
+
+            self.pushButton.setCheckable(True)
+            self.pushButton.setObjectName("pushButton")
+
+            self.pushButton_2 = QtWidgets.QPushButton(self.frame_mode)
+            self.pushButton_2.setGeometry(QtCore.QRect(259, 0, 244, 325))
+            self.pushButton_2.setStyleSheet("background-color : #FFFFFF;")
+            self.pushButton_2.setStyleSheet(
+                '''
+                QPushButton{image:url(./image/KOR/3-1.png); border:0px;}
+                QPushButton:hover{image:url(./image/KOR/3-3.png); border:0px;}
+                QPushButton:checked{image:url(./image/KOR/3-2.png); border:0px;}
+                QPushButton{
+                    background-color: rgb(233, 236, 241); border-radius: 30px;
+                }
+                QPushButton:hover {
+                    background-color: rgb(220, 223, 228); border-radius: 30px;
+                }
+                QPushButton:checked {
+                    background-color: rgb(0, 217, 104); border-radius: 30px;
+                }
+                ''')
+            self.pushButton_2.setObjectName("pushButton_2")
+            self.pushButton_2.setCheckable(True)
+            self.pushButton_3 = QtWidgets.QPushButton(self.frame_mode)
+            self.pushButton_3.setGeometry(QtCore.QRect(518, 0, 244, 325))
+            self.pushButton_3.setStyleSheet(
+                '''
+                QPushButton{image:url(./image/KOR/2-1.png); border:0px;}
+                QPushButton:hover{image:url(./image/KOR/2-3.png); border:0px;}
+                QPushButton:checked{image:url(./image/KOR/2-2.png); border:0px;}
+                QPushButton{
+                    background-color: rgb(233, 236, 241); border-radius: 30px;
+                }
+                QPushButton:hover {
+                    background-color: rgb(220, 223, 228); border-radius: 30px;
+                }
+                QPushButton:checked {
+                    background-color: rgb(0, 217, 104); border-radius: 30px;
+                }
+                ''')
+            self.pushButton_3.setCheckable(True)
+            self.pushButton_3.setObjectName("pushButton_3")
+            self.pushButton_4 = QtWidgets.QPushButton(self.frame_mode)
+            self.pushButton_4.setGeometry(QtCore.QRect(777, 0, 244, 325))
+            self.pushButton_4.setStyleSheet(
+                '''
+                QPushButton{image:url(./image/KOR/4-1.png); border:0px;}
+                QPushButton:hover{image:url(./image/KOR/4-3.png); border:0px;}
+                QPushButton:checked{image:url(./image/KOR/4-2.png); border:0px;}
+                QPushButton{
+                    background-color: rgb(233, 236, 241); border-radius: 30px;
+                }
+                QPushButton:hover {
+                    background-color: rgb(220, 223, 228); border-radius: 30px;
+                }
+                QPushButton:checked {
+                    background-color: rgb(0, 217, 104); border-radius: 30px;
+                }
+                ''')
+            self.pushButton_4.setCheckable(True)
+            self.pushButton_4.setObjectName("pushButton_4")
+
             # MainWindow.setCentralWidget(self.centralwidget)
 
-            self.line = QtWidgets.QFrame(Form)
-            self.line.setGeometry(QtCore.QRect(40, 340, 130, 16))
-            self.line.setStyleSheet("color : #C4BCB8;")
-            self.line.setFrameShadow(QtWidgets.QFrame.Plain)
-            self.line.setLineWidth(10)
-            self.line.setFrameShape(QtWidgets.QFrame.HLine)
-            self.line.setObjectName("line")
-            self.line_2 = QtWidgets.QFrame(Form)
-            self.line_2.setGeometry(QtCore.QRect(350, 340, 130, 16))
-            self.line_2.setStyleSheet("color : #C4BCB8;")
-            self.line_2.setFrameShadow(QtWidgets.QFrame.Plain)
-            self.line_2.setLineWidth(10)
-            self.line_2.setFrameShape(QtWidgets.QFrame.HLine)
-            self.line_2.setObjectName("line_2")
-            self.line_3 = QtWidgets.QFrame(Form)
-            self.line_3.setGeometry(QtCore.QRect(250, 220, 20, 100))
-            self.line_3.setStyleSheet("color : #C4BCB8;")
-            self.line_3.setFrameShadow(QtWidgets.QFrame.Plain)
-            self.line_3.setLineWidth(10)
-            self.line_3.setFrameShape(QtWidgets.QFrame.VLine)
-            self.line_3.setObjectName("line_3")
-            self.line_4 = QtWidgets.QFrame(Form)
-            self.line_4.setGeometry(QtCore.QRect(250, 376, 20, 100))
-            self.line_4.setStyleSheet("color : #C4BCB8;")
-            self.line_4.setFrameShadow(QtWidgets.QFrame.Plain)
-            self.line_4.setLineWidth(10)
-            self.line_4.setFrameShape(QtWidgets.QFrame.VLine)
-            self.line_4.setObjectName("line_4")
-            self.label_4 = QtWidgets.QLabel(Form)
-            self.label_4.setGeometry(QtCore.QRect(214, 320, 100, 56))
-            font = QtGui.QFont()
-            font.setFamily("서울남산 장체B")
-            font.setPointSize(28)
-            self.label_4.setFont(font)
-            self.label_4.setLayoutDirection(QtCore.Qt.LayoutDirectionAuto)
-            self.label_4.setStyleSheet("color : #ACCCC4;")
-            self.label_4.setObjectName("label_4")
+            # self.line = QtWidgets.QFrame(Form)
+            # self.line.setGeometry(QtCore.QRect(40, 340, 130, 16))
+            # self.line.setStyleSheet("color : #C4BCB8;")
+            # self.line.setFrameShadow(QtWidgets.QFrame.Plain)
+            # self.line.setLineWidth(10)
+            # self.line.setFrameShape(QtWidgets.QFrame.HLine)
+            # self.line.setObjectName("line")
+            # self.line_2 = QtWidgets.QFrame(Form)
+            # self.line_2.setGeometry(QtCore.QRect(350, 340, 130, 16))
+            # self.line_2.setStyleSheet("color : #C4BCB8;")
+            # self.line_2.setFrameShadow(QtWidgets.QFrame.Plain)
+            # self.line_2.setLineWidth(10)
+            # self.line_2.setFrameShape(QtWidgets.QFrame.HLine)
+            # self.line_2.setObjectName("line_2")
+            # self.line_3 = QtWidgets.QFrame(Form)
+            # self.line_3.setGeometry(QtCore.QRect(250, 220, 20, 100))
+            # self.line_3.setStyleSheet("color : #C4BCB8;")
+            # self.line_3.setFrameShadow(QtWidgets.QFrame.Plain)
+            # self.line_3.setLineWidth(10)
+            # self.line_3.setFrameShape(QtWidgets.QFrame.VLine)
+            # self.line_3.setObjectName("line_3")
+            # self.line_4 = QtWidgets.QFrame(Form)
+            # self.line_4.setGeometry(QtCore.QRect(250, 376, 20, 100))
+            # self.line_4.setStyleSheet("color : #C4BCB8;")
+            # self.line_4.setFrameShadow(QtWidgets.QFrame.Plain)
+            # self.line_4.setLineWidth(10)
+            # self.line_4.setFrameShape(QtWidgets.QFrame.VLine)
+            # self.line_4.setObjectName("line_4")
+            # self.label_4 = QtWidgets.QLabel(Form)
+            # self.label_4.setGeometry(QtCore.QRect(214, 320, 100, 56))
+            # font = QtGui.QFont()
+            # font.setFamily("서울남산 장체B")
+            # font.setPointSize(28)
+            # self.label_4.setFont(font)
+            # self.label_4.setLayoutDirection(QtCore.Qt.LayoutDirectionAuto)
+            # self.label_4.setStyleSheet("color : #ACCCC4;")
+            # self.label_4.setObjectName("label_4")
 
             self.menubar = QtWidgets.QMenuBar(Form)
             self.menubar.setGeometry(QRect(0, 0, 870, 21))
@@ -1788,24 +1903,60 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     QPushButton{image:url(./image/KOR/1-1.png); border:0px;}
                     QPushButton:hover{image:url(./image/KOR/1-3.png); border:0px;}
                     QPushButton:checked{image:url(./image/KOR/1-2.png); border:0px;}
+                    QPushButton{
+                    background-color: rgb(233, 236, 241); border-radius: 30px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(220, 223, 228); border-radius: 30px;
+                    }
+                    QPushButton:checked {
+                        background-color: rgb(0, 217, 104); border-radius: 30px;
+                    }
                     ''')
                 self.pushButton_2.setStyleSheet(
                     '''
                     QPushButton{image:url(./image/KOR/3-1.png); border:0px;}
                     QPushButton:hover{image:url(./image/KOR/3-3.png); border:0px;}
                     QPushButton:checked{image:url(./image/KOR/3-2.png); border:0px;}
+                                        QPushButton{
+                    background-color: rgb(233, 236, 241); border-radius: 30px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(220, 223, 228); border-radius: 30px;
+                    }
+                    QPushButton:checked {
+                        background-color: rgb(0, 217, 104); border-radius: 30px;
+                    }
                     ''')
                 self.pushButton_3.setStyleSheet(
                     '''
                     QPushButton{image:url(./image/KOR/2-1.png); border:0px;}
                     QPushButton:hover{image:url(./image/KOR/2-3.png); border:0px;}
                     QPushButton:checked{image:url(./image/KOR/2-2.png); border:0px;}
+                                        QPushButton{
+                    background-color: rgb(233, 236, 241); border-radius: 30px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(220, 223, 228); border-radius: 30px;
+                    }
+                    QPushButton:checked {
+                        background-color: rgb(0, 217, 104); border-radius: 30px;
+                    }
                     ''')
                 self.pushButton_4.setStyleSheet(
                     '''
                     QPushButton{image:url(./image/KOR/4-1.png); border:0px;}
                     QPushButton:hover{image:url(./image/KOR/4-3.png); border:0px;}
                     QPushButton:checked{image:url(./image/KOR/4-2.png); border:0px;}
+                                        QPushButton{
+                    background-color: rgb(233, 236, 241); border-radius: 30px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(220, 223, 228); border-radius: 30px;
+                    }
+                    QPushButton:checked {
+                        background-color: rgb(0, 217, 104); border-radius: 30px;
+                    }
                     ''')
             elif language == '영어(English)':
                 self.pushButton.setStyleSheet(
@@ -1813,34 +1964,71 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     QPushButton{image:url(./image/ENG/1-1.png); border:0px;}
                     QPushButton:hover{image:url(./image/ENG/1-3.png); border:0px;}
                     QPushButton:checked{image:url(./image/ENG/1-2.png); border:0px;}
+                    QPushButton{
+                    background-color: rgb(233, 236, 241); border-radius: 30px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(220, 223, 228); border-radius: 30px;
+                    }
+                    QPushButton:checked {
+                        background-color: rgb(0, 217, 104); border-radius: 30px;
+                    }
                     ''')
                 self.pushButton_2.setStyleSheet(
                     '''
                     QPushButton{image:url(./image/ENG/3-1.png); border:0px;}
                     QPushButton:hover{image:url(./image/ENG/3-3.png); border:0px;}
                     QPushButton:checked{image:url(./image/ENG/3-2.png); border:0px;}
+                    QPushButton{
+                    background-color: rgb(233, 236, 241); border-radius: 30px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(220, 223, 228); border-radius: 30px;
+                    }
+                    QPushButton:checked {
+                        background-color: rgb(0, 217, 104); border-radius: 30px;
+                    }
                     ''')
                 self.pushButton_3.setStyleSheet(
                     '''
                     QPushButton{image:url(./image/ENG/2-1.png); border:0px;}
                     QPushButton:hover{image:url(./image/ENG/2-3.png); border:0px;}
                     QPushButton:checked{image:url(./image/ENG/2-2.png); border:0px;}
+                    QPushButton{
+                    background-color: rgb(233, 236, 241); border-radius: 30px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(220, 223, 228); border-radius: 30px;
+                    }
+                    QPushButton:checked {
+                        background-color: rgb(0, 217, 104); border-radius: 30px;
+                    }
                     ''')
                 self.pushButton_4.setStyleSheet(
                     '''
                     QPushButton{image:url(./image/ENG/4-1.png); border:0px;}
                     QPushButton:hover{image:url(./image/ENG/4-3.png); border:0px;}
                     QPushButton:checked{image:url(./image/ENG/4-2.png); border:0px;}
+                    QPushButton{
+                    background-color: rgb(233, 236, 241); border-radius: 30px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(220, 223, 228); border-radius: 30px;
+                    }
+                    QPushButton:checked {
+                        background-color: rgb(0, 217, 104); border-radius: 30px;
+                    }
                     ''')
+
 
         def retranslateUi(self, Form):
             _translate = QtCore.QCoreApplication.translate
-            Form.setWindowTitle(_translate("Form", "Hand Gesture Presentation Tool V 1.1"))
-            self.label_2.setText(_translate("Form", "Presentation Tool"))
-            self.label_3.setText(_translate("Form", "1.1"))
+            Form.setWindowTitle(_translate("Form", "Motion Presentation V 1.2"))
+            # self.label_2.setText(_translate("Form", "Presentation Tool"))
+            # self.label_3.setText(_translate("Form", "1.2"))
             # 여기다가
-            self.label.setText(_translate("Form", "Hand Gesture"))
-            self.label_4.setText(_translate("Form", "MODE"))
+            self.label.setText(_translate("Form", "Motion Presentation"))
+            # self.label_4.setText(_translate("Form", "MODE"))
 
         def exitDialog(self):
             msgBox = QMessageBox()
@@ -1913,7 +2101,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             bytes_per_line = ch * w  # 차원?
             convert_to_Qt_format = QtGui.QImage(img.data, w, h, bytes_per_line,
                                                 QtGui.QImage.Format_RGB888)  # qt 포맷으로 바꾸기
-            p = convert_to_Qt_format.scaled(943, 707, QtCore.Qt.KeepAspectRatio)  # 디스클레이 크기로 바꿔주기.
+            p = convert_to_Qt_format.scaled(811, 608, QtCore.Qt.KeepAspectRatio)  # 디스클레이 크기로 바꿔주기.
 
             return QtGui.QPixmap.fromImage(p)  # 진정한 qt 이미지 생성
 
@@ -1931,6 +2119,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 self.pushButton_4.setEnabled(True)
                 self.pushButton_7.setEnabled(True)
                 self.button6_checked.emit(True)
+
             else:
                 self.pushButton.setEnabled(False)
                 self.pushButton_2.setEnabled(False)
@@ -1963,8 +2152,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # print(frameRect)
             # get the grabWidget geometry and remap it to global coordinates
             grabGeometry = self.grabWidget.geometry()
-            grabGeometry = QtCore.QRect(0, 0, 1328, 187)
-            grabGeometry.moveTopLeft(self.grabWidget.mapToGlobal(QtCore.QPoint(530, 871)))
+            grabGeometry = QtCore.QRect(0, 0, 1860, 350)
+            # 30, 668
+            grabGeometry.moveTopLeft(self.grabWidget.mapToGlobal(QtCore.QPoint(30, 668)))
 
             # get the actual margins between the grabWidget and the window margins
             left = frameRect.left() - grabGeometry.left()
@@ -1973,8 +2163,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             bottom = frameRect.bottom() - grabGeometry.bottom()
 
             # reset the geometries to get "0-point" rectangles for the mask
-            frameRect.moveTopLeft(QtCore.QPoint(530, 831))
-            grabGeometry.moveTopLeft(QtCore.QPoint(530, 831))
+            frameRect.moveTopLeft(QtCore.QPoint(30, 668))
+            grabGeometry.moveTopLeft(QtCore.QPoint(30, 668))
 
             # create the base mask region, adjusted to the margins between the
             # grabWidget and the window as computed above
