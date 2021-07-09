@@ -1006,7 +1006,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     mod_y = max(0, mod_y);
                     mod_y = min(FULLSIZE[1], mod_y)
                     # print(mod_x, mod_y)
-                    return int(mod_x) + 1920, int(mod_y)
+                    return int(mod_x), int(mod_y)
 
                 def mousemove(self):
                     if now_click == True:

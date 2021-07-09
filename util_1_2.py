@@ -807,7 +807,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     WHEEL_USE = False
                     laser_state = mode_2_off(mode_global, laser_state)
                     print('MODE 1, 대기 모드')
-                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 2020, 100, 0, 0)
+                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 100, 100, 0, 0)
 
                     # win32api.keybd_event(0x74, 0, 0, 0)  # F5 DOWN
                     # win32api.keybd_event(0x74, 0, win32con.KEYEVENTF_KEYUP, 0)  # F5 UP
@@ -918,7 +918,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     mod_y = max(0, mod_y);
                     mod_y = min(FULLSIZE[1], mod_y)
                     # print(mod_x, mod_y)
-                    return int(mod_x) + 1920, int(mod_y)
+                    return int(mod_x) - 1919, int(mod_y)
 
                 def mousemove(self):
                     if now_click == True:
@@ -1574,12 +1574,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             Form.setStyleSheet("background-color : rgb(248, 249, 251);")
 
             self.label = QtWidgets.QLabel(Form)
-            self.label.setGeometry(QtCore.QRect(272, 72, 271, 41))
-            font = QtGui.QFont()
-            font.setFamily("서울남산 장체B")
-            font.setPointSize(18)
-            self.label.setFont(font)
-            self.label.setStyleSheet("color : rgb(32, 36, 47)")
+            self.label.setGeometry(QtCore.QRect(217, 72, 300, 48))
+
+            self.label.setStyleSheet("image:url(./Image/logo.png)")
             self.label.setObjectName("label")
 
             # self.label_2 = QtWidgets.QLabel(Form)
@@ -1608,13 +1605,13 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_8.setStyleSheet(
                 '''
                 QPushButton{image:url(./Image/setting.png); border:0px;}
-                QPushButton:hover{image:url(./Image/setting-hover.png); border:0px;}
+                QPushButton:hover{image:url(./Image/setting_hover.png); border:0px;}
                 ''')
             self.pushButton_8.setObjectName("pushButton_8")
             self.pushButton_8.clicked.connect(self.settingwindow)
 
             # Button 5 : Power
-            self.pushButton_5 = QtWidgets.QPushButton('&카메라 켜기', Form)
+            self.pushButton_5 = QtWidgets.QPushButton(Form)
             self.pushButton_5.setGeometry(QtCore.QRect(30, 538, 502, 100))
             self.pushButton_5.setStyleSheet("border-radius : 100; border : 2px;")
             '''
@@ -1622,6 +1619,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 QPushButton:hover{image:url(./image/Power-hover.png); border:0px;}
                 QPushButton:checked{image:url(./image/Power-on.png); border:0px;}
             '''
+
             self.pushButton_5.setStyleSheet(
                 '''
                 QPushButton{
@@ -1630,19 +1628,24 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     stop:0 rgba(226, 0, 46, 255),
                     stop:1 rgba(144, 61, 167, 255));
                     border-radius: 30px;
+                    image:url(./image/cam_on.png);
                 }
                 QPushButton:hover {
                     background-color: rgb(246, 20, 66); border-radius: 30px;
                 }
+                QPushButton:checked{
+                    background-color: rgb(246, 20, 66); border-radius: 30px;
+                    image:url(./image/cam_off.png);
+                    }
                 ''')
             self.pushButton_5.setObjectName("pushButton_5")
             self.pushButton_5.setCheckable(True)
             self.pushButton_5.raise_()
 
             # Button 6 : Question Mark
-            self.pushButton_6 = QtWidgets.QPushButton('&가이드 열기', Form)
+            self.pushButton_6 = QtWidgets.QPushButton(Form)
             self.pushButton_6.setGeometry(QtCore.QRect(547, 538, 502, 100))
-            self.pushButton_6.setStyleSheet("border-radius : 55; border : 2px;")
+            self.pushButton_6.setStyleSheet("border : 2px;")
             '''
                 QPushButton{image:url(./Image/qmark.png); border:0px;}
                 QPushButton:hover{image:url(./Image/qmark-hover.png); border:0px;}
@@ -1656,6 +1659,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     stop:0 rgba(0, 160, 182, 255),
                     stop:1 rgba(144, 61, 167, 255));
                     border-radius: 30px;
+                    image:url(./Image/guide_open.png);
                 }
                 QPushButton:hover {
                     background-color: rgb(20, 180, 202); border-radius: 30px;
@@ -1671,7 +1675,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_9.setStyleSheet(
                 '''
                 QPushButton{image:url(./image/inbody.png); border:0px;}
-                QPushButton:hover{image:url(./image/인바디.png); border:0px;}
+                QPushButton:hover{image:url(./image/inbody_hover.png); border:0px;}
                 
                 ''')
 
@@ -1683,7 +1687,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_10.setStyleSheet(
                 '''
                 QPushButton{image:url(./image/exit.png); border:0px;}
-                QPushButton:hover{image:url(./image/exit-hover.png); border:0px;}
+                QPushButton:hover{image:url(./image/exit_hover.png); border:0px;}
                 ''')
             self.pushButton_10.setObjectName("pushButton_10")
             self.pushButton_10.clicked.connect(self.exitDialog)
@@ -1700,41 +1704,29 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.label_6.setGeometry(QtCore.QRect(0, 0, 811, 608))
             self.label_6.setStyleSheet("background-color : white; border-radius: 30px;", )
             self.label_6.setObjectName("label_6")
-            self.label_6.setPixmap(QtGui.QPixmap("./image/default2.jpg"))
+            self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
 
             self.cam_frame = QtWidgets.QLabel(self.frame)
             self.cam_frame.setGeometry(QtCore.QRect(0, 0, 811, 608))
             self.cam_frame.setStyleSheet("background-color : rgba(0,0,0,0%);")
             self.cam_frame.setObjectName("cam_frame")
             self.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame.png"))
-            # # original
-            # pixmap = QtGui.QPixmap("./image/default2.jpg")
-            # pixmap = pixmap.scaledToWidth(811)
-            # pixmap = pixmap.scaledToHeight(608)
-            # radius = 30
-            #
-            # # create empty pixmap of same size as original
-            # rounded = QtGui.QPixmap(pixmap.size())
-            # rounded.fill(QtGui.QColor("transparent"))
-            #
-            # # draw rounded rect on new pixmap using original pixmap as brush
-            # painter = QtGui.QPainter(rounded)
-            # painter.setRenderHint(QtGui.QPainter.Antialiasing)
-            # painter.setBrush(QtGui.QBrush(pixmap))
-            # painter.setPen(QtCore.Qt.NoPen)
-            # painter.drawRoundedRect(pixmap.rect(), radius, radius)
-            #
-            # # set pixmap of label
-            # self.label_6.setPixmap(rounded)
+
+            self.script_frame = QtWidgets.QLabel(Form)
+            self.script_frame.setGeometry(QtCore.QRect(30, 668, 100, 100)) #1860, 350))
+            self.script_frame.setStyleSheet("background-color : rgba(0,250,255,50%);")
+            self.script_frame.setObjectName("script_frame")
+            self.script_frame.setPixmap(QtGui.QPixmap("./image/script_frame.png"))
+
 
             self.pushButton_7 = QtWidgets.QPushButton(self.frame)
-            self.pushButton_7.setGeometry(QtCore.QRect(576, 528, 200, 60))
+            self.pushButton_7.setGeometry(QtCore.QRect(610, 540, 200, 60))
             self.pushButton_7.setStyleSheet("border-radius : 55; border : 2px;")
             self.pushButton_7.setStyleSheet("background-color : rgba( 255, 255, 255, 0% );, ")
             self.pushButton_7.setStyleSheet(
                 '''
-                QPushButton{image:url(./image/cam.png); border:0px;}
-                QPushButton:hover{image:url(./image/cam-hover.png); border:0px;}
+                QPushButton{image:url(./image/capture.png); border:0px;}
+                QPushButton:hover{image:url(./image/capture_hover.png); border:0px;}
                 ''')
             self.pushButton_7.setObjectName("pushButton_7")
 
@@ -2027,7 +2019,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # self.label_2.setText(_translate("Form", "Presentation Tool"))
             # self.label_3.setText(_translate("Form", "1.2"))
             # 여기다가
-            self.label.setText(_translate("Form", "Motion Presentation"))
+            # self.label.setText(_translate("Form", "Motion Presentation"))
             # self.label_4.setText(_translate("Form", "MODE"))
 
         def exitDialog(self):
@@ -2133,7 +2125,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     if button.isChecked():
                         button.toggle()
                 self.button6_checked.emit(False)
-                self.label_6.setPixmap(QtGui.QPixmap("./image/default2.jpg"))
+                self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
 
         def settingwindow(self):
             dlg = Setting_window()
@@ -2156,11 +2148,14 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # 30, 668
             grabGeometry.moveTopLeft(self.grabWidget.mapToGlobal(QtCore.QPoint(30, 668)))
 
+
+
             # get the actual margins between the grabWidget and the window margins
             left = frameRect.left() - grabGeometry.left()
             top = frameRect.top() - grabGeometry.top()
             right = frameRect.right() - grabGeometry.right()
             bottom = frameRect.bottom() - grabGeometry.bottom()
+
 
             # reset the geometries to get "0-point" rectangles for the mask
             frameRect.moveTopLeft(QtCore.QPoint(30, 668))
