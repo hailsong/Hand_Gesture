@@ -8,6 +8,7 @@ import time
 import numpy as np
 from PIL import Image
 from tensorflow import keras
+from os import system
 
 import tensorflow as tf
 
@@ -604,7 +605,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         finger_th = np.array([-0.08736683, -0.96164491, -0.26001175])
         # print(ctrl_z_check, left)
         parameter = get_angle(palm, palm_th) + get_angle(finger, finger_th)
-        if p_check == 0 and left == 3 and parameter < 1:
+        if p_check == 0 and left == 3 and parameter < 1.2:
             print('이전 페이지 (Left Arrow)')
             win32api.keybd_event(0x25, 0, 0, 0)  # Left Arrow 누르기.
             win32api.keybd_event(0x25, 0, win32con.KEYEVENTF_KEYUP, 0)
@@ -918,7 +919,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     mod_y = max(0, mod_y);
                     mod_y = min(FULLSIZE[1], mod_y)
                     # print(mod_x, mod_y)
-                    return int(mod_x) - 1919, int(mod_y)
+                    # 모니터 수, 화면 갯수별로 다르게 Return 해야함
+                    return int(mod_x) - 1919 - 1920, int(mod_y)
 
                 def mousemove(self):
                     if now_click == True:
@@ -1008,11 +1010,14 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     # ctypes.windll.user32.mouse_event(0x0004, 0, 0, 0, 0)
                     now_click = False
 
-            def hand_click(landmark, pixel):
+            def hand_click(landmark, pixel, HM):
                 global now_click2
+                palm_v = HM.palm_vector
+                click_angle = get_angle(palm_v, np.array([0, 0, -1]))
 
                 if get_distance(landmark[4], landmark[10]) < get_distance(landmark[7],
-                                                                          landmark[8]) and now_click2 == False:
+                                                                          landmark[8]) and now_click2 == False\
+                        and click_angle < 1:
                     print('click')
                     pos = win32api.GetCursorPos()
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, pos[0], pos[1], 0, 0)
@@ -1338,7 +1343,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                             if finger_open_[2] != 1 and CLICK_USE == True:
                                 if not now_click:
-                                    click_tr = hand_click(mark_p, pixel_c)
+                                    click_tr = hand_click(mark_p, pixel_c, HM)
                             # else:
                             # win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, int(pixel_c.x), int(pixel_c.y), 0, 0)
 
@@ -1566,7 +1571,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             return pushButton
 
         def setupUi(self, Form):
-
+            # system("ZoomIt.exe")
             Form.setObjectName("Form")
             Form.resize(1920, 1080)
             self.From_button = False
@@ -1765,8 +1770,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_2.setStyleSheet("background-color : #FFFFFF;")
             self.pushButton_2.setStyleSheet(
                 '''
-                QPushButton{image:url(./image/KOR/3-1.png); border:0px;}
-                QPushButton:checked{image:url(./image/KOR/3-2.png); border:0px;}
+                QPushButton{image:url(./image/KOR/2-1.png); border:0px;}
+                QPushButton:checked{image:url(./image/KOR/2-2.png); border:0px;}
                 QPushButton{
                     background-color: rgb(233, 236, 241); border-radius: 30px;
                 }
@@ -1783,8 +1788,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_3.setGeometry(QtCore.QRect(518, 0, 244, 325))
             self.pushButton_3.setStyleSheet(
                 '''
-                QPushButton{image:url(./image/KOR/2-1.png); border:0px;}
-                QPushButton:checked{image:url(./image/KOR/2-2.png); border:0px;}
+                QPushButton{image:url(./image/KOR/3-1.png); border:0px;}
+                QPushButton:checked{image:url(./image/KOR/3-2.png); border:0px;}
                 QPushButton{
                     background-color: rgb(233, 236, 241); border-radius: 30px;
                 }
@@ -1898,8 +1903,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     ''')
                 self.pushButton_2.setStyleSheet(
                     '''
-                    QPushButton{image:url(./image/KOR/3-1.png); border:0px;}
-                    QPushButton:checked{image:url(./image/KOR/3-2.png); border:0px;}
+                    QPushButton{image:url(./image/KOR/2-1.png); border:0px;}
+                    QPushButton:checked{image:url(./image/KOR/2-2.png); border:0px;}
                                         QPushButton{
                     background-color: rgb(233, 236, 241); border-radius: 30px;
                     }
@@ -1912,8 +1917,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     ''')
                 self.pushButton_3.setStyleSheet(
                     '''
-                    QPushButton{image:url(./image/KOR/2-1.png); border:0px;}
-                    QPushButton:checked{image:url(./image/KOR/2-2.png); border:0px;}
+                    QPushButton{image:url(./image/KOR/3-1.png); border:0px;}
+                    QPushButton:checked{image:url(./image/KOR/3-2.png); border:0px;}
                                         QPushButton{
                     background-color: rgb(233, 236, 241); border-radius: 30px;
                     }
@@ -1992,8 +1997,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     ''')
                 self.pushButton_2.setStyleSheet(
                     '''
-                    QPushButton{image:url(./image/ENG/3-1.png); border:0px;}
-                    QPushButton:checked{image:url(./image/ENG/3-2.png); border:0px;}
+                    QPushButton{image:url(./image/ENG/2-1.png); border:0px;}
+                    QPushButton:checked{image:url(./image/ENG/2-2.png); border:0px;}
                     QPushButton{
                     background-color: rgb(233, 236, 241); border-radius: 30px;
                     }
@@ -2006,8 +2011,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     ''')
                 self.pushButton_3.setStyleSheet(
                     '''
-                    QPushButton{image:url(./image/ENG/2-1.png); border:0px;}
-                    QPushButton:checked{image:url(./image/ENG/2-2.png); border:0px;}
+                    QPushButton{image:url(./image/ENG/3-1.png); border:0px;}
+                    QPushButton:checked{image:url(./image/ENG/3-2.png); border:0px;}
                     QPushButton{
                     background-color: rgb(233, 236, 241); border-radius: 30px;
                     }
@@ -2141,7 +2146,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 pass
 
         def screenshot(self):
-            print('clicked')
+            # print('clicked')
             now = datetime.datetime.now().strftime("%d_%H-%M-%S")
             filename = './screenshots/' + str(now) + ".jpg"
             print('Saving image as ' + filename)
@@ -2210,8 +2215,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # 30, 668
             grabGeometry.moveTopLeft(self.grabWidget.mapToGlobal(QtCore.QPoint(30, 668)))
 
-
-
             # get the actual margins between the grabWidget and the window margins
             left = frameRect.left() - grabGeometry.left()
             top = frameRect.top() - grabGeometry.top()
@@ -2269,6 +2272,7 @@ if __name__ == '__main__':
     print("This is util set program, it works well... maybe... XD")
 
     print('Running main_1_2.py...')
-    from os import system
+
+    # system('ZoomIt.exe')
 
     system('python main_1_2.py')
