@@ -13,7 +13,7 @@ import tensorflow as tf
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox, QWidget, QTabWidget, QVBoxLayout
-from PyQt5.QtCore import QThread, QObject, QRect, pyqtSlot, pyqtSignal
+from PyQt5.QtCore import QThread, QObject, QRect, pyqtSlot, pyqtSignal, QSize
 import datetime
 import sys
 import os
@@ -1414,19 +1414,24 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
     class Setting_window(QtWidgets.QDialog):
         def setupUi(self, Dialog):
+            self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
             global language_setting
             Dialog.setObjectName("Setting")
-            Dialog.resize(400, 120)
+            Dialog.resize(600, 500)
+            Dialog.setStyleSheet("background-color : rgb(254, 243, 213)")
             icon = QtGui.QIcon()
             icon.addPixmap(QtGui.QPixmap("image/setting.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             Dialog.setWindowIcon(icon)
             self.buttonBox = QtWidgets.QDialogButtonBox(Dialog)
-            self.buttonBox.setGeometry(QtCore.QRect(30, 80, 341, 32))
+            self.buttonBox.setGeometry(QtCore.QRect(30, 200, 341, 32))
             self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
             self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Ok)
             self.buttonBox.setObjectName("buttonBox")
+            self.buttonBox.setStyleSheet('''
+            
+            ''')
             self.comboBox = QtWidgets.QComboBox(Dialog)
-            self.comboBox.setGeometry(QtCore.QRect(230, 40, 121, 21))
+            self.comboBox.setGeometry(QtCore.QRect(230, 40, 121, 50))
             self.comboBox.setObjectName("comboBox")
             if language_setting == '한국어(Korean)':
                 self.comboBox.addItem("한국어(Korean)")
@@ -1435,10 +1440,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 self.comboBox.addItem("영어(English)")
                 self.comboBox.addItem("한국어(Korean)")
             self.label = QtWidgets.QLabel(Dialog)
-            self.label.setGeometry(QtCore.QRect(50, 30, 350, 16))
+            self.label.setGeometry(QtCore.QRect(50, 42, 200, 16))
             font = QtGui.QFont()
             font.setFamily("서울남산 장체B")
-            font.setPointSize(13)
+            font.setPointSize(9)
             self.label.setFont(font)
             self.label.setObjectName("label")
 
@@ -1508,7 +1513,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # create a "placeholder" widget for the screen grab geometry
             self.grabWidget = QtWidgets.QWidget()
             # self.grabWidget.setGeometry(0, 0, 100, 100)
-            self.grabWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+
             layout.addWidget(self.grabWidget)
 
             # let's add a configuration panel
@@ -1559,7 +1564,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             pushButton.setStyleSheet(
                 '''
                 QPushButton{image:url(./image/KOR/2-1.png); border:0px;}
-                QPushButton:hover{image:url(./image/KOR/2-3.png); border:0px;}
                 QPushButton:checked{image:url(./image/KOR/2-2.png); border:0px;}
 
                 ''')
@@ -1597,6 +1601,50 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # self.label_3.setStyleSheet("color : #ACCCC4;")
             # self.label_3.setObjectName("label_3")
 
+            # Button 5 : Power
+            self.pushButton_5 = QtWidgets.QPushButton(Form)
+            self.pushButton_5.setGeometry(QtCore.QRect(30, 538, 502, 100))
+            self.pushButton_5.setStyleSheet(
+                '''
+                QPushButton{
+                    color: white;
+                    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                    stop:0 rgba(226, 0, 46, 255),
+                    stop:1 rgba(144, 61, 167, 255));
+                    border-radius: 30px;
+                    image:url(./image/KOR/cam_on.png);
+                }
+                QPushButton:hover {
+                    background-color: rgb(246, 20, 66); border-radius: 30px;
+                }
+                QPushButton:checked{
+                    background-color: rgb(246, 20, 66); border-radius: 30px;
+                    image:url(./image/KOR/cam_off.png);
+                    }
+                ''')
+            self.pushButton_5.setObjectName("pushButton_5")
+            self.pushButton_5.setCheckable(True)
+            self.pushButton_5.raise_()
+
+            # Button 6 : Guide Open
+            self.pushButton_6 = QtWidgets.QPushButton(Form)
+            self.pushButton_6.setGeometry(QtCore.QRect(547, 538, 502, 100))
+            self.pushButton_6.setStyleSheet(
+                '''
+                QPushButton{
+                    color: white;
+                    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                    stop:0 rgba(0, 160, 182, 255),
+                    stop:1 rgba(144, 61, 167, 255));
+                    border-radius: 30px;
+                    image:url(./Image/KOR/guide_open.png);
+                }
+                QPushButton:hover {
+                    background-color: rgb(20, 180, 202); border-radius: 30px;
+                }
+                ''')
+            self.pushButton_6.setObjectName("pushButton_6")
+            # self.pushButton_6.clicked.connect(self.guidewindow)
 
             # Button 8 : Language Setting
             self.pushButton_8 = QtWidgets.QPushButton(Form)
@@ -1610,66 +1658,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_8.setObjectName("pushButton_8")
             self.pushButton_8.clicked.connect(self.settingwindow)
 
-            # Button 5 : Power
-            self.pushButton_5 = QtWidgets.QPushButton(Form)
-            self.pushButton_5.setGeometry(QtCore.QRect(30, 538, 502, 100))
-            self.pushButton_5.setStyleSheet("border-radius : 100; border : 2px;")
-            '''
-                            QPushButton{image:url(./image/Power.png); border:0px;}
-                QPushButton:hover{image:url(./image/Power-hover.png); border:0px;}
-                QPushButton:checked{image:url(./image/Power-on.png); border:0px;}
-            '''
-
-            self.pushButton_5.setStyleSheet(
-                '''
-                QPushButton{
-                    color: white;
-                    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
-                    stop:0 rgba(226, 0, 46, 255),
-                    stop:1 rgba(144, 61, 167, 255));
-                    border-radius: 30px;
-                    image:url(./image/cam_on.png);
-                }
-                QPushButton:hover {
-                    background-color: rgb(246, 20, 66); border-radius: 30px;
-                }
-                QPushButton:checked{
-                    background-color: rgb(246, 20, 66); border-radius: 30px;
-                    image:url(./image/cam_off.png);
-                    }
-                ''')
-            self.pushButton_5.setObjectName("pushButton_5")
-            self.pushButton_5.setCheckable(True)
-            self.pushButton_5.raise_()
-
-            # Button 6 : Question Mark
-            self.pushButton_6 = QtWidgets.QPushButton(Form)
-            self.pushButton_6.setGeometry(QtCore.QRect(547, 538, 502, 100))
-            self.pushButton_6.setStyleSheet("border : 2px;")
-            '''
-                QPushButton{image:url(./Image/qmark.png); border:0px;}
-                QPushButton:hover{image:url(./Image/qmark-hover.png); border:0px;}
-                
-            '''
-            self.pushButton_6.setStyleSheet(
-                '''
-                QPushButton{
-                    color: white;
-                    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
-                    stop:0 rgba(0, 160, 182, 255),
-                    stop:1 rgba(144, 61, 167, 255));
-                    border-radius: 30px;
-                    image:url(./Image/guide_open.png);
-                }
-                QPushButton:hover {
-                    background-color: rgb(20, 180, 202); border-radius: 30px;
-                }
-                ''')
-            self.pushButton_6.setObjectName("pushButton_6")
-            # self.pushButton_6.clicked.connect(self.guidewindow)
-
-
-
+            # Button 9 : inbody website
             self.pushButton_9 = QtWidgets.QPushButton(Form)
             self.pushButton_9.setGeometry(QtCore.QRect(30, 50, 230, 60))
             self.pushButton_9.setStyleSheet(
@@ -1681,6 +1670,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             self.pushButton_9.setObjectName("pushButton_9")
             self.pushButton_9.clicked.connect(self.Go_to_inbody)
+
+            # Button 10 : Exit Button
             self.pushButton_10 = QtWidgets.QPushButton(Form)
             self.pushButton_10.setGeometry(QtCore.QRect(1000, 79, 30, 30))
             self.pushButton_10.setStyleSheet("border-radius : 20;")
@@ -1725,8 +1716,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_7.setStyleSheet("background-color : rgba( 255, 255, 255, 0% );, ")
             self.pushButton_7.setStyleSheet(
                 '''
-                QPushButton{image:url(./image/capture.png); border:0px;}
-                QPushButton:hover{image:url(./image/capture_hover.png); border:0px;}
+                QPushButton{image:url(./image/KOR/capture.png); border:0px;}
+                QPushButton:hover{image:url(./image/KOR/capture_hover.png); border:0px;}
                 ''')
             self.pushButton_7.setObjectName("pushButton_7")
 
@@ -1748,7 +1739,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton.setStyleSheet(
                 '''
                 QPushButton{image:url(./image/KOR/1-1.png); border:0px;}
-                QPushButton:hover{image:url(./image/KOR/1-3.png); border:0px;}
                 QPushButton:checked{image:url(./image/KOR/1-2.png); border:0px;}
                 QPushButton{
                     background-color: rgb(233, 236, 241); border-radius: 30px;
@@ -1761,9 +1751,18 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 }
                 '''
             )
-
             self.pushButton.setCheckable(True)
             self.pushButton.setObjectName("pushButton")
+            # self.pushButton_image = QtWidgets.QLabel(self.pushButton)
+            # self.pushButton_image.setGeometry(QtCore.QRect(80, 120, 70, 70))
+            # self.pushButton_image.setStyleSheet("background-color : rgba(0, 0, 0, 0%)")
+            # self.pushButton_image.setStyleSheet(
+            #     '''
+            #     QLabel{image:url(./image/hand/hand1.png); border:0px;}
+            #     '''
+            # )
+            # self.pushButton.setObjectName("pushButton_image")
+
 
             self.pushButton_2 = QtWidgets.QPushButton(self.frame_mode)
             self.pushButton_2.setGeometry(QtCore.QRect(259, 0, 244, 325))
@@ -1771,7 +1770,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_2.setStyleSheet(
                 '''
                 QPushButton{image:url(./image/KOR/3-1.png); border:0px;}
-                QPushButton:hover{image:url(./image/KOR/3-3.png); border:0px;}
                 QPushButton:checked{image:url(./image/KOR/3-2.png); border:0px;}
                 QPushButton{
                     background-color: rgb(233, 236, 241); border-radius: 30px;
@@ -1790,7 +1788,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_3.setStyleSheet(
                 '''
                 QPushButton{image:url(./image/KOR/2-1.png); border:0px;}
-                QPushButton:hover{image:url(./image/KOR/2-3.png); border:0px;}
                 QPushButton:checked{image:url(./image/KOR/2-2.png); border:0px;}
                 QPushButton{
                     background-color: rgb(233, 236, 241); border-radius: 30px;
@@ -1809,7 +1806,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_4.setStyleSheet(
                 '''
                 QPushButton{image:url(./image/KOR/4-1.png); border:0px;}
-                QPushButton:hover{image:url(./image/KOR/4-3.png); border:0px;}
                 QPushButton:checked{image:url(./image/KOR/4-2.png); border:0px;}
                 QPushButton{
                     background-color: rgb(233, 236, 241); border-radius: 30px;
@@ -1893,7 +1889,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 self.pushButton.setStyleSheet(
                     '''
                     QPushButton{image:url(./image/KOR/1-1.png); border:0px;}
-                    QPushButton:hover{image:url(./image/KOR/1-3.png); border:0px;}
                     QPushButton:checked{image:url(./image/KOR/1-2.png); border:0px;}
                     QPushButton{
                     background-color: rgb(233, 236, 241); border-radius: 30px;
@@ -1908,7 +1903,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 self.pushButton_2.setStyleSheet(
                     '''
                     QPushButton{image:url(./image/KOR/3-1.png); border:0px;}
-                    QPushButton:hover{image:url(./image/KOR/3-3.png); border:0px;}
                     QPushButton:checked{image:url(./image/KOR/3-2.png); border:0px;}
                                         QPushButton{
                     background-color: rgb(233, 236, 241); border-radius: 30px;
@@ -1923,7 +1917,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 self.pushButton_3.setStyleSheet(
                     '''
                     QPushButton{image:url(./image/KOR/2-1.png); border:0px;}
-                    QPushButton:hover{image:url(./image/KOR/2-3.png); border:0px;}
                     QPushButton:checked{image:url(./image/KOR/2-2.png); border:0px;}
                                         QPushButton{
                     background-color: rgb(233, 236, 241); border-radius: 30px;
@@ -1938,7 +1931,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 self.pushButton_4.setStyleSheet(
                     '''
                     QPushButton{image:url(./image/KOR/4-1.png); border:0px;}
-                    QPushButton:hover{image:url(./image/KOR/4-3.png); border:0px;}
                     QPushButton:checked{image:url(./image/KOR/4-2.png); border:0px;}
                                         QPushButton{
                     background-color: rgb(233, 236, 241); border-radius: 30px;
@@ -1950,11 +1942,47 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         background-color: rgb(0, 217, 104); border-radius: 30px;
                     }
                     ''')
+                self.pushButton_7.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/KOR/capture.png); border:0px;}
+                    QPushButton:hover{image:url(./image/KOR/capture_hover.png); border:0px;}
+                    ''')
+                self.pushButton_5.setStyleSheet(
+                    '''
+                    QPushButton{
+                        color: white;
+                        background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                        stop:0 rgba(226, 0, 46, 255),
+                        stop:1 rgba(144, 61, 167, 255));
+                        border-radius: 30px;
+                        image:url(./image/KOR/cam_on.png);
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(246, 20, 66); border-radius: 30px;
+                    }
+                    QPushButton:checked{
+                        background-color: rgb(246, 20, 66); border-radius: 30px;
+                        image:url(./image/KOR/cam_off.png);
+                        }
+                    ''')
+                self.pushButton_6.setStyleSheet(
+                    '''
+                    QPushButton{
+                        color: white;
+                        background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                        stop:0 rgba(0, 160, 182, 255),
+                        stop:1 rgba(144, 61, 167, 255));
+                        border-radius: 30px;
+                        image:url(./Image/KOR/guide_open.png);
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(20, 180, 202); border-radius: 30px;
+                    }
+                    ''')
             elif language == '영어(English)':
                 self.pushButton.setStyleSheet(
                     '''
                     QPushButton{image:url(./image/ENG/1-1.png); border:0px;}
-                    QPushButton:hover{image:url(./image/ENG/1-3.png); border:0px;}
                     QPushButton:checked{image:url(./image/ENG/1-2.png); border:0px;}
                     QPushButton{
                     background-color: rgb(233, 236, 241); border-radius: 30px;
@@ -1969,7 +1997,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 self.pushButton_2.setStyleSheet(
                     '''
                     QPushButton{image:url(./image/ENG/3-1.png); border:0px;}
-                    QPushButton:hover{image:url(./image/ENG/3-3.png); border:0px;}
                     QPushButton:checked{image:url(./image/ENG/3-2.png); border:0px;}
                     QPushButton{
                     background-color: rgb(233, 236, 241); border-radius: 30px;
@@ -1984,7 +2011,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 self.pushButton_3.setStyleSheet(
                     '''
                     QPushButton{image:url(./image/ENG/2-1.png); border:0px;}
-                    QPushButton:hover{image:url(./image/ENG/2-3.png); border:0px;}
                     QPushButton:checked{image:url(./image/ENG/2-2.png); border:0px;}
                     QPushButton{
                     background-color: rgb(233, 236, 241); border-radius: 30px;
@@ -1999,7 +2025,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 self.pushButton_4.setStyleSheet(
                     '''
                     QPushButton{image:url(./image/ENG/4-1.png); border:0px;}
-                    QPushButton:hover{image:url(./image/ENG/4-3.png); border:0px;}
                     QPushButton:checked{image:url(./image/ENG/4-2.png); border:0px;}
                     QPushButton{
                     background-color: rgb(233, 236, 241); border-radius: 30px;
@@ -2009,6 +2034,43 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     }
                     QPushButton:checked {
                         background-color: rgb(0, 217, 104); border-radius: 30px;
+                    }
+                    ''')
+                self.pushButton_7.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/ENG/capture.png); border:0px;}
+                    QPushButton:hover{image:url(./image/ENG/capture_hover.png); border:0px;}
+                    ''')
+                self.pushButton_5.setStyleSheet(
+                    '''
+                    QPushButton{
+                        color: white;
+                        background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                        stop:0 rgba(226, 0, 46, 255),
+                        stop:1 rgba(144, 61, 167, 255));
+                        border-radius: 30px;
+                        image:url(./image/ENG/cam_on.png);
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(246, 20, 66); border-radius: 30px;
+                    }
+                    QPushButton:checked{
+                        background-color: rgb(246, 20, 66); border-radius: 30px;
+                        image:url(./image/ENG/cam_off.png);
+                        }
+                    ''')
+                self.pushButton_6.setStyleSheet(
+                    '''
+                    QPushButton{
+                        color: white;
+                        background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                        stop:0 rgba(0, 160, 182, 255),
+                        stop:1 rgba(144, 61, 167, 255));
+                        border-radius: 30px;
+                        image:url(./Image/ENG/guide_open.png);
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(20, 180, 202); border-radius: 30px;
                     }
                     ''')
 
@@ -2024,6 +2086,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
         def exitDialog(self):
             msgBox = QMessageBox()
+            msgBox.setMinimumSize(QSize(1000, 500))
+            msgBox.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
             msgBox.setIcon(QMessageBox.Information)
             font = QtGui.QFont()
             font.setFamily("서울남산 장체B")
@@ -2083,9 +2147,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             print('clicked')
             now = datetime.datetime.now().strftime("%d_%H-%M-%S")
             filename = './screenshots/' + str(now) + ".jpg"
-            print(filename)
+            print('Saving image as ' + filename)
             image = self.label_6.pixmap()
-            image.save(filename, 'jpg')
+            # print(image.size())
+            image.save(filename)
 
         def cvt_qt(self, img):
             # rgb_image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # cv 이미지 파일 rgb 색계열로 바꿔주기
