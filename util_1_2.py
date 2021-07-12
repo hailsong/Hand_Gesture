@@ -1417,21 +1417,17 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
             global language_setting
             Dialog.setObjectName("Setting")
-            Dialog.resize(600, 500)
-            Dialog.setStyleSheet("background-color : rgb(254, 243, 213)")
+            Dialog.resize(400, 120)
             icon = QtGui.QIcon()
             icon.addPixmap(QtGui.QPixmap("image/setting.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             Dialog.setWindowIcon(icon)
             self.buttonBox = QtWidgets.QDialogButtonBox(Dialog)
-            self.buttonBox.setGeometry(QtCore.QRect(30, 200, 341, 32))
+            self.buttonBox.setGeometry(QtCore.QRect(30, 80, 341, 32))
             self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
             self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Ok)
             self.buttonBox.setObjectName("buttonBox")
-            self.buttonBox.setStyleSheet('''
-            
-            ''')
             self.comboBox = QtWidgets.QComboBox(Dialog)
-            self.comboBox.setGeometry(QtCore.QRect(230, 40, 121, 50))
+            self.comboBox.setGeometry(QtCore.QRect(230, 40, 121, 21))
             self.comboBox.setObjectName("comboBox")
             if language_setting == '한국어(Korean)':
                 self.comboBox.addItem("한국어(Korean)")
@@ -2086,9 +2082,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
         def exitDialog(self):
             msgBox = QMessageBox()
-            msgBox.setMinimumSize(QSize(1000, 500))
+            # msgBox.setMinimumSize(QSize(1000, 500))
             msgBox.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
             msgBox.setIcon(QMessageBox.Information)
+            # msgBox.resizeEvent(500, 500)
             font = QtGui.QFont()
             font.setFamily("서울남산 장체B")
             font.setPointSize(12)
