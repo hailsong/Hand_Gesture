@@ -15,6 +15,8 @@ import tensorflow as tf
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox, QWidget, QTabWidget, QVBoxLayout
 from PyQt5.QtCore import QThread, QObject, QRect, pyqtSlot, pyqtSignal, QSize
+
+
 import datetime
 import sys
 import os
@@ -512,6 +514,23 @@ def get_angle(l1, l2):
         return np.arccos(np.dot(l1_, l2_) / (norm(l1) * norm(l2)))
     # return np.arccos(np.dot(l1_, l2_) / (norm(l1) * norm(l2)))
 
+def mod_cursor_position(pos: tuple):
+    """
+    :param pos: position data (tuple)
+    :return: modified cursor position x, y (tuple)
+    """
+    x, y = pos[0], pos[1]
+    FULLSIZE = 1920, 1080
+    MOD_SIZE = 1600, 640
+    mod_x = x * FULLSIZE[0] / MOD_SIZE[0] - (FULLSIZE[0] - MOD_SIZE[0]) / 2
+    mod_x = max(0, mod_x);
+    mod_x = min(FULLSIZE[0], mod_x)
+    mod_y = y * FULLSIZE[1] / MOD_SIZE[1] - (FULLSIZE[1] - MOD_SIZE[1]) / 2
+    mod_y = max(0, mod_y);
+    mod_y = min(FULLSIZE[1], mod_y)
+    # print(mod_x, mod_y)
+    # 모니터 수, 화면 갯수별로 다르게 Return 해야함
+    return int(mod_x) - 1919 - 1920, int(mod_y)
 
 def vector_magnitude(one_d_array):
     """
@@ -841,7 +860,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     DRAG_USE = True
                     WHEEL_USE = False
                     laser_state = mode_2_off(mode_global, laser_state)
-                    # win32api.SetCursorPos((200, 200))
+                    #print(mod_cursor_position(200, 200))
+                    #win32api.SetCursorPos(-1920-1920+200, 200)
                     win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
                     win32api.keybd_event(0x32, 0, 0, 0)  # 2 누르기.
                     time.sleep(0.1)
@@ -1645,7 +1665,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 }
                 ''')
             self.pushButton_6.setObjectName("pushButton_6")
-            # self.pushButton_6.clicked.connect(self.guidewindow)
+            self.pushButton_6.clicked.connect(self.guidewindow)
 
             # Button 8 : Language Setting
             self.pushButton_8 = QtWidgets.QPushButton(Form)
@@ -2100,6 +2120,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
             returnValue = msgBox.exec()
             if returnValue == QMessageBox.Ok:
+                system("taskkill /f /im ZoomIt64.exe")
+                system("taskkill /f /im ZoomIt.exe")
                 sys.exit()
 
         @pyqtSlot(int)
@@ -2200,9 +2222,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             dlg.exec_()
 
         def guidewindow(self):
-            guide = Guide_window()
-            guide.setupUi(guide)
-            guide.exec_()
+            path = os.getcwd()
+            guide_path = path + "\\guide\\0\\0.html"
+            os.system('start chrome /new-window / ' + guide_path)
 
         # 대본영역
         def updateMask(self):
@@ -2258,8 +2280,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         def Go_to_inbody(self):
             os.system('explorer https://www.inbody.com/kr/')
 
-    app = QtWidgets.QApplication(sys.argv)
 
+    app = QtWidgets.QApplication(sys.argv)
 
     ui = Grabber()
     ui.setupUi(ui)
