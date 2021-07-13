@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+<head>
+    <title>드롭다운 메뉴</title>
+    <link rel="Stylesheet" href="style.css">
+    <style>
+        ul, ol, li { list-style:none; margin:0; padding:0; }
+
+        ul.myMenu {}
+        ul.myMenu > li { display:inline-block; width:120px; padding:20px 40px; background:#eee; border:1px solid #eee; text-align:center; position:relative; }
+        ul.myMenu > li:hover { background:#CB0D36; color:white; }
+        ul.myMenu > li ul.submenu { display:none; position:absolute; top:60px; left:0; color:black; }
+        ul.myMenu > li:hover ul.submenu { display:block; }
+        ul.myMenu > li ul.submenu > li { display:inline-block; width:110px; padding:20px 40px; background:#eee; border:2px solid #eee; text-align:center; }
+        ul.myMenu > li ul.submenu > li:hover { background:#FF4500; color:white;}
+    </style>
+</head>
+<body>
+<h1><a href="home.html">Motion Presentation Guide</a></h1>
+<div id="container">
+  <ul class="myMenu">
+    <li class="menu"><a href="home.html">시작</a></li>
+    <li class="menu">화면구성</li>
+    <li class="menu">
+        모드
+        <ul class="menu3_s submenu">
+            <li>대기 모드</li>
+            <li>발표 모드</li>
+            <li>필기 모드</li>
+            <li>자유 모드</li>
+        </ul>
+    </li>
+    <li class="menu">
+      기타
+      <ul class="menu3_s submenu">
+          <li>화면 캡쳐</li>
+          <li>설정</li>
+          <li>종료</li>
+          <li>자유 모드</li>
+      </ul>
+    </li>
+  </ul>
+  <div id="content">
+       안녕하세요!  Motion Presentation 프로그램을 이용해 주셔서 감사합니다. Motion Presentation은 카메라를 이용해 모션을 인식해 발표를 돕습니다. 터치패널 화면에 발표할 PPT파일을 Windows Powerpoint로 실행한 뒤 Motion Presentation을 실행시켜 주세요.
+
+  </div>
+</div>
+
+</body>
+</html>
