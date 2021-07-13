@@ -5,3 +5,5 @@ pyqt/
 .spec
 .mp4
 .avi
+/video_output/
+/video_input/
