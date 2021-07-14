@@ -689,7 +689,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         finger_th = np.array([-0.08736683, -0.96164491, -0.26001175])
         # print(ctrl_z_check, left)
         parameter = get_angle(palm, palm_th) + get_angle(finger, finger_th)
-        if ctrl_z_check == 0 and left == 3 and parameter < 1:
+        if ctrl_z_check == 0 and left == 6:# and parameter < 1:
             print('되돌리기 (CTRL + Z)')
             win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
             win32api.keybd_event(0x5a, 0, 0, 0)  # Z 누르기.
@@ -861,7 +861,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     WHEEL_USE = False
                     laser_state = mode_2_off(mode_global, laser_state)
                     #print(mod_cursor_position(200, 200))
-                    #win32api.SetCursorPos(-1920-1920+200, 200)
+                    win32api.SetCursorPos((-1920-1920+200, 200))
                     win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
                     win32api.keybd_event(0x32, 0, 0, 0)  # 2 누르기.
                     time.sleep(0.1)
@@ -1023,7 +1023,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     # ctypes.windll.user32.mouse_event(0x0002, 0, 0, 0, 0)
                     now_click = True
 
-                elif gesture == 1 and now_click == True:
+                elif (gesture == 1 or gesture == 6) and now_click == True:
                     print('drag off')
                     pos = win32api.GetCursorPos()
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, pos[0], pos[1], 0, 0)
@@ -2224,7 +2224,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         def guidewindow(self):
             path = os.getcwd()
             guide_path = path + "\\guide\\0\\0.html"
-            os.system('start chrome /new-window / ' + guide_path)
+            os.system('''open_guide.bat''')
 
         # 대본영역
         def updateMask(self):
