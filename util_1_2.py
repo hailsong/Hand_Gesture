@@ -862,6 +862,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     laser_state = mode_2_off(mode_global, laser_state)
                     #print(mod_cursor_position(200, 200))
                     win32api.SetCursorPos((-1920-1920+200, 200))
+                    time.sleep(0.1)
+
                     win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
                     win32api.keybd_event(0x32, 0, 0, 0)  # 2 누르기.
                     time.sleep(0.1)
