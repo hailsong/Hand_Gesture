@@ -15,11 +15,10 @@ if __name__ == "__main__":
     print("Copyright 2021. INBODY inc. all rights reserved")
     print("Contact : shi@inbody.com, HAIL SONG")
 
-    from os import system
-    #system('ZoomIt.exe')
-    #physical_devices = tf.config.list_physical_devices('GPU')
-    #print(physical_devices)
-    #tf.config.experimental.set_memory_growth(physical_devices[0], True)
+    os.system('start open_zoomit.bat')
+    # physical_devices = tf.config.list_physical_devices('GPU')
+    # print(physical_devices)
+    # tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
     # width = 1024 # 너비
     # height= 600 # 높이
@@ -33,19 +32,19 @@ if __name__ == "__main__":
     process1 = Process(target=initialize, args=(shared_array_l, static_num_l, shared_array_r, static_num_r))
     process2 = Process(target=process_static_gesture, args=(shared_array_l, static_num_l))
     process3 = Process(target=process_static_gesture, args=(shared_array_r, static_num_r))
-    #process4 = Process(target=GUI, args=([test_np_array]))
-    #process4 = GUi
+    # process4 = Process(target=GUI, args=([test_np_array]))
+    # process4 = GUi
 
     process1.start()
     process2.start()
     process3.start()
-    #process4.start()
+    # process4.start()
     while process1.is_alive():
         pass
     process2.terminate()
     process3.terminate()
-    #process4.terminate()
+    # process4.terminate()
     process1.join()
     process2.join()
     process3.join()
-    #process4.join()
+    # process4.join()
