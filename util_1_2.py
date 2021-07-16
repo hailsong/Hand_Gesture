@@ -17,6 +17,7 @@ from PyQt5.QtWidgets import QMessageBox, QWidget, QTabWidget, QVBoxLayout
 from PyQt5.QtCore import QThread, QObject, QRect, pyqtSlot, pyqtSignal, QSize
 
 
+
 import datetime
 import sys
 import os
@@ -884,6 +885,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
         @pyqtSlot(bool)
         def send_img(self, bool_state):  # p를 보는 emit 함수
+            ui.label_6.setPixmap(QtGui.QPixmap("./icon1.png"))
+            print('icon')
             self.capture = cv2.VideoCapture(0, cv2.CAP_DSHOW)
             cap = self.capture
             # For webcam input:
@@ -1441,21 +1444,73 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
     class Setting_window(QtWidgets.QDialog):
         def setupUi(self, Dialog):
-            self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
+            # self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
             global language_setting
             Dialog.setObjectName("Setting")
-            Dialog.resize(400, 120)
+            Dialog.resize(600, 400)
+            Dialog.setFixedSize(600, 400)
+            Dialog.setStyleSheet("background-color : rgb(255, 255, 255);")
             icon = QtGui.QIcon()
             icon.addPixmap(QtGui.QPixmap("image/setting.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             Dialog.setWindowIcon(icon)
-            self.buttonBox = QtWidgets.QDialogButtonBox(Dialog)
-            self.buttonBox.setGeometry(QtCore.QRect(30, 80, 341, 32))
-            self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-            self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Ok)
-            self.buttonBox.setObjectName("buttonBox")
+
+            self.pushButton_ok = QtWidgets.QPushButton(Dialog)
+            self.pushButton_ok.setGeometry(QtCore.QRect(30, 260, 261, 111))
+            self.pushButton_ok.setStyleSheet(
+                '''
+                QPushButton{
+                    color: white;
+                    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                    stop:0 rgba(0, 217, 104, 255),
+                    stop:1 rgba(144, 61, 167, 255));
+                    border-radius: 30px;
+                    image:url(./image/OK.png);
+                }
+                QPushButton:hover {
+                    background-color: rgb(0, 217, 104); border-radius: 30px;
+                }
+                QPushButton:checked{
+                    background-color: rgb(0, 217, 104); border-radius: 30px;
+                    image:url(./image/KOR/cam_off.png);
+                    }
+                ''')
+            self.pushButton_ok.setObjectName("pushButton_ok")
+            self.pushButton_ok.clicked.connect(Dialog.accept)
+            self.pushButton_ok.clicked.connect(self.getComboBoxItem)
+
+            self.pushButton_cancel = QtWidgets.QPushButton(Dialog)
+            self.pushButton_cancel.setGeometry(QtCore.QRect(310, 260, 261, 111))
+            self.pushButton_cancel.setStyleSheet(
+                '''
+                QPushButton{
+                    color: white;
+                    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                    stop:0 rgba(0, 160, 182, 255),
+                    stop:1 rgba(144, 61, 167, 255));
+                    border-radius: 30px;
+                    image:url(./image/Cancel.png);
+                }
+                QPushButton:hover {
+                    background-color: rgb(0, 160, 182); border-radius: 30px;
+                }
+                QPushButton:checked{
+                    background-color: rgb(0, 160, 182); border-radius: 30px;
+                    image:url(./image/KOR/cam_off.png);
+                    }
+                ''')
+            self.pushButton_cancel.setObjectName("pushButton_cancel")
+            self.pushButton_cancel.clicked.connect(Dialog.reject)
+
+            font = QtGui.QFont()
+            font.setFamily("서울남산 장체B")
+            font.setPointSize(22)
+            font2 = QtGui.QFont()
+            font2.setFamily("서울남산 장체B")
+            font2.setPointSize(15)
             self.comboBox = QtWidgets.QComboBox(Dialog)
-            self.comboBox.setGeometry(QtCore.QRect(230, 40, 121, 21))
+            self.comboBox.setGeometry(QtCore.QRect(140, 160, 321, 41))
             self.comboBox.setObjectName("comboBox")
+            self.comboBox.setFont(font2)
             if language_setting == '한국어(Korean)':
                 self.comboBox.addItem("한국어(Korean)")
                 self.comboBox.addItem("영어(English)")
@@ -1463,17 +1518,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 self.comboBox.addItem("영어(English)")
                 self.comboBox.addItem("한국어(Korean)")
             self.label = QtWidgets.QLabel(Dialog)
-            self.label.setGeometry(QtCore.QRect(50, 42, 200, 16))
-            font = QtGui.QFont()
-            font.setFamily("서울남산 장체B")
-            font.setPointSize(9)
+            self.label.setGeometry(QtCore.QRect(130, 70, 401, 31))
             self.label.setFont(font)
             self.label.setObjectName("label")
 
             self.retranslateUi(Dialog)
-            self.buttonBox.accepted.connect(Dialog.accept)
-            self.buttonBox.accepted.connect(self.getComboBoxItem)
-            self.buttonBox.rejected.connect(Dialog.reject)
             QtCore.QMetaObject.connectSlotsByName(Dialog)
 
         def retranslateUi(self, Dialog):
@@ -1490,26 +1539,89 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 # print("Set Language : ", crnttxt)
                 ui.setupLanguage(ui, crnttxt)
 
-    class Guide_window(QWidget):
-        def __init__(self):
-            super().__init__()
+    class Exit_window(QtWidgets.QDialog):
+        def setupUi(self, Dialog):
+            # self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
+            global language_setting
+            Dialog.setObjectName("Exit")
+            Dialog.resize(600, 400)
+            Dialog.setFixedSize(600, 400)
+            Dialog.setStyleSheet("background-color : rgb(255, 255, 255);")
+            icon = QtGui.QIcon()
+            icon.addPixmap(QtGui.QPixmap("image/exit.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            Dialog.setWindowIcon(icon)
 
-        def setupUi(self):
-            tab1 = QWidget()
-            tab2 = QWidget()
+            self.pushButton_ok = QtWidgets.QPushButton(Dialog)
+            self.pushButton_ok.setGeometry(QtCore.QRect(30, 260, 261, 111))
+            self.pushButton_ok.setStyleSheet(
+                '''
+                QPushButton{
+                    color: white;
+                    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                    stop:0 rgba(0, 217, 104, 255),
+                    stop:1 rgba(144, 61, 167, 255));
+                    border-radius: 30px;
+                    image:url(./image/OK.png);
+                }
+                QPushButton:hover {
+                    background-color: rgb(0, 217, 104); border-radius: 30px;
+                }
+                QPushButton:checked{
+                    background-color: rgb(0, 217, 104); border-radius: 30px;
+                    image:url(./image/KOR/cam_off.png);
+                    }
+                ''')
+            self.pushButton_ok.setObjectName("pushButton_ok")
+            self.pushButton_ok.clicked.connect(Dialog.accept)
+            self.pushButton_ok.clicked.connect(self.exitProgram)
 
-            tabs = QTabWidget()
-            tabs.addTab(tab1, 'Tab1')
-            tabs.addTab(tab2, 'Tab2')
+            self.pushButton_cancel = QtWidgets.QPushButton(Dialog)
+            self.pushButton_cancel.setGeometry(QtCore.QRect(310, 260, 261, 111))
+            self.pushButton_cancel.setStyleSheet(
+                '''
+                QPushButton{
+                    color: white;
+                    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                    stop:0 rgba(0, 160, 182, 255),
+                    stop:1 rgba(144, 61, 167, 255));
+                    border-radius: 30px;
+                    image:url(./image/Cancel.png);
+                }
+                QPushButton:hover {
+                    background-color: rgb(0, 160, 182); border-radius: 30px;
+                }
+                QPushButton:checked{
+                    background-color: rgb(0, 160, 182); border-radius: 30px;
+                    image:url(./image/KOR/cam_off.png);
+                    }
+                ''')
+            self.pushButton_cancel.setObjectName("pushButton_cancel")
+            self.pushButton_cancel.clicked.connect(Dialog.reject)
 
-            vbox = QVBoxLayout()
-            vbox.addWidget(tabs)
+            font = QtGui.QFont()
+            font.setFamily("서울남산 장체B")
+            font.setPointSize(22)
+            font2 = QtGui.QFont()
+            font2.setFamily("서울남산 장체B")
+            font2.setPointSize(15)
 
-            self.setLayout(vbox)
+            self.label = QtWidgets.QLabel(Dialog)
+            self.label.setGeometry(QtCore.QRect(130, 50, 401, 150))
+            self.label.setFont(font)
+            self.label.setObjectName("label")
 
-            self.setWindowTitle('QTabWidget')
-            self.setGeometry(300, 300, 300, 200)
-            self.show()
+            self.exitUi(Dialog)
+            QtCore.QMetaObject.connectSlotsByName(Dialog)
+
+        def exitUi(self, Dialog):
+            _translate = QtCore.QCoreApplication.translate
+            Dialog.setWindowTitle(_translate("Exit?", "Exit?"))
+            self.label.setText(_translate("Dialog", "이용해 주셔서 감사합니다! \n \n프로그램을 종료하시겠습니까?"))
+
+        def exitProgram(self):
+            system("taskkill /f /im ZoomIt64.exe")
+            system("taskkill /f /im ZoomIt.exe")
+            sys.exit()
 
     class Grabber(QtWidgets.QWidget):
         click_mode = pyqtSignal(int, int)
@@ -1522,6 +1634,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # self.showMaximized()
             self.setGeometry(0, 0, 1920, 1080)
             self.setWindowTitle('Screen grabber')
+            self.setWindowIcon((QtGui.QIcon('icon1.png')))
             # ensure that the widget always stays on top, no matter what
             self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
             layout = QtWidgets.QVBoxLayout()
@@ -1671,7 +1784,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # Button 8 : Language Setting
             self.pushButton_8 = QtWidgets.QPushButton(Form)
-            self.pushButton_8.setGeometry(QtCore.QRect(950, 80, 30, 30))
+            self.pushButton_8.setGeometry(QtCore.QRect(920, 56, 50, 50))
             self.pushButton_8.setStyleSheet("border-radius : 20;")
             self.pushButton_8.setStyleSheet(
                 '''
@@ -1696,7 +1809,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # Button 10 : Exit Button
             self.pushButton_10 = QtWidgets.QPushButton(Form)
-            self.pushButton_10.setGeometry(QtCore.QRect(1000, 79, 30, 30))
+            self.pushButton_10.setGeometry(QtCore.QRect(990, 55, 50, 50))
             self.pushButton_10.setStyleSheet("border-radius : 20;")
             self.pushButton_10.setStyleSheet(
                 '''
@@ -1704,7 +1817,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 QPushButton:hover{image:url(./image/exit_hover.png); border:0px;}
                 ''')
             self.pushButton_10.setObjectName("pushButton_10")
-            self.pushButton_10.clicked.connect(self.exitDialog)
+            self.pushButton_10.clicked.connect(self.exitwindow)
 
             # 카메라 모니터링
             self.frame = QtWidgets.QFrame(Form)
@@ -2110,12 +2223,13 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         def exitDialog(self):
             msgBox = QMessageBox()
             # msgBox.setMinimumSize(QSize(1000, 500))
-            msgBox.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
+            # msgBox.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
             msgBox.setIcon(QMessageBox.Information)
+            msgBox.setStyleSheet("background-color:rgba(255, 255, 255, 255);")
             # msgBox.resizeEvent(500, 500)
             font = QtGui.QFont()
             font.setFamily("서울남산 장체B")
-            font.setPointSize(12)
+            font.setPointSize(22)
             msgBox.setFont(font)
             msgBox.setText("프로그램을 종료하시겠습니까?")
             msgBox.setWindowTitle("Exit?")
@@ -2125,6 +2239,52 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 system("taskkill /f /im ZoomIt64.exe")
                 system("taskkill /f /im ZoomIt.exe")
                 sys.exit()
+
+            msgBox.pushButton_ok = QtWidgets.QPushButton(msgBox)
+            msgBox.pushButton_ok.setGeometry(QtCore.QRect(30, 260, 261, 111))
+            msgBox.pushButton_ok.setStyleSheet(
+                '''
+                QPushButton{
+                    color: white;
+                    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                    stop:0 rgba(0, 217, 104, 255),
+                    stop:1 rgba(144, 61, 167, 255));
+                    border-radius: 30px;
+                    image:url(./image/OK.png);
+                }
+                QPushButton:hover {
+                    background-color: rgb(0, 217, 104); border-radius: 30px;
+                }
+                QPushButton:checked{
+                    background-color: rgb(0, 217, 104); border-radius: 30px;
+                    image:url(./image/KOR/cam_off.png);
+                    }
+                ''')
+            msgBox.pushButton_ok.setObjectName("pushButton_ok")
+            msgBox.pushButton_ok.clicked.connect(msgBox.accept)
+            msgBox.pushButton_ok.clicked.connect(msgBox.getComboBoxItem)
+
+            msgBox.pushButton_cancel = QtWidgets.QPushButton(msgBox)
+            msgBox.pushButton_cancel.setGeometry(QtCore.QRect(310, 260, 261, 111))
+            msgBox.pushButton_cancel.setStyleSheet(
+                '''
+                QPushButton{
+                    color: white;
+                    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                    stop:0 rgba(0, 160, 182, 255),
+                    stop:1 rgba(144, 61, 167, 255));
+                    border-radius: 30px;
+                    image:url(./image/Cancel.png);
+                }
+                QPushButton:hover {
+                    background-color: rgb(246, 20, 66); border-radius: 30px;
+                }
+                QPushButton:checked{
+                    background-color: rgb(246, 20, 66); border-radius: 30px;
+                    image:url(./image/KOR/cam_off.png);
+                    }
+                ''')
+            self.pushButton_cancel.setObjectName("pushButton_cancel")
 
         @pyqtSlot(int)
         def push_button(self, integer):  # 2-1
@@ -2201,6 +2361,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 self.pushButton_3.setEnabled(True)
                 self.pushButton_4.setEnabled(True)
                 self.pushButton_7.setEnabled(True)
+
                 self.button6_checked.emit(True)
 
             else:
@@ -2227,6 +2388,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             path = os.getcwd()
             guide_path = path + "\\guide\\0\\0.html"
             os.system('''open_guide.bat''')
+
+        def exitwindow(self):
+            dlg = Exit_window()
+            dlg.setupUi(dlg)
+            dlg.exec_()
 
         # 대본영역
         def updateMask(self):
