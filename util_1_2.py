@@ -16,8 +16,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox, QWidget, QTabWidget, QVBoxLayout
 from PyQt5.QtCore import QThread, QObject, QRect, pyqtSlot, pyqtSignal, QSize
 
-
-
 import datetime
 import sys
 import os
@@ -531,7 +529,7 @@ def mod_cursor_position(pos: tuple):
     mod_y = min(FULLSIZE[1], mod_y)
     # print(mod_x, mod_y)
     # 모니터 수, 화면 갯수별로 다르게 Return 해야함
-    return int(mod_x) - 1919 - 1920, int(mod_y)
+    return int(mod_x) - 1919 , int(mod_y)
 
 def vector_magnitude(one_d_array):
     """
@@ -862,7 +860,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     WHEEL_USE = False
                     laser_state = mode_2_off(mode_global, laser_state)
                     #print(mod_cursor_position(200, 200))
-                    win32api.SetCursorPos((-1920-1920+200, 200))
+                    win32api.SetCursorPos((-1920+200, 200))
                     time.sleep(0.1)
 
                     win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
@@ -945,7 +943,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     mod_y = min(FULLSIZE[1], mod_y)
                     # print(mod_x, mod_y)
                     # 모니터 수, 화면 갯수별로 다르게 Return 해야함
-                    return int(mod_x) - 1919 - 1920, int(mod_y)
+                    return int(mod_x) - 1919, int(mod_y)
 
                 def mousemove(self):
                     if now_click == True:
