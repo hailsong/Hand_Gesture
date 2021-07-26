@@ -884,7 +884,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         @pyqtSlot(bool)
         def send_img(self, bool_state):  # p를 보는 emit 함수
             ui.label_6.setPixmap(QtGui.QPixmap("./icon1.png"))
-            print('icon')
             self.capture = cv2.VideoCapture(0, cv2.CAP_DSHOW)
             cap = self.capture
             # For webcam input:
