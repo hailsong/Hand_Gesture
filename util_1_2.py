@@ -13,12 +13,19 @@ from os import system
 import tensorflow as tf
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMessageBox, QWidget, QTabWidget, QVBoxLayout
-from PyQt5.QtCore import QThread, QObject, QRect, pyqtSlot, pyqtSignal, QSize
+
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
+from PyQt5 import uic
+
+# FROM_CLASS_MainWindow = uic.loadUiType("mainwindow.ui")[0]
+FROM_CLASS_Loading = uic.loadUiType("load.ui")[0]
 
 import datetime
 import sys
 import os
+
 '''
 키 코드 링크 : https://lab.cliel.com/entry/%EA%B0%80%EC%83%81-Key-Code%ED%91%9C
 '''
@@ -367,14 +374,12 @@ class Gesture:
                     if get_angle(self.palm_data[i], angle_threshold) < 1.5:
                         condition1 += 1
 
-
                 condition_sum = condition1
 
                 if condition_sum > 4:
                     print("RIGHT")
                     # win32api.keybd_event(0x27, 0, 0, 0)
                     return -1
-
 
     def gesture_LRUD(self):  # 상하좌우 변화량 판단
         LR_trigger, UD_trigger = 0, 0
@@ -530,7 +535,7 @@ def mod_cursor_position(pos: tuple):
     mod_y = min(FULLSIZE[1], mod_y)
     # print(mod_x, mod_y)
     # 모니터 수, 화면 갯수별로 다르게 Return 해야함
-    return int(mod_x) - 1919 , int(mod_y)
+    return int(mod_x) - 1919, int(mod_y)
 
 
 def vector_magnitude(one_d_array):
@@ -618,7 +623,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     global DRAG_USE
     global pen_color
 
-
     # GUI Part
     def mode_2_pre(palm, finger, left, p_check):
         palm_th = np.array([-0.41607399, -0.20192736, 0.88662719])
@@ -635,7 +639,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             return p_check - 1
         else:
             return 0
-
 
     def mode_2_laser(state, num, right):
         LASER_CHANGE_TIME = 6
@@ -663,7 +666,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             return state, num
         return state, num
 
-
     def mode_3_interrupt(mode_global):
         if mode_global == 3:
             # win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
@@ -673,7 +675,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # win32api.keybd_event(0x31, 0, win32con.KEYEVENTF_KEYUP, 0)
             win32api.keybd_event(0x1B, 0, 0, 0)  # ESC DOWN
             win32api.keybd_event(0x1B, 0, win32con.KEYEVENTF_KEYUP, 0)  # ESC UP
-
 
     def mode_2_off(mode_before, laser_state):
         """
@@ -688,13 +689,12 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             win32api.keybd_event(0x4C, 0, win32con.KEYEVENTF_KEYUP, 0)
             return False
 
-
     def mode_3_ctrl_z(palm, finger, left, ctrl_z_check):
         palm_th = np.array([-0.41607399, -0.20192736, 0.88662719])
         finger_th = np.array([-0.08736683, -0.96164491, -0.26001175])
         # print(ctrl_z_check, left)
         parameter = get_angle(palm, palm_th) + get_angle(finger, finger_th)
-        if ctrl_z_check == 0 and left == 6:# and parameter < 1:
+        if ctrl_z_check == 0 and left == 6:  # and parameter < 1:
             print('되돌리기 (CTRL + Z)')
             win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
             win32api.keybd_event(0x5a, 0, 0, 0)  # Z 누르기.
@@ -707,7 +707,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             return ctrl_z_check - 1
         else:
             return 0
-
 
     def mode_3_remove_all(palm, finger, left, remove_check):
         # 60 means 60 frames to trigger 'REMOVE ALL'
@@ -727,7 +726,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             return 0
         else:
             return max(0, remove_check - 1)
-
 
     def mode_3_board(palm, finger, left, remove_check):
         # 60 means 60 frames to trigger 'REMOVE ALL'
@@ -757,8 +755,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         else:
             return 0
 
-
-    class opcv(QThread):
+    class Opcv(QThread):
 
         change_pixmap_signal = pyqtSignal(np.ndarray)
         mode_signal = pyqtSignal(int)
@@ -868,8 +865,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     DRAG_USE = True
                     WHEEL_USE = False
                     laser_state = mode_2_off(mode_global, laser_state)
-                    #print(mod_cursor_position(200, 200))
-                    win32api.SetCursorPos((-1920+200, 200))
+                    # print(mod_cursor_position(200, 200))
+                    win32api.SetCursorPos((-1920 + 200, 200))
                     time.sleep(0.1)
 
                     win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
@@ -1020,7 +1017,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     # ctypes.windll.user32.mouse_event(0x0004, 0, 0, 0, 0)
                     now_click = False
 
-            def hand_drag2(landmark, gesture): # 1 : non_click, 13 : click
+            def hand_drag2(landmark, gesture):  # 1 : non_click, 13 : click
                 """
                 :param landmark: landmark or mark_p
                 :return: nothing, but it change mouse position and click statement
@@ -1049,7 +1046,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 click_angle = get_angle(palm_v, np.array([0, 0, -1]))
 
                 if get_distance(landmark[4], landmark[10]) < get_distance(landmark[7],
-                                                                          landmark[8]) and now_click2 == False\
+                                                                          landmark[8]) and now_click2 == False \
                         and click_angle < 1:
                     print('click')
                     pos = win32api.GetCursorPos()
@@ -1123,7 +1120,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             board_num = 0
             p_check_number = 0
 
-
             cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
             cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
             cap.set(cv2.CAP_PROP_FPS, 30)
@@ -1188,6 +1184,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                 plt.show()
             print('loaded')
+            ui_load.close()
 
             while bool_state and cap.isOpened():
                 # print('cam')
@@ -1309,16 +1306,16 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             finger_vector = HM.get_finger_vector()
 
                             if finger_open_[1] == 1 and \
-                                sum(finger_open_[3:]) == 0 and \
+                                    sum(finger_open_[3:]) == 0 and \
                                     finger_open_[2] == 1 and \
                                     get_angle(mark_p[5] - mark_p[8], mark_p[5] - mark_p[12]) < 0.3:
-                                swipe_signal = True # swipe signal
+                                swipe_signal = True  # swipe signal
                                 # print('swipe')
 
                             if mode_global == 2:
                                 # MODE 2 LEFT ARROW
                                 p_check_number = mode_2_pre(palm_vector, finger_vector,
-                                                                 static_gesture_num_r, p_check_number)
+                                                            static_gesture_num_r, p_check_number)
                                 # MODE 2 LASER POINTER
                                 laser_hand = np.all(finger_open_ == np.array([1, 1, 1, 0, 0]))
                                 laser_state, laser_num = mode_2_laser(laser_state, laser_num, laser_hand)
@@ -1326,11 +1323,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             # MODE 3 CTRL + Z
                             if mode_global == 3:
                                 ctrl_z_check_number = mode_3_ctrl_z(palm_vector, finger_vector,
-                                                                         static_gesture_num_r, ctrl_z_check_number)
+                                                                    static_gesture_num_r, ctrl_z_check_number)
                                 remove_all_number = mode_3_remove_all(palm_vector, finger_vector,
-                                                                         static_gesture_num_r, remove_all_number)
+                                                                      static_gesture_num_r, remove_all_number)
                                 board_num = mode_3_board(palm_vector, finger_vector,
-                                                                      static_gesture_num_r, board_num)
+                                                         static_gesture_num_r, board_num)
 
                             pixel_c = mark_p5
                             # gesture updating
@@ -1385,10 +1382,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             if finger_open_[2] == 1 and WHEEL_USE == True and get_angle(mark_p[5] - mark_p[8],
                                                                                         mark_p[5] - mark_p[12]) < 0.3:
                                 pixel_c.wheel(before_c)
-
-
-
-
 
                         # MODE 3 색 변경
                         if len(mark_p[-1]) == 4:
@@ -1450,7 +1443,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             hands.close()
             self.capture.release()
-
 
     class Setting_window(QtWidgets.QDialog):
         def setupUi(self, Dialog):
@@ -1633,6 +1625,39 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             system("taskkill /f /im ZoomIt.exe")
             sys.exit()
 
+    class Load_Ui(object):
+        def setupUi(self, MainWindow):
+            self.MainWindow = MainWindow
+            self.MainWindow.setObjectName("MainWindow")
+            self.MainWindow.resize(500, 500)
+            self.MainWindow.setWindowFlag(QtCore.Qt.FramelessWindowHint)
+            self.MainWindow.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint)
+            self.centralwidget = QtWidgets.QWidget(MainWindow)
+            self.centralwidget.setObjectName("centralwidget")
+            self.centralwidget.setWindowFlag(QtCore.Qt.FramelessWindowHint)
+            self.centralwidget.setStyleSheet("background-color : rgb(224,244,253)")
+
+            # create label
+            self.label = QtWidgets.QLabel(self.centralwidget)
+            self.label.setGeometry(QtCore.QRect(25, 25, 500, 500))
+            self.label.setMinimumSize(QtCore.QSize(500, 500))
+            self.label.setMaximumSize(QtCore.QSize(500, 500))
+            self.label.setObjectName("label")
+
+            # add label to main window
+            # MainWindow.setCentralWidget(self.centralwidget)
+
+            # set qmovie as label
+            self.movie = QMovie("./image/test.gif")
+            self.label.setMovie(self.movie)
+            self.movie.start()
+
+        def close(self):
+            self.MainWindow.setWindowOpacity(0)
+
+        def open(self):
+            self.MainWindow.setWindowOpacity(1)
+
     class Loading(QtWidgets.QMainWindow):
         def __init__(self):
             super().__init__()
@@ -1640,6 +1665,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.setStyleSheet('''QMainWindow{background-color : rgb(0, 0, 0);}''')
             self.msg = QMessageBox()
         def closeEvent(self, event):
+            print('close?')
             result = self.msg.question(self,
                                  "Confirm Exit...",
                                  "Are you sure you want to exit ?",
@@ -1649,7 +1675,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             else :
                 event.ignore()
 
-    class Grabber(QtWidgets.QWidget):
+    class Grabber(QtWidgets.QMainWindow):
         click_mode = pyqtSignal(int, int)
         button6_checked = pyqtSignal(bool)
 
@@ -1721,6 +1747,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # panelLayout.addWidget(self.playButton)
 
             # panelLayout.addStretch(0)
+            # self.loading = Loading()
+            # self.loading.setupUi(self)
 
         def setButtonStyle(self, pushButton):
             pushButton.setStyleSheet(
@@ -1738,6 +1766,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.From_button = False
 
             Form.setStyleSheet("background-color : rgb(248, 249, 251);")
+
+            # window.close()
 
             self.label = QtWidgets.QLabel(Form)
             self.label.setGeometry(QtCore.QRect(217, 72, 300, 48))
@@ -1827,11 +1857,12 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 '''
                 QPushButton{image:url(./image/inbody.png); border:0px;}
                 QPushButton:hover{image:url(./image/inbody_hover.png); border:0px;}
-                
+
                 ''')
 
             self.pushButton_9.setObjectName("pushButton_9")
             self.pushButton_9.clicked.connect(self.Go_to_inbody)
+            # self.pushButton_9.clicked.connect(ui_load.close)
 
             # Button 10 : Exit Button
             self.pushButton_10 = QtWidgets.QPushButton(Form)
@@ -1856,7 +1887,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             self.label_6 = QtWidgets.QLabel(self.frame)
             self.label_6.setGeometry(QtCore.QRect(0, 0, 811, 608))
-            self.label_6.setStyleSheet("background-color : white; border-radius: 30px; background: url(./image/default.jpg)",)
+            self.label_6.setStyleSheet(
+                "background-color : white; border-radius: 30px; background: url(./image/default.jpg)", )
             self.label_6.setObjectName("label_6")
             self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
 
@@ -1872,11 +1904,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # self.loading.setObjectName("loading")
 
             self.script_frame = QtWidgets.QLabel(Form)
-            self.script_frame.setGeometry(QtCore.QRect(30, 668, 100, 100)) #1860, 350))
+            self.script_frame.setGeometry(QtCore.QRect(30, 668, 100, 100))  # 1860, 350))
             self.script_frame.setStyleSheet("background-color : rgba(0,250,255,50%);")
             self.script_frame.setObjectName("script_frame")
             self.script_frame.setPixmap(QtGui.QPixmap("./image/script_frame.png"))
-
 
             self.pushButton_7 = QtWidgets.QPushButton(self.frame)
             self.pushButton_7.setGeometry(QtCore.QRect(610, 540, 200, 60))
@@ -1930,7 +1961,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             #     '''
             # )
             # self.pushButton.setObjectName("pushButton_image")
-
 
             self.pushButton_2 = QtWidgets.QPushButton(self.frame_mode)
             self.pushButton_2.setGeometry(QtCore.QRect(259, 0, 244, 325))
@@ -2032,14 +2062,17 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.menubar.setGeometry(QRect(0, 0, 870, 21))
             self.menubar.setObjectName("menubar")
 
-
             self.pushButton.toggled.connect(lambda: self.togglebutton(Form, integer=0))
             self.pushButton_2.toggled.connect(lambda: self.togglebutton(Form, integer=1))
             self.pushButton_3.toggled.connect(lambda: self.togglebutton(Form, integer=2))
             self.pushButton_4.toggled.connect(lambda: self.togglebutton(Form, integer=3))
 
+            self.pushButton_5.toggled.connect(ui_load.open)
+            #self.pushButton_4.clicked.connect(self.loading.closeEvent)
             self.pushButton_5.toggled.connect(lambda: self.checked(Form))
-            self.thread = opcv()
+
+
+            self.thread = Opcv()
 
             self.click_mode.connect(self.thread.mode_setting)
             self.button6_checked.connect(self.thread.send_img)
@@ -2048,6 +2081,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.thread.mode_signal.connect(self.push_button)
 
             self.thread.start()
+
+
+            # thread_load
+            # self.thread_load = Load()
+
             self.retranslateUi(Form)
             QtCore.QMetaObject.connectSlotsByName(Form)
 
@@ -2242,7 +2280,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     }
                     ''')
 
-
         def retranslateUi(self, Form):
             _translate = QtCore.QCoreApplication.translate
             Form.setWindowTitle(_translate("Form", "Motion Presentation V 1.2"))
@@ -2394,6 +2431,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # dlg = Loading()
             # dlg.setupUi(dlg)
             # dlg.exec_()
+            self.label_6.setStyleSheet(
+                "background-color : white; border-radius: 50px; background: url(./image/default.jpg)", )
+            self.label_6.setObjectName("label_6")
+            self.label_6.setPixmap(QtGui.QPixmap("./image/default2.jpg"))
+            print('load222')
 
             if self.pushButton_5.isChecked():
                 # image = cv2.imread('./image/testtest.jpg')
@@ -2426,7 +2468,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 print('Default image set')
                 self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
 
-
         def settingwindow(self):
             dlg = Setting_window()
             dlg.setupUi(dlg)
@@ -2458,7 +2499,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             top = frameRect.top() - grabGeometry.top()
             right = frameRect.right() - grabGeometry.right()
             bottom = frameRect.bottom() - grabGeometry.bottom()
-
 
             # reset the geometries to get "0-point" rectangles for the mask
             frameRect.moveTopLeft(QtCore.QPoint(30, 668))
@@ -2496,12 +2536,18 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         def Go_to_inbody(self):
             os.system('explorer https://www.inbody.com/kr/')
 
-
     app = QtWidgets.QApplication(sys.argv)
+    window = QtWidgets.QWidget()
+    ui_load = Load_Ui()
+    ui_load.setupUi(window)
+    window.show()
 
     ui = Grabber()
     ui.setupUi(ui)
     ui.show()
+
+
+
     # ui.MainWindow.show()
     sys.exit(app.exec_())
 
