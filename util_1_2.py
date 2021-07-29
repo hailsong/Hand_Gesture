@@ -513,6 +513,7 @@ def get_angle(l1, l2):
         return np.arccos(np.dot(l1_, l2_) / (norm(l1) * norm(l2)))
     # return np.arccos(np.dot(l1_, l2_) / (norm(l1) * norm(l2)))
 
+
 def mod_cursor_position(pos: tuple):
     """
     :param pos: position data (tuple)
@@ -530,6 +531,7 @@ def mod_cursor_position(pos: tuple):
     # print(mod_x, mod_y)
     # 모니터 수, 화면 갯수별로 다르게 Return 해야함
     return int(mod_x) - 1919 , int(mod_y)
+
 
 def vector_magnitude(one_d_array):
     """
@@ -634,6 +636,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         else:
             return 0
 
+
     def mode_2_laser(state, num, right):
         LASER_CHANGE_TIME = 6
         # print(state, num, right)
@@ -660,6 +663,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             return state, num
         return state, num
 
+
     def mode_3_interrupt(mode_global):
         if mode_global == 3:
             # win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
@@ -669,6 +673,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # win32api.keybd_event(0x31, 0, win32con.KEYEVENTF_KEYUP, 0)
             win32api.keybd_event(0x1B, 0, 0, 0)  # ESC DOWN
             win32api.keybd_event(0x1B, 0, win32con.KEYEVENTF_KEYUP, 0)  # ESC UP
+
 
     def mode_2_off(mode_before, laser_state):
         """
@@ -682,6 +687,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             win32api.keybd_event(0xa2, 0, win32con.KEYEVENTF_KEYUP, 0)
             win32api.keybd_event(0x4C, 0, win32con.KEYEVENTF_KEYUP, 0)
             return False
+
 
     def mode_3_ctrl_z(palm, finger, left, ctrl_z_check):
         palm_th = np.array([-0.41607399, -0.20192736, 0.88662719])
@@ -701,6 +707,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             return ctrl_z_check - 1
         else:
             return 0
+
 
     def mode_3_remove_all(palm, finger, left, remove_check):
         # 60 means 60 frames to trigger 'REMOVE ALL'
@@ -750,7 +757,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         else:
             return 0
 
+
     class opcv(QThread):
+
         change_pixmap_signal = pyqtSignal(np.ndarray)
         mode_signal = pyqtSignal(int)
 
@@ -883,7 +892,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
         @pyqtSlot(bool)
         def send_img(self, bool_state):  # p를 보는 emit 함수
-            ui.label_6.setPixmap(QtGui.QPixmap("./icon1.png"))
+            # ui.label_6.setPixmap(QtGui.QPixmap("./icon1.png"))
+            # Grabber.label_6.setStyleSheet("background-color : white; border-radius: 100px;", )
+            # Grabber.label_6.setPixmap(image)
             self.capture = cv2.VideoCapture(0, cv2.CAP_DSHOW)
             cap = self.capture
             # For webcam input:
@@ -1176,6 +1187,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 anim = animation.FuncAnimation(fig, animate, init_func=init, frames=200, interval=20, blit=False)
 
                 plt.show()
+            print('loaded')
 
             while bool_state and cap.isOpened():
                 # print('cam')
@@ -1439,6 +1451,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             hands.close()
             self.capture.release()
 
+
     class Setting_window(QtWidgets.QDialog):
         def setupUi(self, Dialog):
             # self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
@@ -1619,6 +1632,22 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             system("taskkill /f /im ZoomIt64.exe")
             system("taskkill /f /im ZoomIt.exe")
             sys.exit()
+
+    class Loading(QtWidgets.QMainWindow):
+        def __init__(self):
+            super().__init__()
+            self.setStyleSheet('''QMessageBox{background-color: rgb(224, 244, 253);}''')
+            self.setStyleSheet('''QMainWindow{background-color : rgb(0, 0, 0);}''')
+            self.msg = QMessageBox()
+        def closeEvent(self, event):
+            result = self.msg.question(self,
+                                 "Confirm Exit...",
+                                 "Are you sure you want to exit ?",
+                                 self.msg.Yes | self.msg.No)
+            if result == self.msg.Yes:
+                sys.exit()
+            else :
+                event.ignore()
 
     class Grabber(QtWidgets.QWidget):
         click_mode = pyqtSignal(int, int)
@@ -1824,9 +1853,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
             self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
             self.frame.setObjectName("frame")
+
             self.label_6 = QtWidgets.QLabel(self.frame)
             self.label_6.setGeometry(QtCore.QRect(0, 0, 811, 608))
-            self.label_6.setStyleSheet("background-color : white; border-radius: 30px;", )
+            self.label_6.setStyleSheet("background-color : white; border-radius: 30px; background: url(./image/default.jpg)",)
             self.label_6.setObjectName("label_6")
             self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
 
@@ -1835,6 +1865,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.cam_frame.setStyleSheet("background-color : rgba(0,0,0,0%);")
             self.cam_frame.setObjectName("cam_frame")
             self.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame.png"))
+
+            # self.loading = QtWidgets.QLabel(Form)
+            # self.loading.setGeometry(QtCore.QRect(405, 304, 300, 500))
+            # self.loading.setStyleSheet("background-color : rgba(0,0,0,0%);")
+            # self.loading.setObjectName("loading")
 
             self.script_frame = QtWidgets.QLabel(Form)
             self.script_frame.setGeometry(QtCore.QRect(30, 668, 100, 100)) #1860, 350))
@@ -2003,9 +2038,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_3.toggled.connect(lambda: self.togglebutton(Form, integer=2))
             self.pushButton_4.toggled.connect(lambda: self.togglebutton(Form, integer=3))
 
+            self.pushButton_5.toggled.connect(lambda: self.checked(Form))
             self.thread = opcv()
 
-            self.pushButton_5.toggled.connect(lambda: self.checked(Form))
             self.click_mode.connect(self.thread.mode_setting)
             self.button6_checked.connect(self.thread.send_img)
             # self.power_off_signal.connect(self.thread.send_img)
@@ -2335,7 +2370,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # print(image.size())
             image.save(filename)
 
-        def cvt_qt(self, img):
+        def cvt_qt(self, img, size=(811, 608)):
             # rgb_image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # cv 이미지 파일 rgb 색계열로 바꿔주기
             h, w, ch = img.shape  # image 쉐입 알기
             bytes_per_line = ch * w  # 차원?
@@ -2351,8 +2386,22 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.label_6.setPixmap(qt_img)
 
         def checked(self, Form):
+            # self.loading.setGeometry(10, 10, 100, 200)
+            # loading_window = Load_window()
+            # loading_window.setupUi(loading_window)
+            # loading_window.exec_()
+            print('loading...')
+            # dlg = Loading()
+            # dlg.setupUi(dlg)
+            # dlg.exec_()
+
             if self.pushButton_5.isChecked():
-                print('checked')
+                # image = cv2.imread('./image/testtest.jpg')
+                # image = self.cvt_qt(image)
+                # self.label_6.setPixmap(image)
+                # self.label_6.setPixmap(QtGui.QPixmap("./image/testtest.jpg"))
+                # self.label_6.setStyleShee
+                # loading_window.reject()
                 self.pushButton.setEnabled(True)
                 self.pushButton_2.setEnabled(True)
                 self.pushButton_3.setEnabled(True)
@@ -2374,7 +2423,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     if button.isChecked():
                         button.toggle()
                 self.button6_checked.emit(False)
+                print('Default image set')
                 self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
+
 
         def settingwindow(self):
             dlg = Setting_window()

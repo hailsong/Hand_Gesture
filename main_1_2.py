@@ -1,14 +1,10 @@
-import numpy as np
 from util_1_2 import process_static_gesture, initialize
-import tensorflow as tf
 
 from multiprocessing import Process, Value, Array
 import os
-import ctypes
 import win32gui, win32console
 
 if __name__ == "__main__":
-
     win32gui.ShowWindow(win32console.GetConsoleWindow(), 0)
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
