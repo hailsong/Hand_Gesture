@@ -1,4 +1,4 @@
-from util_1_2 import process_static_gesture, initialize
+from util_1_2 import process_static_gesture, initialize, process_load_window
 
 from multiprocessing import Process, Value, Array
 import os
@@ -22,24 +22,26 @@ if __name__ == "__main__":
     static_num_l = Value('i', 0)
     shared_array_r = Array('d', [0. for _ in range(18)])
     static_num_r = Value('i', 0)
+    load_status = Value('i', 1)
 
     # GUI과 주고받을 정보 : Mode(쌍방향) [int value], 대기 [int value], 캡쳐 [int value], 이미지 [array]
 
-    process1 = Process(target=initialize, args=(shared_array_l, static_num_l, shared_array_r, static_num_r))
+    process1 = Process(target=initialize, args=(shared_array_l, static_num_l, shared_array_r, static_num_r, load_status))
     process2 = Process(target=process_static_gesture, args=(shared_array_l, static_num_l))
     process3 = Process(target=process_static_gesture, args=(shared_array_r, static_num_r))
-    # process4 = Process(target=GUI, args=([test_np_array]))
-    # process4 = GUi
+    process4 = Process(target=process_load_window, args=(load_status,))
+
+    # os.system('''start python load.pyw''')
 
     process1.start()
     process2.start()
     process3.start()
-    # process4.start()
+    process4.start()
     while process1.is_alive():
         pass
     process2.terminate()
     process3.terminate()
-    # process4.terminate()
+    process4.terminate()
     process1.join()
     process2.join()
     process3.join()

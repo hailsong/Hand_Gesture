@@ -9,6 +9,7 @@ import numpy as np
 from PIL import Image
 from tensorflow import keras
 from os import system
+import threading
 
 import tensorflow as tf
 
@@ -17,10 +18,10 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
-from PyQt5 import uic
+
+from load import *
 
 # FROM_CLASS_MainWindow = uic.loadUiType("mainwindow.ui")[0]
-FROM_CLASS_Loading = uic.loadUiType("load.ui")[0]
 
 import datetime
 import sys
@@ -607,8 +608,77 @@ def process_static_gesture(array_for_static, value_for_static):
         except:
             pass
 
+def process_load_window(load_status):
+    class Getter(QThread):
+        def __init__(self):
+            self.status = 1 # 1이면 띄우기
+        def run(self, target):
+            #while True:
+            print(self.status, load_status.value)
+            print(target)
+            target.close()
 
-def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r):
+    class Load_Ui(QtWidgets.QMainWindow):
+        def __init__(self, img_path='./image/loading2.gif', xy=[850, 400], size=1.0, on_top=False):
+            print('load Ui loaded')
+            super(Load_Ui, self).__init__()
+            self.timer = QtCore.QTimer(self)
+            self.img_path = img_path
+            self.xy = xy
+            self.from_xy = xy
+            self.from_xy_diff = [0, 0]
+            self.to_xy = xy
+            self.to_xy_diff = [0, 0]
+            self.speed = 60
+            self.direction = [0, 0]  # x: 0(left), 1(right), y: 0(up), 1(down)
+            self.size = size
+            self.on_top = on_top
+            self.localPos = None
+
+            self.setupUi()
+            self.show()
+
+        def init_th(self):
+            self.getter = Getter()
+            self.getter.run(target = self)
+
+        def setupUi(self):
+            centralWidget = QtWidgets.QWidget(self)
+            self.setCentralWidget(centralWidget)
+
+            flags = QtCore.Qt.WindowFlags(
+                QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint if self.on_top else QtCore.Qt.FramelessWindowHint)
+            self.setWindowFlags(flags)
+            self.setAttribute(QtCore.Qt.WA_NoSystemBackground, True)
+            self.setAttribute(QtCore.Qt.WA_TranslucentBackground, True)
+
+            label = QtWidgets.QLabel(centralWidget)
+            movie = QMovie(self.img_path)
+            label.setMovie(movie)
+            movie.start()
+            movie.stop()
+
+            w = int(movie.frameRect().size().width() * self.size)
+            h = int(movie.frameRect().size().height() * self.size)
+            movie.setScaledSize(QtCore.QSize(w, h))
+            movie.start()
+
+            self.setGeometry(self.xy[0], self.xy[1], w, h)
+
+        # def mouseDoubleClickEvent(self, e):
+        #     QtWidgets.qApp.quit()
+        def close(self):
+            self.setWindowOpacity(0.3)
+
+        def open(self):
+            self.setWindowOpacity(0.8)
+
+    app = QtWidgets.QApplication(sys.argv)
+    ui_load_ = Load_Ui('image/loading2.gif', xy=[850, 400], size=1, on_top=True)
+    ui_load_.init_th()
+    sys.exit(app.exec_())
+
+def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r, load_status):
     '''
     :param array_for_static_l: static gesture 판별하는 process 와 공유할 왼손 input data
     :param value_for_static_l: static gesture 판별하는 process 와 공유할 왼손 output data
@@ -1184,7 +1254,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                 plt.show()
             print('loaded')
-            ui_load.close()
+            # ui_load.close()
+            load_status.value = 0
 
             while bool_state and cap.isOpened():
                 # print('cam')
@@ -1625,56 +1696,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             system("taskkill /f /im ZoomIt.exe")
             sys.exit()
 
-    class Load_Ui(object):
-        def setupUi(self, MainWindow):
-            self.MainWindow = MainWindow
-            self.MainWindow.setObjectName("MainWindow")
-            self.MainWindow.resize(500, 500)
-            self.MainWindow.setWindowFlag(QtCore.Qt.FramelessWindowHint)
-            self.MainWindow.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint)
-            self.centralwidget = QtWidgets.QWidget(MainWindow)
-            self.centralwidget.setObjectName("centralwidget")
-            self.centralwidget.setWindowFlag(QtCore.Qt.FramelessWindowHint)
-            self.centralwidget.setStyleSheet("background-color : rgb(224,244,253)")
-
-            # create label
-            self.label = QtWidgets.QLabel(self.centralwidget)
-            self.label.setGeometry(QtCore.QRect(25, 25, 500, 500))
-            self.label.setMinimumSize(QtCore.QSize(500, 500))
-            self.label.setMaximumSize(QtCore.QSize(500, 500))
-            self.label.setObjectName("label")
-
-            # add label to main window
-            # MainWindow.setCentralWidget(self.centralwidget)
-
-            # set qmovie as label
-            self.movie = QMovie("./image/test.gif")
-            self.label.setMovie(self.movie)
-            self.movie.start()
-
-        def close(self):
-            self.MainWindow.setWindowOpacity(0)
-
-        def open(self):
-            self.MainWindow.setWindowOpacity(1)
-
-    class Loading(QtWidgets.QMainWindow):
-        def __init__(self):
-            super().__init__()
-            self.setStyleSheet('''QMessageBox{background-color: rgb(224, 244, 253);}''')
-            self.setStyleSheet('''QMainWindow{background-color : rgb(0, 0, 0);}''')
-            self.msg = QMessageBox()
-        def closeEvent(self, event):
-            print('close?')
-            result = self.msg.question(self,
-                                 "Confirm Exit...",
-                                 "Are you sure you want to exit ?",
-                                 self.msg.Yes | self.msg.No)
-            if result == self.msg.Yes:
-                sys.exit()
-            else :
-                event.ignore()
-
     class Grabber(QtWidgets.QMainWindow):
         click_mode = pyqtSignal(int, int)
         button6_checked = pyqtSignal(bool)
@@ -1767,7 +1788,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             Form.setStyleSheet("background-color : rgb(248, 249, 251);")
 
-            # window.close()
+            load_status.value=0
 
             self.label = QtWidgets.QLabel(Form)
             self.label.setGeometry(QtCore.QRect(217, 72, 300, 48))
@@ -2066,8 +2087,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_2.toggled.connect(lambda: self.togglebutton(Form, integer=1))
             self.pushButton_3.toggled.connect(lambda: self.togglebutton(Form, integer=2))
             self.pushButton_4.toggled.connect(lambda: self.togglebutton(Form, integer=3))
-
-            self.pushButton_5.toggled.connect(ui_load.open)
+            def connectload():
+                load_status.value = 1
+            self.pushButton_5.toggled.connect(connectload)
             #self.pushButton_4.clicked.connect(self.loading.closeEvent)
             self.pushButton_5.toggled.connect(lambda: self.checked(Form))
 
@@ -2467,6 +2489,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 self.button6_checked.emit(False)
                 print('Default image set')
                 self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
+                ui_load.close()
 
         def settingwindow(self):
             dlg = Setting_window()
@@ -2537,16 +2560,14 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             os.system('explorer https://www.inbody.com/kr/')
 
     app = QtWidgets.QApplication(sys.argv)
-    window = QtWidgets.QWidget()
-    ui_load = Load_Ui()
-    ui_load.setupUi(window)
-    window.show()
+    # window = QtWidgets.QWidget()
+    # ui_load = Load_Ui('image/loading2.gif', xy=[850, 400], size=1, on_top=True)
+    # ui_load.setupUi()
+    # ui_load.show()
 
     ui = Grabber()
     ui.setupUi(ui)
     ui.show()
-
-
 
     # ui.MainWindow.show()
     sys.exit(app.exec_())
