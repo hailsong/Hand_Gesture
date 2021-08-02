@@ -7,21 +7,20 @@ import win32con
 import time
 import numpy as np
 from PIL import Image
-from tensorflow import keras
+
 from os import system
-import threading
 
 import tensorflow as tf
 
+tf.config.experimental.set_visible_devices([], 'GPU')
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-from load import *
+from loading import *
 
-# FROM_CLASS_MainWindow = uic.loadUiType("mainwindow.ui")[0]
 
 import datetime
 import sys
@@ -31,7 +30,7 @@ import os
 키 코드 링크 : https://lab.cliel.com/entry/%EA%B0%80%EC%83%81-Key-Code%ED%91%9C
 '''
 
-tf.config.experimental.set_visible_devices([], 'GPU')
+
 # physical_devices = tf.config.list_physical_devices('GPU')
 # # print(physical_devices)
 # tf.config.experimental.set_memory_growth(physical_devices[0], True)
@@ -68,9 +67,7 @@ BOARD_COLOR = 'w'
 
 VISUALIZE_GRAPH = False
 
-MODEL_STATIC = keras.models.load_model(
-    'keras_util/model_save/my_model_21.h5'
-)
+
 
 gesture_check = False
 mode_global = 0
@@ -595,6 +592,10 @@ def process_static_gesture(array_for_static, value_for_static):
     :param value_for_static: shared value between main process and static gesture detection process
     :return: NO RETURN BUT IT MODIFY SHARED ARR AND VAL
     """
+    import keras
+    MODEL_STATIC = keras.models.load_model(
+        'keras_util/model_save/my_model_21.h5'
+    )
     while True:
         input_ = np.copy(array_for_static[:])
         # print(input_)
@@ -608,77 +609,8 @@ def process_static_gesture(array_for_static, value_for_static):
         except:
             pass
 
-def process_load_window(load_status):
-    class Getter(QThread):
-        def __init__(self):
-            self.status = 1 # 1이면 띄우기
-        def run(self, target):
-            #while True:
-            print(self.status, load_status.value)
-            print(target)
-            target.close()
 
-    class Load_Ui(QtWidgets.QMainWindow):
-        def __init__(self, img_path='./image/loading2.gif', xy=[850, 400], size=1.0, on_top=False):
-            print('load Ui loaded')
-            super(Load_Ui, self).__init__()
-            self.timer = QtCore.QTimer(self)
-            self.img_path = img_path
-            self.xy = xy
-            self.from_xy = xy
-            self.from_xy_diff = [0, 0]
-            self.to_xy = xy
-            self.to_xy_diff = [0, 0]
-            self.speed = 60
-            self.direction = [0, 0]  # x: 0(left), 1(right), y: 0(up), 1(down)
-            self.size = size
-            self.on_top = on_top
-            self.localPos = None
-
-            self.setupUi()
-            self.show()
-
-        def init_th(self):
-            self.getter = Getter()
-            self.getter.run(target = self)
-
-        def setupUi(self):
-            centralWidget = QtWidgets.QWidget(self)
-            self.setCentralWidget(centralWidget)
-
-            flags = QtCore.Qt.WindowFlags(
-                QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint if self.on_top else QtCore.Qt.FramelessWindowHint)
-            self.setWindowFlags(flags)
-            self.setAttribute(QtCore.Qt.WA_NoSystemBackground, True)
-            self.setAttribute(QtCore.Qt.WA_TranslucentBackground, True)
-
-            label = QtWidgets.QLabel(centralWidget)
-            movie = QMovie(self.img_path)
-            label.setMovie(movie)
-            movie.start()
-            movie.stop()
-
-            w = int(movie.frameRect().size().width() * self.size)
-            h = int(movie.frameRect().size().height() * self.size)
-            movie.setScaledSize(QtCore.QSize(w, h))
-            movie.start()
-
-            self.setGeometry(self.xy[0], self.xy[1], w, h)
-
-        # def mouseDoubleClickEvent(self, e):
-        #     QtWidgets.qApp.quit()
-        def close(self):
-            self.setWindowOpacity(0.3)
-
-        def open(self):
-            self.setWindowOpacity(0.8)
-
-    app = QtWidgets.QApplication(sys.argv)
-    ui_load_ = Load_Ui('image/loading2.gif', xy=[850, 400], size=1, on_top=True)
-    ui_load_.init_th()
-    sys.exit(app.exec_())
-
-def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r, load_status):
+def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value_for_static_r):
     '''
     :param array_for_static_l: static gesture 판별하는 process 와 공유할 왼손 input data
     :param value_for_static_l: static gesture 판별하는 process 와 공유할 왼손 output data
@@ -686,12 +618,20 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     :param value_for_static_r: static gesture 판별하는 process 와 공유할 오른손 output data
     :return:
     '''
+
+
     global image
     global MOUSE_USE
     global CLICK_USE
     global WHEEL_USE
     global DRAG_USE
     global pen_color
+
+    app = QtWidgets.QApplication(sys.argv)
+    #window = QtWidgets.QWidget()
+    ui_load = Load_Ui2()
+    # ui_load.setupUi()
+    # ui_load.show()
 
     # GUI Part
     def mode_2_pre(palm, finger, left, p_check):
@@ -825,6 +765,39 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         else:
             return 0
 
+    # class Load_Ui(object):
+    #     def setupUi(self, MainWindow):
+    #         self.MainWindow = MainWindow
+    #         self.MainWindow.setObjectName("MainWindow")
+    #         self.MainWindow.resize(500, 500)
+    #         self.MainWindow.setWindowFlag(QtCore.Qt.FramelessWindowHint)
+    #         self.MainWindow.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint)
+    #         self.centralwidget = QtWidgets.QWidget(MainWindow)
+    #         self.centralwidget.setObjectName("centralwidget")
+    #         self.centralwidget.setWindowFlag(QtCore.Qt.FramelessWindowHint)
+    #         self.centralwidget.setStyleSheet("background-color : rgb(224,244,253)")
+    #
+    #         # create label
+    #         self.label = QtWidgets.QLabel(self.centralwidget)
+    #         self.label.setGeometry(QtCore.QRect(25, 25, 500, 500))
+    #         self.label.setMinimumSize(QtCore.QSize(500, 500))
+    #         self.label.setMaximumSize(QtCore.QSize(500, 500))
+    #         self.label.setObjectName("label")
+    #
+    #         # add label to main window
+    #         # MainWindow.setCentralWidget(self.centralwidget)
+    #
+    #         # set qmovie as label
+    #         self.movie = QMovie("./image/loading.png")
+    #         self.label.setMovie(self.movie)
+    #         self.movie.start()
+    #
+    #     def close(self):
+    #         self.MainWindow.setWindowOpacity(0)
+    #
+    #     def open(self):
+    #         self.MainWindow.setWindowOpacity(1)
+
     class Opcv(QThread):
 
         change_pixmap_signal = pyqtSignal(np.ndarray)
@@ -847,6 +820,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
         def __init__(self):
             super().__init__()
+
 
         def mode_3_pen_color(self, palm, finger, image):
             global pen_color
@@ -1254,8 +1228,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                 plt.show()
             print('loaded')
-            # ui_load.close()
-            load_status.value = 0
+
+            if ui_load.status == 0:
+                ui_load.close()
+                ui_load.status = 1
 
             while bool_state and cap.isOpened():
                 # print('cam')
@@ -1788,7 +1764,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             Form.setStyleSheet("background-color : rgb(248, 249, 251);")
 
-            load_status.value=0
+            ui_load.close()
 
             self.label = QtWidgets.QLabel(Form)
             self.label.setGeometry(QtCore.QRect(217, 72, 300, 48))
@@ -2087,9 +2063,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_2.toggled.connect(lambda: self.togglebutton(Form, integer=1))
             self.pushButton_3.toggled.connect(lambda: self.togglebutton(Form, integer=2))
             self.pushButton_4.toggled.connect(lambda: self.togglebutton(Form, integer=3))
-            def connectload():
-                load_status.value = 1
-            self.pushButton_5.toggled.connect(connectload)
+
+            self.pushButton_5.toggled.connect(ui_load.open)
             #self.pushButton_4.clicked.connect(self.loading.closeEvent)
             self.pushButton_5.toggled.connect(lambda: self.checked(Form))
 
@@ -2454,10 +2429,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # dlg.setupUi(dlg)
             # dlg.exec_()
             self.label_6.setStyleSheet(
-                "background-color : white; border-radius: 50px; background: url(./image/default.jpg)", )
+                "background-color : white; border-radius: 50px;" )
             self.label_6.setObjectName("label_6")
-            self.label_6.setPixmap(QtGui.QPixmap("./image/default2.jpg"))
-            print('load222')
+            self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
 
             if self.pushButton_5.isChecked():
                 # image = cv2.imread('./image/testtest.jpg')
@@ -2488,8 +2462,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         button.toggle()
                 self.button6_checked.emit(False)
                 print('Default image set')
-                self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
-                ui_load.close()
+                #self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
+                if ui_load.status == 1:
+                    ui_load.close()
+                    ui_load.status = 0
 
         def settingwindow(self):
             dlg = Setting_window()
@@ -2559,15 +2535,13 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         def Go_to_inbody(self):
             os.system('explorer https://www.inbody.com/kr/')
 
-    app = QtWidgets.QApplication(sys.argv)
-    # window = QtWidgets.QWidget()
-    # ui_load = Load_Ui('image/loading2.gif', xy=[850, 400], size=1, on_top=True)
-    # ui_load.setupUi()
-    # ui_load.show()
+
 
     ui = Grabber()
     ui.setupUi(ui)
     ui.show()
+
+
 
     # ui.MainWindow.show()
     sys.exit(app.exec_())
