@@ -31,9 +31,9 @@ import os
 '''
 
 
-# physical_devices = tf.config.list_physical_devices('GPU')
-# # print(physical_devices)
-# tf.config.experimental.set_memory_growth(physical_devices[0], True)
+physical_devices = tf.config.list_physical_devices('GPU')
+# print(physical_devices)
+tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 # For webcam input:
 # hands = mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5)
@@ -62,6 +62,7 @@ USE_DYNAMIC = True
 # 왼손잡이 모드 개발 중
 REVERSE_MODE = False
 language_setting = "한국어(Korean)"
+DARK_MODE = True
 
 BOARD_COLOR = 'w'
 
@@ -1068,7 +1069,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 """
                 # print(gesture)
                 global now_click
-                global straight_line, rectangular, circle
+                # global straight_line, rectangular, circle
 
                 if gesture == 13 and now_click == False:
                     print('drag on')
@@ -1552,12 +1553,12 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             font = QtGui.QFont()
             font.setFamily("서울남산 장체B")
-            font.setPointSize(22)
+            font.setPointSize(18)
             font2 = QtGui.QFont()
             font2.setFamily("서울남산 장체B")
             font2.setPointSize(15)
             self.comboBox = QtWidgets.QComboBox(Dialog)
-            self.comboBox.setGeometry(QtCore.QRect(140, 160, 321, 41))
+            self.comboBox.setGeometry(QtCore.QRect(140, 95, 321, 41))
             self.comboBox.setObjectName("comboBox")
             self.comboBox.setFont(font2)
             if language_setting == '한국어(Korean)':
@@ -1566,8 +1567,19 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             elif language_setting == '영어(English)':
                 self.comboBox.addItem("영어(English)")
                 self.comboBox.addItem("한국어(Korean)")
+            self.comboBox2 = QtWidgets.QComboBox(Dialog)
+            self.comboBox2.setGeometry(QtCore.QRect(140, 180, 321, 41))
+            self.comboBox2.setObjectName("comboBox2")
+            self.comboBox2.setFont(font2)
+            if DARK_MODE == True:
+                self.comboBox2.addItem("Dark Mode")
+                self.comboBox2.addItem("Light Mode")
+            elif DARK_MODE == False:
+                self.comboBox2.addItem("Light Mode")
+                self.comboBox2.addItem("Dark Mode")
+
             self.label = QtWidgets.QLabel(Dialog)
-            self.label.setGeometry(QtCore.QRect(130, 70, 401, 31))
+            self.label.setGeometry(QtCore.QRect(95, 20, 450, 31))
             self.label.setFont(font)
             self.label.setObjectName("label")
 
@@ -1577,16 +1589,22 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         def retranslateUi(self, Dialog):
             _translate = QtCore.QCoreApplication.translate
             Dialog.setWindowTitle(_translate("Setting Window", "Setting Window"))
-            self.label.setText(_translate("Dialog", "언어 선택(Language Selection)"))
+            self.label.setText(_translate("Dialog", "언어 / 테마 설정 (Language / Theme Setting)"))
 
         def getComboBoxItem(self):
             global language_setting
-            crnttxt = self.comboBox.currentText()
+            global DARK_MODE
+            language = self.comboBox.currentText()
+            theme = self.comboBox2.currentText()
             # print(crnttxt)
-            if crnttxt != language_setting:
-                language_setting = crnttxt
+            # if (theme == 'Dark Mode') != DARK_MODE:
+            #     DARK_MODE = (theme == 'Dark Mode')
+            #     # ui.setupTheme(ui, theme)
+            if language != language_setting or (theme == 'Dark Mode') != DARK_MODE:
+                DARK_MODE = (theme == 'Dark Mode')
+                language_setting = language
                 # print("Set Language : ", crnttxt)
-                ui.setupLanguage(ui, crnttxt)
+                ui.setupLanguage(ui, language)
 
     class Exit_window(QtWidgets.QDialog):
         def setupUi(self, Dialog):
@@ -1762,15 +1780,25 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             Form.resize(1920, 1080)
             self.From_button = False
 
-            Form.setStyleSheet("background-color : rgb(248, 249, 251);")
+            if not DARK_MODE: Form.setStyleSheet("background-color : rgb(248, 249, 251);");
+            else: Form.setStyleSheet("background-color : rgb(32, 36, 47);");
 
             ui_load.close()
 
-            self.label = QtWidgets.QLabel(Form)
-            self.label.setGeometry(QtCore.QRect(217, 72, 300, 48))
+            self.label = QtWidgets.QLabel('Motion Presentation', Form)
+            self.label.setGeometry(QtCore.QRect(278, 69, 300, 48))
 
-            self.label.setStyleSheet("image:url(./Image/logo.png)")
-            self.label.setObjectName("label")
+            if not DARK_MODE: self.label.setStyleSheet("color : rgb(32, 36, 47);");
+            else: self.label.setStyleSheet("color : rgb(248, 249, 251);");
+
+            font = QtGui.QFont()
+            font.setFamily("서울남산 장체B")
+            font.setPointSize(20)
+            self.label.setFont(font)
+
+
+            # self.label.setStyleSheet("image:url(./Image/logo.png)")
+            # self.label.setObjectName("label")
 
             # self.label_2 = QtWidgets.QLabel(Form)
             # self.label_2.setGeometry(QtCore.QRect(30, 100, 341, 41))
@@ -1932,21 +1960,38 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton = QtWidgets.QPushButton(self.frame_mode)
             self.pushButton.setGeometry(QtCore.QRect(0, 0, 244, 325))
             self.pushButton.setStyleSheet("background-color : #FFFFFF;")
-            self.pushButton.setStyleSheet(
-                '''
-                QPushButton{image:url(./image/KOR/1-1.png); border:0px;}
-                QPushButton:checked{image:url(./image/KOR/1-2.png); border:0px;}
-                QPushButton{
-                    background-color: rgb(233, 236, 241); border-radius: 30px;
-                }
-                QPushButton:hover {
-                    background-color: rgb(220, 223, 228); border-radius: 30px;
-                }
-                QPushButton:checked {
-                    background-color: rgb(0, 217, 104); border-radius: 30px;
-                }
-                '''
-            )
+            if DARK_MODE:
+                self.pushButton.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/KOR/1-2.png); border:0px;}
+                    QPushButton:checked{image:url(./image/KOR/1-2.png); border:0px;}
+                    QPushButton{
+                    background-color: rgb(47, 56, 77); border-radius: 30px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(113, 128, 147); border-radius: 30px;
+                    }
+                    QPushButton:checked {
+                        background-color: rgb(0, 217, 104); border-radius: 30px;
+                    }
+                    '''
+                )
+            else:
+                self.pushButton.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/KOR/1-1.png); border:0px;}
+                    QPushButton:checked{image:url(./image/KOR/1-2.png); border:0px;}
+                    QPushButton{
+                        background-color: rgb(233, 236, 241); border-radius: 30px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(220, 223, 228); border-radius: 30px;
+                    }
+                    QPushButton:checked {
+                        background-color: rgb(0, 217, 104); border-radius: 30px;
+                    }
+                    '''
+                )
             self.pushButton.setCheckable(True)
             self.pushButton.setObjectName("pushButton")
             # self.pushButton_image = QtWidgets.QLabel(self.pushButton)
@@ -1962,56 +2007,104 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_2 = QtWidgets.QPushButton(self.frame_mode)
             self.pushButton_2.setGeometry(QtCore.QRect(259, 0, 244, 325))
             self.pushButton_2.setStyleSheet("background-color : #FFFFFF;")
-            self.pushButton_2.setStyleSheet(
-                '''
-                QPushButton{image:url(./image/KOR/2-1.png); border:0px;}
-                QPushButton:checked{image:url(./image/KOR/2-2.png); border:0px;}
-                QPushButton{
-                    background-color: rgb(233, 236, 241); border-radius: 30px;
-                }
-                QPushButton:hover {
-                    background-color: rgb(220, 223, 228); border-radius: 30px;
-                }
-                QPushButton:checked {
-                    background-color: rgb(0, 217, 104); border-radius: 30px;
-                }
-                ''')
+            if DARK_MODE:
+                self.pushButton_2.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/KOR/2-2.png); border:0px;}
+                    QPushButton:checked{image:url(./image/KOR/2-2.png); border:0px;}
+                    QPushButton{
+                        background-color: rgb(47, 56, 77); border-radius: 30px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(113, 128, 147); border-radius: 30px;
+                    }
+                    QPushButton:checked {
+                        background-color: rgb(0, 217, 104); border-radius: 30px;
+                    }
+                    ''')
+            else:
+                self.pushButton_2.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/KOR/2-1.png); border:0px;}
+                    QPushButton:checked{image:url(./image/KOR/2-2.png); border:0px;}
+                    QPushButton{
+                        background-color: rgb(233, 236, 241); border-radius: 30px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(220, 223, 228); border-radius: 30px;
+                    }
+                    QPushButton:checked {
+                        background-color: rgb(0, 217, 104); border-radius: 30px;
+                    }
+                    ''')
             self.pushButton_2.setObjectName("pushButton_2")
             self.pushButton_2.setCheckable(True)
             self.pushButton_3 = QtWidgets.QPushButton(self.frame_mode)
             self.pushButton_3.setGeometry(QtCore.QRect(518, 0, 244, 325))
-            self.pushButton_3.setStyleSheet(
-                '''
-                QPushButton{image:url(./image/KOR/3-1.png); border:0px;}
-                QPushButton:checked{image:url(./image/KOR/3-2.png); border:0px;}
-                QPushButton{
-                    background-color: rgb(233, 236, 241); border-radius: 30px;
-                }
-                QPushButton:hover {
-                    background-color: rgb(220, 223, 228); border-radius: 30px;
-                }
-                QPushButton:checked {
-                    background-color: rgb(0, 217, 104); border-radius: 30px;
-                }
-                ''')
+            if DARK_MODE:
+                self.pushButton_3.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/KOR/3-2.png); border:0px;}
+                    QPushButton:checked{image:url(./image/KOR/3-2.png); border:0px;}
+                    QPushButton{
+                        background-color: rgb(47, 56, 77); border-radius: 30px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(113, 128, 147); border-radius: 30px;
+                    }
+                    QPushButton:checked {
+                        background-color: rgb(0, 217, 104); border-radius: 30px;
+                    }
+                    ''')
+            else:
+                self.pushButton_3.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/KOR/3-1.png); border:0px;}
+                    QPushButton:checked{image:url(./image/KOR/3-2.png); border:0px;}
+                    QPushButton{
+                        background-color: rgb(233, 236, 241); border-radius: 30px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(220, 223, 228); border-radius: 30px;
+                    }
+                    QPushButton:checked {
+                        background-color: rgb(0, 217, 104); border-radius: 30px;
+                    }
+                    ''')
             self.pushButton_3.setCheckable(True)
             self.pushButton_3.setObjectName("pushButton_3")
             self.pushButton_4 = QtWidgets.QPushButton(self.frame_mode)
             self.pushButton_4.setGeometry(QtCore.QRect(777, 0, 244, 325))
-            self.pushButton_4.setStyleSheet(
-                '''
-                QPushButton{image:url(./image/KOR/4-1.png); border:0px;}
-                QPushButton:checked{image:url(./image/KOR/4-2.png); border:0px;}
-                QPushButton{
-                    background-color: rgb(233, 236, 241); border-radius: 30px;
-                }
-                QPushButton:hover {
-                    background-color: rgb(220, 223, 228); border-radius: 30px;
-                }
-                QPushButton:checked {
-                    background-color: rgb(0, 217, 104); border-radius: 30px;
-                }
-                ''')
+            if DARK_MODE:
+                self.pushButton_4.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/KOR/4-2.png); border:0px;}
+                    QPushButton:checked{image:url(./image/KOR/4-2.png); border:0px;}
+                    QPushButton{
+                        background-color: rgb(47, 56, 77); border-radius: 30px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(113, 128, 147); border-radius: 30px;
+                    }
+                    QPushButton:checked {
+                        background-color: rgb(0, 217, 104); border-radius: 30px;
+                    }
+                    ''')
+            else:
+                self.pushButton_4.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/KOR/4-1.png); border:0px;}
+                    QPushButton:checked{image:url(./image/KOR/4-2.png); border:0px;}
+                    QPushButton{
+                        background-color: rgb(233, 236, 241); border-radius: 30px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(220, 223, 228); border-radius: 30px;
+                    }
+                    QPushButton:checked {
+                        background-color: rgb(0, 217, 104); border-radius: 30px;
+                    }
+                    ''')
             self.pushButton_4.setCheckable(True)
             self.pushButton_4.setObjectName("pushButton_4")
 
@@ -2086,18 +2179,16 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.retranslateUi(Form)
             QtCore.QMetaObject.connectSlotsByName(Form)
 
-        def setupLanguage(self, Form, language):
+        def setupTheme(self, Form, theme):
             print('setupLanguage')
-            if language == '한국어(Korean)':
+            if theme == 'Dark Mode':
                 self.pushButton.setStyleSheet(
                     '''
-                    QPushButton{image:url(./image/KOR/1-1.png); border:0px;}
-                    QPushButton:checked{image:url(./image/KOR/1-2.png); border:0px;}
                     QPushButton{
-                    background-color: rgb(233, 236, 241); border-radius: 30px;
+                    background-color: rgb(0, 0, 0); border-radius: 30px;
                     }
                     QPushButton:hover {
-                        background-color: rgb(220, 223, 228); border-radius: 30px;
+                        background-color: rgb(220, 0, 228); border-radius: 30px;
                     }
                     QPushButton:checked {
                         background-color: rgb(0, 217, 104); border-radius: 30px;
@@ -2182,7 +2273,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         background-color: rgb(20, 180, 202); border-radius: 30px;
                     }
                     ''')
-            elif language == '영어(English)':
+            elif theme != 'Dark Mode':
                 self.pushButton.setStyleSheet(
                     '''
                     QPushButton{image:url(./image/ENG/1-1.png); border:0px;}
@@ -2276,6 +2367,389 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         background-color: rgb(20, 180, 202); border-radius: 30px;
                     }
                     ''')
+
+        def setupLanguage(self, Form, language):
+            print('setupLanguage')
+            if not DARK_MODE: Form.setStyleSheet("background-color : rgb(248, 249, 251);");
+            else: Form.setStyleSheet("background-color : rgb(32, 36, 47);");
+            if language == '한국어(Korean)':
+                if not DARK_MODE:
+                    self.pushButton.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/KOR/1-1.png); border:0px;}
+                        QPushButton:checked{image:url(./image/KOR/1-2.png); border:0px;}
+                        QPushButton{
+                        background-color: rgb(233, 236, 241); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(220, 223, 228); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_2.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/KOR/2-1.png); border:0px;}
+                        QPushButton:checked{image:url(./image/KOR/2-2.png); border:0px;}
+                                            QPushButton{
+                        background-color: rgb(233, 236, 241); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(220, 223, 228); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_3.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/KOR/3-1.png); border:0px;}
+                        QPushButton:checked{image:url(./image/KOR/3-2.png); border:0px;}
+                                            QPushButton{
+                        background-color: rgb(233, 236, 241); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(220, 223, 228); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_4.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/KOR/4-1.png); border:0px;}
+                        QPushButton:checked{image:url(./image/KOR/4-2.png); border:0px;}
+                                            QPushButton{
+                        background-color: rgb(233, 236, 241); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(220, 223, 228); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_7.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/KOR/capture.png); border:0px;}
+                        QPushButton:hover{image:url(./image/KOR/capture_hover.png); border:0px;}
+                        ''')
+                    self.pushButton_5.setStyleSheet(
+                        '''
+                        QPushButton{
+                            color: white;
+                            background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                            stop:0 rgba(226, 0, 46, 255),
+                            stop:1 rgba(144, 61, 167, 255));
+                            border-radius: 30px;
+                            image:url(./image/KOR/cam_on.png);
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(246, 20, 66); border-radius: 30px;
+                        }
+                        QPushButton:checked{
+                            background-color: rgb(246, 20, 66); border-radius: 30px;
+                            image:url(./image/KOR/cam_off.png);
+                            }
+                        ''')
+                    self.pushButton_6.setStyleSheet(
+                        '''
+                        QPushButton{
+                            color: white;
+                            background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                            stop:0 rgba(0, 160, 182, 255),
+                            stop:1 rgba(144, 61, 167, 255));
+                            border-radius: 30px;
+                            image:url(./Image/KOR/guide_open.png);
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(20, 180, 202); border-radius: 30px;
+                        }
+                        ''')
+                else:
+                    self.pushButton.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/KOR/1-2.png); border:0px;}
+                        QPushButton:checked{image:url(./image/KOR/1-2.png); border:0px;}
+                        QPushButton{
+                        background-color: rgb(47, 56, 77); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(113, 128, 147); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_2.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/KOR/2-2.png); border:0px;}
+                        QPushButton:checked{image:url(./image/KOR/2-2.png); border:0px;}
+                        QPushButton{
+                        background-color: rgb(47, 56, 77); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(113, 128, 147); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_3.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/KOR/3-2.png); border:0px;}
+                        QPushButton:checked{image:url(./image/KOR/3-2.png); border:0px;}
+                                            QPushButton{
+                        background-color: rgb(47, 56, 77); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(113, 128, 147); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_4.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/KOR/4-2.png); border:0px;}
+                        QPushButton:checked{image:url(./image/KOR/4-2.png); border:0px;}
+                                            QPushButton{
+                        background-color: rgb(47, 56, 77); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(113, 128, 147); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_7.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/KOR/capture.png); border:0px;}
+                        QPushButton:hover{image:url(./image/KOR/capture_hover.png); border:0px;}
+                        ''')
+                    self.pushButton_5.setStyleSheet(
+                        '''
+                        QPushButton{
+                            color: white;
+                            background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                            stop:0 rgba(226, 0, 46, 255),
+                            stop:1 rgba(144, 61, 167, 255));
+                            border-radius: 30px;
+                            image:url(./image/KOR/cam_on.png);
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(246, 20, 66); border-radius: 30px;
+                        }
+                        QPushButton:checked{
+                            background-color: rgb(246, 20, 66); border-radius: 30px;
+                            image:url(./image/KOR/cam_off.png);
+                            }
+                        ''')
+                    self.pushButton_6.setStyleSheet(
+                        '''
+                        QPushButton{
+                            color: white;
+                            background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                            stop:0 rgba(0, 160, 182, 255),
+                            stop:1 rgba(144, 61, 167, 255));
+                            border-radius: 30px;
+                            image:url(./Image/KOR/guide_open.png);
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(20, 180, 202); border-radius: 30px;
+                        }
+                        ''')
+            elif language == '영어(English)':
+                if not DARK_MODE:
+                    self.pushButton.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/ENG/1-1.png); border:0px;}
+                        QPushButton:checked{image:url(./image/ENG/1-2.png); border:0px;}
+                        QPushButton{
+                        background-color: rgb(233, 236, 241); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(220, 223, 228); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_2.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/ENG/2-1.png); border:0px;}
+                        QPushButton:checked{image:url(./image/ENG/2-2.png); border:0px;}
+                        QPushButton{
+                        background-color: rgb(233, 236, 241); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(220, 223, 228); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_3.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/ENG/3-1.png); border:0px;}
+                        QPushButton:checked{image:url(./image/ENG/3-2.png); border:0px;}
+                        QPushButton{
+                        background-color: rgb(233, 236, 241); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(220, 223, 228); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_4.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/ENG/4-1.png); border:0px;}
+                        QPushButton:checked{image:url(./image/ENG/4-2.png); border:0px;}
+                        QPushButton{
+                        background-color: rgb(233, 236, 241); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(220, 223, 228); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_7.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/ENG/capture.png); border:0px;}
+                        QPushButton:hover{image:url(./image/ENG/capture_hover.png); border:0px;}
+                        ''')
+                    self.pushButton_5.setStyleSheet(
+                        '''
+                        QPushButton{
+                            color: white;
+                            background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                            stop:0 rgba(226, 0, 46, 255),
+                            stop:1 rgba(144, 61, 167, 255));
+                            border-radius: 30px;
+                            image:url(./image/ENG/cam_on.png);
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(246, 20, 66); border-radius: 30px;
+                        }
+                        QPushButton:checked{
+                            background-color: rgb(246, 20, 66); border-radius: 30px;
+                            image:url(./image/ENG/cam_off.png);
+                            }
+                        ''')
+                    self.pushButton_6.setStyleSheet(
+                        '''
+                        QPushButton{
+                            color: white;
+                            background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                            stop:0 rgba(0, 160, 182, 255),
+                            stop:1 rgba(144, 61, 167, 255));
+                            border-radius: 30px;
+                            image:url(./Image/ENG/guide_open.png);
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(20, 180, 202); border-radius: 30px;
+                        }
+                        ''')
+                else:
+                    self.pushButton.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/ENG/1-1.png); border:0px;}
+                        QPushButton:checked{image:url(./image/ENG/1-2.png); border:0px;}
+                        QPushButton{
+                        background-color: rgb(47, 56, 77); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(113, 128, 147); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_2.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/ENG/2-1.png); border:0px;}
+                        QPushButton:checked{image:url(./image/ENG/2-2.png); border:0px;}
+                        QPushButton{
+                        background-color: rgb(47, 56, 77); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(113, 128, 147); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_3.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/ENG/3-1.png); border:0px;}
+                        QPushButton:checked{image:url(./image/ENG/3-2.png); border:0px;}
+                        QPushButton{
+                        background-color: rgb(47, 56, 77); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(113, 128, 147); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_4.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/ENG/4-1.png); border:0px;}
+                        QPushButton:checked{image:url(./image/ENG/4-2.png); border:0px;}
+                        QPushButton{
+                        background-color: rgb(47, 56, 77); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(113, 128, 147); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_7.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/ENG/capture.png); border:0px;}
+                        QPushButton:hover{image:url(./image/ENG/capture_hover.png); border:0px;}
+                        ''')
+                    self.pushButton_5.setStyleSheet(
+                        '''
+                        QPushButton{
+                            color: white;
+                            background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                            stop:0 rgba(226, 0, 46, 255),
+                            stop:1 rgba(144, 61, 167, 255));
+                            border-radius: 30px;
+                            image:url(./image/ENG/cam_on.png);
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(246, 20, 66); border-radius: 30px;
+                        }
+                        QPushButton:checked{
+                            background-color: rgb(246, 20, 66); border-radius: 30px;
+                            image:url(./image/ENG/cam_off.png);
+                            }
+                        ''')
+                    self.pushButton_6.setStyleSheet(
+                        '''
+                        QPushButton{
+                            color: white;
+                            background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                            stop:0 rgba(0, 160, 182, 255),
+                            stop:1 rgba(144, 61, 167, 255));
+                            border-radius: 30px;
+                            image:url(./Image/ENG/guide_open.png);
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(20, 180, 202); border-radius: 30px;
+                        }
+                        ''')
 
         def retranslateUi(self, Form):
             _translate = QtCore.QCoreApplication.translate
@@ -2540,8 +3014,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     ui = Grabber()
     ui.setupUi(ui)
     ui.show()
-
-
 
     # ui.MainWindow.show()
     sys.exit(app.exec_())
