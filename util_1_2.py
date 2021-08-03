@@ -1561,6 +1561,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.comboBox.setGeometry(QtCore.QRect(140, 95, 321, 41))
             self.comboBox.setObjectName("comboBox")
             self.comboBox.setFont(font2)
+            # self.comboBox.setStyleSheet(
+            #
+            # )
             if language_setting == '한국어(Korean)':
                 self.comboBox.addItem("한국어(Korean)")
                 self.comboBox.addItem("영어(English)")
