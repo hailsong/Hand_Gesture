@@ -1508,11 +1508,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             else: Dialog.setStyleSheet("background-color : rgb(42, 46, 57);");
 
             icon = QtGui.QIcon()
-            icon.addPixmap(QtGui.QPixmap("image/setting.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            icon.addPixmap(QtGui.QPixmap("image/icon/setting.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             Dialog.setWindowIcon(icon)
 
             self.pushButton_ok = QtWidgets.QPushButton(Dialog)
-            self.pushButton_ok.setGeometry(QtCore.QRect(30, 260, 261, 111))
+            self.pushButton_ok.setGeometry(QtCore.QRect(30, 271, 261, 100))
             self.pushButton_ok.setStyleSheet(
                 '''
                 QPushButton{
@@ -1536,7 +1536,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_ok.clicked.connect(self.getComboBoxItem)
 
             self.pushButton_cancel = QtWidgets.QPushButton(Dialog)
-            self.pushButton_cancel.setGeometry(QtCore.QRect(310, 260, 261, 111))
+            self.pushButton_cancel.setGeometry(QtCore.QRect(310, 271, 261, 100))
             self.pushButton_cancel.setStyleSheet(
                 '''
                 QPushButton{
@@ -1641,11 +1641,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             else:
                 Dialog.setStyleSheet("background-color : rgb(42, 46, 57);");
             icon = QtGui.QIcon()
-            icon.addPixmap(QtGui.QPixmap("image/exit.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            icon.addPixmap(QtGui.QPixmap("image/icon/exit.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             Dialog.setWindowIcon(icon)
 
             self.pushButton_ok = QtWidgets.QPushButton(Dialog)
-            self.pushButton_ok.setGeometry(QtCore.QRect(30, 260, 261, 111))
+            self.pushButton_ok.setGeometry(QtCore.QRect(30, 271, 261, 100))
             self.pushButton_ok.setStyleSheet(
                 '''
                 QPushButton{
@@ -1669,7 +1669,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_ok.clicked.connect(self.exitProgram)
 
             self.pushButton_cancel = QtWidgets.QPushButton(Dialog)
-            self.pushButton_cancel.setGeometry(QtCore.QRect(310, 260, 261, 111))
+            self.pushButton_cancel.setGeometry(QtCore.QRect(310, 271, 261, 100))
             self.pushButton_cancel.setStyleSheet(
                 '''
                 QPushButton{
@@ -1896,12 +1896,12 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # Button 8 : Language Setting
             self.pushButton_8 = QtWidgets.QPushButton(Form)
-            self.pushButton_8.setGeometry(QtCore.QRect(920, 56, 50, 50))
+            self.pushButton_8.setGeometry(QtCore.QRect(935, 55, 50, 50))
             self.pushButton_8.setStyleSheet("border-radius : 20;")
             self.pushButton_8.setStyleSheet(
                 '''
-                QPushButton{image:url(./Image/setting.png); border:0px;}
-                QPushButton:hover{image:url(./Image/setting_hover.png); border:0px;}
+                QPushButton{image:url(./Image/icon/setting.png); border:0px;}
+                QPushButton:hover{image:url(./Image/icon/setting_hover.png); border:0px;}
                 ''')
             self.pushButton_8.setObjectName("pushButton_8")
             self.pushButton_8.clicked.connect(self.settingwindow)
@@ -1922,12 +1922,12 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # Button 10 : Exit Button
             self.pushButton_10 = QtWidgets.QPushButton(Form)
-            self.pushButton_10.setGeometry(QtCore.QRect(990, 55, 50, 50))
+            self.pushButton_10.setGeometry(QtCore.QRect(1000, 55, 50, 50))
             self.pushButton_10.setStyleSheet("border-radius : 20;")
             self.pushButton_10.setStyleSheet(
                 '''
-                QPushButton{image:url(./image/exit.png); border:0px;}
-                QPushButton:hover{image:url(./image/exit_hover.png); border:0px;}
+                QPushButton{image:url(./image/icon/exit.png); border:0px;}
+                QPushButton:hover{image:url(./image/icon/exit_hover.png); border:0px;}
                 ''')
             self.pushButton_10.setObjectName("pushButton_10")
             self.pushButton_10.clicked.connect(self.exitwindow)
@@ -2229,6 +2229,42 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 Form.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame_dark.png"))
             else:
                 Form.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame.png"))
+            if DARK_MODE:
+                self.pushButton_10.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/icon/exit_dark.png); border:0px;}
+                    QPushButton:hover{image:url(./image/icon/exit_dark_hover.png); border:0px;}
+                    ''')
+                self.pushButton_8.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./Image/icon/setting_dark.png); border:0px;}
+                    QPushButton:hover{image:url(./Image/icon/setting_dark_hover.png); border:0px;}
+                    ''')
+                self.pushButton_9.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/inbody_dark.png); border:0px;}
+                    QPushButton:hover{image:url(./image/inbody_hover.png); border:0px;}
+
+                    ''')
+                self.label_6.setPixmap(QtGui.QPixmap("./image/default_dark.jpg"))
+            else:
+                self.pushButton_10.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/icon/exit.png); border:0px;}
+                    QPushButton:hover{image:url(./image/icon/exit_hover.png); border:0px;}
+                    ''')
+                self.pushButton_8.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./Image/icon/setting.png); border:0px;}
+                    QPushButton:hover{image:url(./Image/icon/setting_hover.png); border:0px;}
+                    ''')
+                self.pushButton_9.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/inbody.png); border:0px;}
+                    QPushButton:hover{image:url(./image/inbody_hover.png); border:0px;}
+
+                    ''')
+                self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
             if language == '한국어(Korean)':
                 if not DARK_MODE:
                     self.pushButton.setStyleSheet(
@@ -2649,7 +2685,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 sys.exit()
 
             msgBox.pushButton_ok = QtWidgets.QPushButton(msgBox)
-            msgBox.pushButton_ok.setGeometry(QtCore.QRect(30, 260, 261, 111))
+            msgBox.pushButton_ok.setGeometry(QtCore.QRect(30, 271, 261, 100))
             msgBox.pushButton_ok.setStyleSheet(
                 '''
                 QPushButton{
@@ -2673,7 +2709,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             msgBox.pushButton_ok.clicked.connect(msgBox.getComboBoxItem)
 
             msgBox.pushButton_cancel = QtWidgets.QPushButton(msgBox)
-            msgBox.pushButton_cancel.setGeometry(QtCore.QRect(310, 260, 261, 111))
+            msgBox.pushButton_cancel.setGeometry(QtCore.QRect(310, 271, 261, 100))
             msgBox.pushButton_cancel.setStyleSheet(
                 '''
                 QPushButton{
