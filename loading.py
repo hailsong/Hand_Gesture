@@ -55,6 +55,7 @@ class Load_Ui2(QtWidgets.QMainWindow):
         self.setWindowFlags(flags)
         self.setAttribute(QtCore.Qt.WA_NoSystemBackground, True)
         self.setAttribute(QtCore.Qt.WA_TranslucentBackground, True)
+        self.setWindowOpacity(0.8)
 
         label = QtWidgets.QLabel(centralWidget)
         movie = QMovie(self.img_path)
@@ -73,4 +74,4 @@ class Load_Ui2(QtWidgets.QMainWindow):
         self.setWindowOpacity(0)
 
     def open(self):
-        self.setWindowOpacity(1)
+        self.setWindowOpacity(0.7)

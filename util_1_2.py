@@ -61,14 +61,18 @@ USE_TENSORFLOW = True
 USE_DYNAMIC = True
 # 왼손잡이 모드 개발 중
 REVERSE_MODE = False
-language_setting = "한국어(Korean)"
-DARK_MODE = True
+
+import json
+
+with open('setting.json', encoding='UTF8') as json_file:
+    json_data = json.load(json_file)
+
+language_setting = json_data["LANGUAGE"]
+DARK_MODE = True if json_data["DARK_MODE"] == "True" else False
 
 BOARD_COLOR = 'w'
 
 VISUALIZE_GRAPH = False
-
-
 
 gesture_check = False
 mode_global = 0
@@ -1494,12 +1498,15 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
     class Setting_window(QtWidgets.QDialog):
         def setupUi(self, Dialog):
-            # self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
+            self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
             global language_setting
             Dialog.setObjectName("Setting")
             Dialog.resize(600, 400)
             Dialog.setFixedSize(600, 400)
-            Dialog.setStyleSheet("background-color : rgb(255, 255, 255);")
+            Dialog.setWindowOpacity(0.85)
+            if not DARK_MODE: Dialog.setStyleSheet("background-color : rgb(238, 239, 241);");
+            else: Dialog.setStyleSheet("background-color : rgb(42, 46, 57);");
+
             icon = QtGui.QIcon()
             icon.addPixmap(QtGui.QPixmap("image/setting.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             Dialog.setWindowIcon(icon)
@@ -1554,6 +1561,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             font = QtGui.QFont()
             font.setFamily("서울남산 장체B")
             font.setPointSize(18)
+
             font2 = QtGui.QFont()
             font2.setFamily("서울남산 장체B")
             font2.setPointSize(15)
@@ -1561,28 +1569,34 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.comboBox.setGeometry(QtCore.QRect(140, 95, 321, 41))
             self.comboBox.setObjectName("comboBox")
             self.comboBox.setFont(font2)
-            # self.comboBox.setStyleSheet(
-            #
-            # )
             if language_setting == '한국어(Korean)':
                 self.comboBox.addItem("한국어(Korean)")
                 self.comboBox.addItem("영어(English)")
             elif language_setting == '영어(English)':
                 self.comboBox.addItem("영어(English)")
                 self.comboBox.addItem("한국어(Korean)")
+            if not DARK_MODE:
+                self.comboBox.setStyleSheet("color : rgb(32, 36, 47);");
+            else:
+                self.comboBox.setStyleSheet("color : rgb(248, 249, 251);");
+
             self.comboBox2 = QtWidgets.QComboBox(Dialog)
             self.comboBox2.setGeometry(QtCore.QRect(140, 180, 321, 41))
             self.comboBox2.setObjectName("comboBox2")
             self.comboBox2.setFont(font2)
             if DARK_MODE == True:
-                self.comboBox2.addItem("Dark Mode")
-                self.comboBox2.addItem("Light Mode")
+                self.comboBox2.addItem("다크 모드 (Dark Mode)")
+                self.comboBox2.addItem("라이트 모드 (Light Mode)")
             elif DARK_MODE == False:
-                self.comboBox2.addItem("Light Mode")
-                self.comboBox2.addItem("Dark Mode")
+                self.comboBox2.addItem("라이트 모드 (Light Mode)")
+                self.comboBox2.addItem("다크 모드 (Dark Mode)")
+            if not DARK_MODE:
+                self.comboBox2.setStyleSheet("color : rgb(32, 36, 47);");
+            else:
+                self.comboBox2.setStyleSheet("color : rgb(248, 249, 251);");
 
             self.label = QtWidgets.QLabel(Dialog)
-            self.label.setGeometry(QtCore.QRect(95, 20, 450, 31))
+            self.label.setGeometry(QtCore.QRect(95, 37, 450, 31))
             self.label.setFont(font)
             self.label.setObjectName("label")
 
@@ -1593,6 +1607,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             _translate = QtCore.QCoreApplication.translate
             Dialog.setWindowTitle(_translate("Setting Window", "Setting Window"))
             self.label.setText(_translate("Dialog", "언어 / 테마 설정 (Language / Theme Setting)"))
+            if not DARK_MODE:
+                self.label.setStyleSheet("color : rgb(32, 36, 47);");
+            else:
+                self.label.setStyleSheet("color : rgb(248, 249, 251);");
 
         def getComboBoxItem(self):
             global language_setting
@@ -1603,20 +1621,25 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # if (theme == 'Dark Mode') != DARK_MODE:
             #     DARK_MODE = (theme == 'Dark Mode')
             #     # ui.setupTheme(ui, theme)
-            if language != language_setting or (theme == 'Dark Mode') != DARK_MODE:
-                DARK_MODE = (theme == 'Dark Mode')
+            if language != language_setting or (theme == '다크 모드 (Dark Mode)') != DARK_MODE:
+                DARK_MODE = (theme == '다크 모드 (Dark Mode)')
                 language_setting = language
                 # print("Set Language : ", crnttxt)
-                ui.setupLanguage(ui, language)
+                ui.setupLanguage(ui, language, DARK_MODE)
 
     class Exit_window(QtWidgets.QDialog):
         def setupUi(self, Dialog):
-            # self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
+            self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
             global language_setting
             Dialog.setObjectName("Exit")
             Dialog.resize(600, 400)
             Dialog.setFixedSize(600, 400)
-            Dialog.setStyleSheet("background-color : rgb(255, 255, 255);")
+            Dialog.setWindowOpacity(0.85)
+            # msgBox.setStyleSheet("background-color:rgba(255, 255, 255, 255);")
+            if not DARK_MODE:
+                Dialog.setStyleSheet("background-color : rgb(238, 239, 241);");
+            else:
+                Dialog.setStyleSheet("background-color : rgb(42, 46, 57);");
             icon = QtGui.QIcon()
             icon.addPixmap(QtGui.QPixmap("image/exit.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             Dialog.setWindowIcon(icon)
@@ -1687,6 +1710,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             _translate = QtCore.QCoreApplication.translate
             Dialog.setWindowTitle(_translate("Exit?", "Exit?"))
             self.label.setText(_translate("Dialog", "이용해 주셔서 감사합니다! \n \n프로그램을 종료하시겠습니까?"))
+            if not DARK_MODE:
+                self.label.setStyleSheet("color : rgb(32, 36, 47);");
+            else:
+                self.label.setStyleSheet("color : rgb(248, 249, 251);");
 
         def exitProgram(self):
             system("taskkill /f /im ZoomIt64.exe")
@@ -1798,6 +1825,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             font.setFamily("서울남산 장체B")
             font.setPointSize(20)
             self.label.setFont(font)
+
 
 
             # self.label.setStyleSheet("image:url(./Image/logo.png)")
@@ -1924,7 +1952,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.cam_frame.setGeometry(QtCore.QRect(0, 0, 811, 608))
             self.cam_frame.setStyleSheet("background-color : rgba(0,0,0,0%);")
             self.cam_frame.setObjectName("cam_frame")
-            self.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame.png"))
+            if DARK_MODE:
+                self.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame_dark.png"))
+            else:
+                self.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame.png"))
 
             # self.loading = QtWidgets.QLabel(Form)
             # self.loading.setGeometry(QtCore.QRect(405, 304, 300, 500))
@@ -1943,11 +1974,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_7.setStyleSheet("background-color : rgba( 255, 255, 255, 0% );, ")
             self.pushButton_7.setStyleSheet(
                 '''
-                QPushButton{image:url(./image/KOR/capture.png); border:0px;}
+                QPushButton{image:url(./image/KOR/capture.png); border:0px; background-color : rgba( 255, 255, 255, 0% );}
                 QPushButton:hover{image:url(./image/KOR/capture_hover.png); border:0px;}
                 ''')
             self.pushButton_7.setObjectName("pushButton_7")
-
             self.pushButton_7.clicked.connect(self.screenshot)
             self.pushButton_7.raise_()
 
@@ -1963,6 +1993,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton = QtWidgets.QPushButton(self.frame_mode)
             self.pushButton.setGeometry(QtCore.QRect(0, 0, 244, 325))
             self.pushButton.setStyleSheet("background-color : #FFFFFF;")
+
+
+
             if DARK_MODE:
                 self.pushButton.setStyleSheet(
                     '''
@@ -2178,203 +2211,24 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # thread_load
             # self.thread_load = Load()
+            ui.setupLanguage(ui, language_setting, DARK_MODE)
 
             self.retranslateUi(Form)
             QtCore.QMetaObject.connectSlotsByName(Form)
 
-        def setupTheme(self, Form, theme):
+        def setupLanguage(self, Form, language, DARK_MODE):
             print('setupLanguage')
-            if theme == 'Dark Mode':
-                self.pushButton.setStyleSheet(
-                    '''
-                    QPushButton{
-                    background-color: rgb(0, 0, 0); border-radius: 30px;
-                    }
-                    QPushButton:hover {
-                        background-color: rgb(220, 0, 228); border-radius: 30px;
-                    }
-                    QPushButton:checked {
-                        background-color: rgb(0, 217, 104); border-radius: 30px;
-                    }
-                    ''')
-                self.pushButton_2.setStyleSheet(
-                    '''
-                    QPushButton{image:url(./image/KOR/2-1.png); border:0px;}
-                    QPushButton:checked{image:url(./image/KOR/2-2.png); border:0px;}
-                                        QPushButton{
-                    background-color: rgb(233, 236, 241); border-radius: 30px;
-                    }
-                    QPushButton:hover {
-                        background-color: rgb(220, 223, 228); border-radius: 30px;
-                    }
-                    QPushButton:checked {
-                        background-color: rgb(0, 217, 104); border-radius: 30px;
-                    }
-                    ''')
-                self.pushButton_3.setStyleSheet(
-                    '''
-                    QPushButton{image:url(./image/KOR/3-1.png); border:0px;}
-                    QPushButton:checked{image:url(./image/KOR/3-2.png); border:0px;}
-                                        QPushButton{
-                    background-color: rgb(233, 236, 241); border-radius: 30px;
-                    }
-                    QPushButton:hover {
-                        background-color: rgb(220, 223, 228); border-radius: 30px;
-                    }
-                    QPushButton:checked {
-                        background-color: rgb(0, 217, 104); border-radius: 30px;
-                    }
-                    ''')
-                self.pushButton_4.setStyleSheet(
-                    '''
-                    QPushButton{image:url(./image/KOR/4-1.png); border:0px;}
-                    QPushButton:checked{image:url(./image/KOR/4-2.png); border:0px;}
-                                        QPushButton{
-                    background-color: rgb(233, 236, 241); border-radius: 30px;
-                    }
-                    QPushButton:hover {
-                        background-color: rgb(220, 223, 228); border-radius: 30px;
-                    }
-                    QPushButton:checked {
-                        background-color: rgb(0, 217, 104); border-radius: 30px;
-                    }
-                    ''')
-                self.pushButton_7.setStyleSheet(
-                    '''
-                    QPushButton{image:url(./image/KOR/capture.png); border:0px;}
-                    QPushButton:hover{image:url(./image/KOR/capture_hover.png); border:0px;}
-                    ''')
-                self.pushButton_5.setStyleSheet(
-                    '''
-                    QPushButton{
-                        color: white;
-                        background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
-                        stop:0 rgba(226, 0, 46, 255),
-                        stop:1 rgba(144, 61, 167, 255));
-                        border-radius: 30px;
-                        image:url(./image/KOR/cam_on.png);
-                    }
-                    QPushButton:hover {
-                        background-color: rgb(246, 20, 66); border-radius: 30px;
-                    }
-                    QPushButton:checked{
-                        background-color: rgb(246, 20, 66); border-radius: 30px;
-                        image:url(./image/KOR/cam_off.png);
-                        }
-                    ''')
-                self.pushButton_6.setStyleSheet(
-                    '''
-                    QPushButton{
-                        color: white;
-                        background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
-                        stop:0 rgba(0, 160, 182, 255),
-                        stop:1 rgba(144, 61, 167, 255));
-                        border-radius: 30px;
-                        image:url(./Image/KOR/guide_open.png);
-                    }
-                    QPushButton:hover {
-                        background-color: rgb(20, 180, 202); border-radius: 30px;
-                    }
-                    ''')
-            elif theme != 'Dark Mode':
-                self.pushButton.setStyleSheet(
-                    '''
-                    QPushButton{image:url(./image/ENG/1-1.png); border:0px;}
-                    QPushButton:checked{image:url(./image/ENG/1-2.png); border:0px;}
-                    QPushButton{
-                    background-color: rgb(233, 236, 241); border-radius: 30px;
-                    }
-                    QPushButton:hover {
-                        background-color: rgb(220, 223, 228); border-radius: 30px;
-                    }
-                    QPushButton:checked {
-                        background-color: rgb(0, 217, 104); border-radius: 30px;
-                    }
-                    ''')
-                self.pushButton_2.setStyleSheet(
-                    '''
-                    QPushButton{image:url(./image/ENG/2-1.png); border:0px;}
-                    QPushButton:checked{image:url(./image/ENG/2-2.png); border:0px;}
-                    QPushButton{
-                    background-color: rgb(233, 236, 241); border-radius: 30px;
-                    }
-                    QPushButton:hover {
-                        background-color: rgb(220, 223, 228); border-radius: 30px;
-                    }
-                    QPushButton:checked {
-                        background-color: rgb(0, 217, 104); border-radius: 30px;
-                    }
-                    ''')
-                self.pushButton_3.setStyleSheet(
-                    '''
-                    QPushButton{image:url(./image/ENG/3-1.png); border:0px;}
-                    QPushButton:checked{image:url(./image/ENG/3-2.png); border:0px;}
-                    QPushButton{
-                    background-color: rgb(233, 236, 241); border-radius: 30px;
-                    }
-                    QPushButton:hover {
-                        background-color: rgb(220, 223, 228); border-radius: 30px;
-                    }
-                    QPushButton:checked {
-                        background-color: rgb(0, 217, 104); border-radius: 30px;
-                    }
-                    ''')
-                self.pushButton_4.setStyleSheet(
-                    '''
-                    QPushButton{image:url(./image/ENG/4-1.png); border:0px;}
-                    QPushButton:checked{image:url(./image/ENG/4-2.png); border:0px;}
-                    QPushButton{
-                    background-color: rgb(233, 236, 241); border-radius: 30px;
-                    }
-                    QPushButton:hover {
-                        background-color: rgb(220, 223, 228); border-radius: 30px;
-                    }
-                    QPushButton:checked {
-                        background-color: rgb(0, 217, 104); border-radius: 30px;
-                    }
-                    ''')
-                self.pushButton_7.setStyleSheet(
-                    '''
-                    QPushButton{image:url(./image/ENG/capture.png); border:0px;}
-                    QPushButton:hover{image:url(./image/ENG/capture_hover.png); border:0px;}
-                    ''')
-                self.pushButton_5.setStyleSheet(
-                    '''
-                    QPushButton{
-                        color: white;
-                        background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
-                        stop:0 rgba(226, 0, 46, 255),
-                        stop:1 rgba(144, 61, 167, 255));
-                        border-radius: 30px;
-                        image:url(./image/ENG/cam_on.png);
-                    }
-                    QPushButton:hover {
-                        background-color: rgb(246, 20, 66); border-radius: 30px;
-                    }
-                    QPushButton:checked{
-                        background-color: rgb(246, 20, 66); border-radius: 30px;
-                        image:url(./image/ENG/cam_off.png);
-                        }
-                    ''')
-                self.pushButton_6.setStyleSheet(
-                    '''
-                    QPushButton{
-                        color: white;
-                        background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
-                        stop:0 rgba(0, 160, 182, 255),
-                        stop:1 rgba(144, 61, 167, 255));
-                        border-radius: 30px;
-                        image:url(./Image/ENG/guide_open.png);
-                    }
-                    QPushButton:hover {
-                        background-color: rgb(20, 180, 202); border-radius: 30px;
-                    }
-                    ''')
+            global language_setting
+            # global DARK_MODE
 
-        def setupLanguage(self, Form, language):
-            print('setupLanguage')
             if not DARK_MODE: Form.setStyleSheet("background-color : rgb(248, 249, 251);");
             else: Form.setStyleSheet("background-color : rgb(32, 36, 47);");
+            if not DARK_MODE: Form.label.setStyleSheet("color : rgb(32, 36, 47);");
+            else: Form.label.setStyleSheet("color : rgb(248, 249, 251);");
+            if DARK_MODE:
+                Form.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame_dark.png"))
+            else:
+                Form.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame.png"))
             if language == '한국어(Korean)':
                 if not DARK_MODE:
                     self.pushButton.setStyleSheet(
@@ -2662,7 +2516,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 else:
                     self.pushButton.setStyleSheet(
                         '''
-                        QPushButton{image:url(./image/ENG/1-1.png); border:0px;}
+                        QPushButton{image:url(./image/ENG/1-2.png); border:0px;}
                         QPushButton:checked{image:url(./image/ENG/1-2.png); border:0px;}
                         QPushButton{
                         background-color: rgb(47, 56, 77); border-radius: 30px;
@@ -2676,7 +2530,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         ''')
                     self.pushButton_2.setStyleSheet(
                         '''
-                        QPushButton{image:url(./image/ENG/2-1.png); border:0px;}
+                        QPushButton{image:url(./image/ENG/2-2.png); border:0px;}
                         QPushButton:checked{image:url(./image/ENG/2-2.png); border:0px;}
                         QPushButton{
                         background-color: rgb(47, 56, 77); border-radius: 30px;
@@ -2690,7 +2544,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         ''')
                     self.pushButton_3.setStyleSheet(
                         '''
-                        QPushButton{image:url(./image/ENG/3-1.png); border:0px;}
+                        QPushButton{image:url(./image/ENG/3-2.png); border:0px;}
                         QPushButton:checked{image:url(./image/ENG/3-2.png); border:0px;}
                         QPushButton{
                         background-color: rgb(47, 56, 77); border-radius: 30px;
@@ -2704,7 +2558,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         ''')
                     self.pushButton_4.setStyleSheet(
                         '''
-                        QPushButton{image:url(./image/ENG/4-1.png); border:0px;}
+                        QPushButton{image:url(./image/ENG/4-2.png); border:0px;}
                         QPushButton:checked{image:url(./image/ENG/4-2.png); border:0px;}
                         QPushButton{
                         background-color: rgb(47, 56, 77); border-radius: 30px;
@@ -2754,6 +2608,15 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         }
                         ''')
 
+            with open('setting.json', 'r', encoding='UTF8') as json_file:
+                json_data = json.load(json_file)
+                new_data = json_data
+            new_data['DARK_MODE'] = str(DARK_MODE)
+            new_data['LANGUAGE'] = language
+            print(new_data)
+            with open('setting.json', 'w', encoding='UTF8') as json_file:
+                json.dump(new_data, json_file, indent="\t")
+
         def retranslateUi(self, Form):
             _translate = QtCore.QCoreApplication.translate
             Form.setWindowTitle(_translate("Form", "Motion Presentation V 1.2"))
@@ -2766,9 +2629,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         def exitDialog(self):
             msgBox = QMessageBox()
             # msgBox.setMinimumSize(QSize(1000, 500))
-            # msgBox.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
+            msgBox.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
             msgBox.setIcon(QMessageBox.Information)
-            msgBox.setStyleSheet("background-color:rgba(255, 255, 255, 255);")
+            # msgBox.setStyleSheet("background-color:rgba(255, 255, 255, 255);")
+            if not DARK_MODE: msgBox.setStyleSheet("background-color : rgb(248, 249, 251);");
+            else: msgBox.setStyleSheet("background-color : rgb(32, 36, 47);");
             # msgBox.resizeEvent(500, 500)
             font = QtGui.QFont()
             font.setFamily("서울남산 장체B")
