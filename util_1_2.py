@@ -1499,6 +1499,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     class Setting_window(QtWidgets.QDialog):
         def setupUi(self, Dialog):
             self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
+            self.setWindowIcon((QtGui.QIcon('icon1.png')))
             global language_setting
             Dialog.setObjectName("Setting")
             Dialog.resize(600, 400)
@@ -1718,6 +1719,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         def exitProgram(self):
             system("taskkill /f /im ZoomIt64.exe")
             system("taskkill /f /im ZoomIt.exe")
+            system("taskkill /f /im Motion-Presentation.exe")
             sys.exit()
 
     class Grabber(QtWidgets.QMainWindow):
@@ -1730,7 +1732,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             super(Grabber, self).__init__()
             # self.showMaximized()
             self.setGeometry(0, 0, 1920, 1080)
-            self.setWindowTitle('Screen grabber')
+
             self.setWindowIcon((QtGui.QIcon('icon1.png')))
             # ensure that the widget always stays on top, no matter what
             self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)

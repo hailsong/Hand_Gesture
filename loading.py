@@ -10,6 +10,7 @@ import sys
 class Load_Ui2(QtWidgets.QMainWindow):
     def __init__(self, img_path='./image/loading.png', xy=[560, 340], size=1.0, on_top=False):
         super(Load_Ui2, self).__init__()
+        self.setWindowIcon((QtGui.QIcon('icon1.png')))
         self.timer = QtCore.QTimer(self)
         self.img_path = img_path
         self.xy = xy
