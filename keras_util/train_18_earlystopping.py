@@ -54,12 +54,9 @@ print(train_y)
 
 model = keras.Sequential([
     keras.layers.Dense(18, activation = 'relu'),
-    keras.layers.Dropout(0.2),
-    keras.layers.Dense(70, activation = 'relu'),
-    keras.layers.Dropout(0.2),
-    keras.layers.Dense(60, activation='relu'),
-    keras.layers.Dropout(0.2),
-    #keras.layers.Dense(30, activation = 'relu'),
+    # keras.layers.Dropout(0.2),
+    keras.layers.Dense(20, activation='relu'),
+    # keras.layers.Dropout(0.2),
     keras.layers.Dense(15, activation='softmax')
 ])
 
@@ -69,7 +66,7 @@ model.compile(optimizer='adam',
 
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 early_stop = EarlyStopping(monitor='val_loss', patience=5)
-filename = 'model_save/my_model_18.h5'
+filename = 'model_save/my_model_18_2.h5'
 checkpoint = ModelCheckpoint(filename, monitor='val_loss', verbose=1, save_best_only=True, mode='auto')
 
 hist = model.fit(train_x, train_y, epochs=100, batch_size=10, validation_data=(valid_x, valid_y),

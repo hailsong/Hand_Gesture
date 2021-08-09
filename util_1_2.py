@@ -599,7 +599,7 @@ def process_static_gesture(array_for_static, value_for_static):
     """
     import keras
     MODEL_STATIC = keras.models.load_model(
-        'keras_util/model_save/my_model_21.h5'
+        'keras_util/model_save/my_model_18.h5'
     )
     while True:
         input_ = np.copy(array_for_static[:])
@@ -607,8 +607,9 @@ def process_static_gesture(array_for_static, value_for_static):
         input_ = input_[np.newaxis]
         try:
             prediction = MODEL_STATIC.predict(input_)
-            if np.max(prediction[0]) > 0.9:
+            if np.max(prediction[0]) > 0.8:
                 value_for_static.value = np.argmax(prediction[0])
+                # print(value_for_static.value)
             else:
                 value_for_static.value = 0
         except:
