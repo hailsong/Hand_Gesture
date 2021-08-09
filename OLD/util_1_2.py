@@ -7,24 +7,33 @@ import win32con
 import time
 import numpy as np
 from PIL import Image
-from tensorflow import keras
+
+from os import system
 
 import tensorflow as tf
 
+tf.config.experimental.set_visible_devices([], 'GPU')
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMessageBox, QWidget, QTabWidget, QVBoxLayout
-from PyQt5.QtCore import QThread, QObject, QRect, pyqtSlot, pyqtSignal
+
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
+
+from loading import *
+
+
 import datetime
 import sys
 import os
+
 '''
 키 코드 링크 : https://lab.cliel.com/entry/%EA%B0%80%EC%83%81-Key-Code%ED%91%9C
 '''
 
-tf.config.experimental.set_visible_devices([], 'GPU')
-# physical_devices = tf.config.list_physical_devices('GPU')
-# # print(physical_devices)
-# tf.config.experimental.set_memory_growth(physical_devices[0], True)
+
+physical_devices = tf.config.list_physical_devices('GPU')
+# print(physical_devices)
+tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 # For webcam input:
 # hands = mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5)
@@ -52,15 +61,18 @@ USE_TENSORFLOW = True
 USE_DYNAMIC = True
 # 왼손잡이 모드 개발 중
 REVERSE_MODE = False
-language_setting = "한국어(Korean)"
+
+import json
+
+with open('../setting.json', encoding='UTF8') as json_file:
+    json_data = json.load(json_file)
+
+language_setting = json_data["LANGUAGE"]
+DARK_MODE = True if json_data["DARK_MODE"] == "True" else False
 
 BOARD_COLOR = 'w'
 
 VISUALIZE_GRAPH = False
-
-MODEL_STATIC = keras.models.load_model(
-    '../keras_util/model_save/my_model_21.h5'
-)
 
 gesture_check = False
 mode_global = 0
@@ -250,7 +262,7 @@ class Handmark:
 # TODO Gesture 판단, 일단은 15프레임 (0.5초)의 Queue로?
 class Gesture:
     GESTURE_ARRAY_SIZE = 7
-    GESTURE_STATIC_SIZE = 30
+    GESTURE_STATIC_SIZE = 15
 
     def __init__(self):
         self.palm_data = [np.array([0, 0, 0]) for _ in range(Gesture.GESTURE_ARRAY_SIZE)]
@@ -259,6 +271,7 @@ class Gesture:
         self.location_data = [[0.1, 0.1, 0.1] for _ in range(Gesture.GESTURE_ARRAY_SIZE)]
         self.finger_data = [np.array([0, 0, 0, 0, 0]) for _ in range(Gesture.GESTURE_ARRAY_SIZE)]
         self.gesture_data = [0] * Gesture.GESTURE_STATIC_SIZE
+        self.gesture_signal = [False] * Gesture.GESTURE_STATIC_SIZE
 
     @staticmethod
     def get_location(p):  # p는 프레임 수 * 좌표 세개
@@ -280,13 +293,14 @@ class Gesture:
         output = np.delete(target, (min_i, max_i))
         return output
 
-    def update(self, handmark, gesture_num):
+    def update(self, handmark, gesture_num, signal):
         # print(self.get_location(handmark._p_list))
         self.palm_data.insert(0, handmark.palm_vector)
         self.d_palm_data.insert(0, (self.palm_data[1] - handmark.palm_vector) * 1000)
         self.location_data.insert(0, Gesture.get_location(handmark._p_list))  # location data는 (프레임 수) * 22 * Mark_p 객체
         self.finger_data.insert(0, handmark.finger_vector)
         self.gesture_data.insert(0, gesture_num)
+        self.gesture_signal.insert(0, signal)
         # print(gesture_num)
         # print(handmark.palm_vector)
 
@@ -296,6 +310,7 @@ class Gesture:
         self.finger_data.pop()
         self.fv = handmark.finger_vector
         self.gesture_data.pop()
+        self.gesture_signal.pop()
 
         # print(self.palm_data[0], self.finger_data[0], self.location_data[0])
         # print(handmark.palm_vector * 1000)
@@ -303,12 +318,14 @@ class Gesture:
     # handmark 지닌 10개의 프레임이 들어온다...
     def detect_gesture(self):  # 이 최근꺼
         global gesture_check
-        # print(self.gesture_data.count(6))
+        # print(self.gesture_signal)
         # print(gesture_check)
-        if (gesture_check == True) or (self.gesture_data.count(6) < 15):
+        if (gesture_check == True) or (self.gesture_signal.count(True) < 8):
             # print(self.gesture_data)
             return -1
+        # print(self.gesture_signal)
 
+        # print('swipe')
         # i가 작을수록 더 최신 것
         ld_window = self.location_data[2:]
         x_classifier = np.array(ld_window[:-1])[:, 0] - np.array(ld_window[1:])[:, 0]
@@ -327,9 +344,56 @@ class Gesture:
         # 위 y감소 아래 y증가
 
         x_mean, y_mean = np.mean(x_classifier), np.mean(y_classifier)
-        print(x_mean, y_mean)
+        # print(x_mean, y_mean)
 
+        # 동적 제스처 - LEFT
+        # print(x_mean)
+        if y_mean != 0:
+            if x_mean / abs(y_mean) < -1.5 and x_mean < -0.03:
+                # print('LEFT')
+                condition1 = condition2 = condition3 = 0
+                angle_threshold = [0., 0., -1.]
+                angle_min = 3
 
+                for i in range(Gesture.GESTURE_ARRAY_SIZE - 1):
+                    # print(get_angle(self.palm_data[i], angle_threshold) < 1.5)
+                    if get_angle(self.palm_data[i], angle_threshold) < 1.5:
+                        condition1 += 1
+
+                condition_sum = condition1
+
+                if condition_sum > 4:
+                    print("LEFT")
+                    # win32api.keybd_event(0x27, 0, 0, 0)
+                    return -1
+
+            # 동적 제스처 - RIGHT
+            if x_mean / abs(y_mean) > 1.5 and x_mean > 0.03:
+                # print('RIGHT')
+                condition1 = condition2 = condition3 = 0
+
+                angle_threshold = [0., 0., -1.]
+                for i in range(Gesture.GESTURE_ARRAY_SIZE - 1):
+                    if get_angle(self.palm_data[i], angle_threshold) < 1.5:
+                        condition1 += 1
+
+                condition_sum = condition1
+
+                if condition_sum > 4:
+                    print("RIGHT")
+                    # win32api.keybd_event(0x27, 0, 0, 0)
+                    return -1
+
+    def gesture_LRUD(self):  # 상하좌우 변화량 판단
+        LR_trigger, UD_trigger = 0, 0
+        for i in range(5):
+            if abs(self.location_data[i][0] - self.location_data[i + 1][0]) > (
+                    self.location_data[i][1] - self.location_data[i + 1][1]):
+                LR_trigger += 1
+            else:
+                UD_trigger += 1
+        output = LR_trigger > UD_trigger
+        return output
 
 
 class Gesture_mode:
@@ -458,6 +522,25 @@ def get_angle(l1, l2):
     # return np.arccos(np.dot(l1_, l2_) / (norm(l1) * norm(l2)))
 
 
+def mod_cursor_position(pos: tuple):
+    """
+    :param pos: position data (tuple)
+    :return: modified cursor position x, y (tuple)
+    """
+    x, y = pos[0], pos[1]
+    FULLSIZE = 1920, 1080
+    MOD_SIZE = 1600, 640
+    mod_x = x * FULLSIZE[0] / MOD_SIZE[0] - (FULLSIZE[0] - MOD_SIZE[0]) / 2
+    mod_x = max(0, mod_x);
+    mod_x = min(FULLSIZE[0], mod_x)
+    mod_y = y * FULLSIZE[1] / MOD_SIZE[1] - (FULLSIZE[1] - MOD_SIZE[1]) / 2
+    mod_y = max(0, mod_y);
+    mod_y = min(FULLSIZE[1], mod_y)
+    # print(mod_x, mod_y)
+    # 모니터 수, 화면 갯수별로 다르게 Return 해야함
+    return int(mod_x) - 1919, int(mod_y)
+
+
 def vector_magnitude(one_d_array):
     """
     :param one_d_array: 1D Array
@@ -514,14 +597,19 @@ def process_static_gesture(array_for_static, value_for_static):
     :param value_for_static: shared value between main process and static gesture detection process
     :return: NO RETURN BUT IT MODIFY SHARED ARR AND VAL
     """
+    import keras
+    MODEL_STATIC = keras.models.load_model(
+        '../keras_util/model_save/my_model_18.h5'
+    )
     while True:
         input_ = np.copy(array_for_static[:])
         # print(input_)
         input_ = input_[np.newaxis]
         try:
             prediction = MODEL_STATIC.predict(input_)
-            if np.max(prediction[0]) > 0.9:
+            if np.max(prediction[0]) > 0.8:
                 value_for_static.value = np.argmax(prediction[0])
+                # print(value_for_static.value)
             else:
                 value_for_static.value = 0
         except:
@@ -536,6 +624,20 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     :param value_for_static_r: static gesture 판별하는 process 와 공유할 오른손 output data
     :return:
     '''
+    '''
+    OOP (Object-Oriented Programming) (ex. java, C++, C#, python)
+    데이터를 객체로 취급하여 프로그램에 반영한 것으로 절차지향 프로그램이 코드 순서대로 동작하는 것과 달리 객체와 객체의 상호작용으로 동작한다.
+    코드의 재사용성과 개발의 생산성이 높으며 유지보수가 편리하지만 속도가 느리고 설계/개발단계에서 많은 시간이 소요된다.
+    추상화 : 공통의 속성이나 기능을 묶어 이름을 붙이는 것
+    캡슐화 : 비슷한 속성과 메소드를 하나의 클래스로 모은 것. 은닉화는 캡슐 내부의 로직이나 변수들을 감춰 객체가 손상되지 않도록 한다. 객체가
+    상속 : 자식 클래스가 부모 클래스의 멤버를 물려받는 것. 생산성을 높이고 유지보수에 편리
+    다형성 : 같은 모양의 함수가 상황에 따라 다르게 동작. 오버로딩과 오버라이딩으로 다형성을 이용할 수 있는데 오버로딩은 같은 함수 이름을 가졌지만 매개변수의 숫자나 타입을 다르게 해 구분하는 것.
+    오버라이딩은 부모 클래스에서 정의된 메소드를 자식 클래스에서 재정의 하는 것
+
+    call by value : 원본과 다른 새로운 메모리 공간에 원본을 복사하는 것으로 복사본을 변경하여도 원본에 영향을 줄 수 없다.
+    call by reference : 원본의 주소값을 넘기는 것으로 원본의 값을 변경할 수 있다.
+    '''
+
     global image
     global MOUSE_USE
     global CLICK_USE
@@ -543,14 +645,16 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     global DRAG_USE
     global pen_color
 
+    app = QtWidgets.QApplication(sys.argv)
+    #window = QtWidgets.QWidget()
+    ui_load = Load_Ui2()
 
-    # GUI Part
     def mode_2_pre(palm, finger, left, p_check):
         palm_th = np.array([-0.41607399, -0.20192736, 0.88662719])
         finger_th = np.array([-0.08736683, -0.96164491, -0.26001175])
         # print(ctrl_z_check, left)
         parameter = get_angle(palm, palm_th) + get_angle(finger, finger_th)
-        if p_check == 0 and left == 3 and parameter < 1:
+        if p_check == 0 and left == 3 and parameter < 1.2:
             print('이전 페이지 (Left Arrow)')
             win32api.keybd_event(0x25, 0, 0, 0)  # Left Arrow 누르기.
             win32api.keybd_event(0x25, 0, win32con.KEYEVENTF_KEYUP, 0)
@@ -615,7 +719,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         finger_th = np.array([-0.08736683, -0.96164491, -0.26001175])
         # print(ctrl_z_check, left)
         parameter = get_angle(palm, palm_th) + get_angle(finger, finger_th)
-        if ctrl_z_check == 0 and left == 3 and parameter < 1:
+        if ctrl_z_check == 0 and left == 6:  # and parameter < 1:
             print('되돌리기 (CTRL + Z)')
             win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
             win32api.keybd_event(0x5a, 0, 0, 0)  # Z 누르기.
@@ -648,7 +752,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         else:
             return max(0, remove_check - 1)
 
-
     def mode_3_board(palm, finger, left, remove_check):
         # 60 means 60 frames to trigger 'REMOVE ALL'
         REMOVE_THRESHOLD = 30
@@ -677,7 +780,41 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         else:
             return 0
 
-    class opcv(QThread):
+    # class Load_Ui(object):
+    #     def setupUi(self, MainWindow):
+    #         self.MainWindow = MainWindow
+    #         self.MainWindow.setObjectName("MainWindow")
+    #         self.MainWindow.resize(500, 500)
+    #         self.MainWindow.setWindowFlag(QtCore.Qt.FramelessWindowHint)
+    #         self.MainWindow.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint)
+    #         self.centralwidget = QtWidgets.QWidget(MainWindow)
+    #         self.centralwidget.setObjectName("centralwidget")
+    #         self.centralwidget.setWindowFlag(QtCore.Qt.FramelessWindowHint)
+    #         self.centralwidget.setStyleSheet("background-color : rgb(224,244,253)")
+    #
+    #         # create label
+    #         self.label = QtWidgets.QLabel(self.centralwidget)
+    #         self.label.setGeometry(QtCore.QRect(25, 25, 500, 500))
+    #         self.label.setMinimumSize(QtCore.QSize(500, 500))
+    #         self.label.setMaximumSize(QtCore.QSize(500, 500))
+    #         self.label.setObjectName("label")
+    #
+    #         # add label to main window
+    #         # MainWindow.setCentralWidget(self.centralwidget)
+    #
+    #         # set qmovie as label
+    #         self.movie = QMovie("./image/loading.png")
+    #         self.label.setMovie(self.movie)
+    #         self.movie.start()
+    #
+    #     def close(self):
+    #         self.MainWindow.setWindowOpacity(0)
+    #
+    #     def open(self):
+    #         self.MainWindow.setWindowOpacity(1)
+
+    class Opcv(QThread):
+
         change_pixmap_signal = pyqtSignal(np.ndarray)
         mode_signal = pyqtSignal(int)
 
@@ -698,6 +835,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
         def __init__(self):
             super().__init__()
+
 
         def mode_3_pen_color(self, palm, finger, image):
             global pen_color
@@ -753,7 +891,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     WHEEL_USE = False
                     laser_state = mode_2_off(mode_global, laser_state)
                     print('MODE 1, 대기 모드')
-                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 2020, 100, 0, 0)
+                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 100, 100, 0, 0)
 
                     # win32api.keybd_event(0x74, 0, 0, 0)  # F5 DOWN
                     # win32api.keybd_event(0x74, 0, win32con.KEYEVENTF_KEYUP, 0)  # F5 UP
@@ -786,7 +924,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     DRAG_USE = True
                     WHEEL_USE = False
                     laser_state = mode_2_off(mode_global, laser_state)
-                    # win32api.SetCursorPos((200, 200))
+                    # print(mod_cursor_position(200, 200))
+                    win32api.SetCursorPos((-1920 + 200, 200))
+                    time.sleep(0.1)
+
                     win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
                     win32api.keybd_event(0x32, 0, 0, 0)  # 2 누르기.
                     time.sleep(0.1)
@@ -807,11 +948,14 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
         @pyqtSlot(bool)
         def send_img(self, bool_state):  # p를 보는 emit 함수
+            # ui.label_6.setPixmap(QtGui.QPixmap("./icon1.png"))
+            # Grabber.label_6.setStyleSheet("background-color : white; border-radius: 100px;", )
+            # Grabber.label_6.setPixmap(image)
             self.capture = cv2.VideoCapture(0, cv2.CAP_DSHOW)
             cap = self.capture
             # For webcam input:
             hands = mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.7)
-            # pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5, upper_bodyd_only=True)
+            pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5, upper_body_only=True)
 
             global width, height, static_gesture_num_l
 
@@ -864,7 +1008,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     mod_y = max(0, mod_y);
                     mod_y = min(FULLSIZE[1], mod_y)
                     # print(mod_x, mod_y)
-                    return int(mod_x) + 1920, int(mod_y)
+                    # 모니터 수, 화면 갯수별로 다르게 Return 해야함
+                    return int(mod_x) - 1919, int(mod_y)
 
                 def mousemove(self):
                     if now_click == True:
@@ -931,11 +1076,37 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     # ctypes.windll.user32.mouse_event(0x0004, 0, 0, 0, 0)
                     now_click = False
 
-            def hand_click(landmark, pixel):
+            def hand_drag2(landmark, gesture):  # 1 : non_click, 13 : click
+                """
+                :param landmark: landmark or mark_p
+                :return: nothing, but it change mouse position and click statement
+                """
+                # print(gesture)
+                global now_click
+                # global straight_line, rectangular, circle
+
+                if gesture == 13 and now_click == False:
+                    print('drag on')
+                    pos = win32api.GetCursorPos()
+                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, pos[0], pos[1], 0, 0)
+                    # ctypes.windll.user32.mouse_event(0x0002, 0, 0, 0, 0)
+                    now_click = True
+
+                elif (gesture == 1 or gesture == 6) and now_click == True:
+                    print('drag off')
+                    pos = win32api.GetCursorPos()
+                    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, pos[0], pos[1], 0, 0)
+                    # ctypes.windll.user32.mouse_event(0x0004, 0, 0, 0, 0)
+                    now_click = False
+
+            def hand_click(landmark, pixel, HM):
                 global now_click2
+                palm_v = HM.palm_vector
+                click_angle = get_angle(palm_v, np.array([0, 0, -1]))
 
                 if get_distance(landmark[4], landmark[10]) < get_distance(landmark[7],
-                                                                          landmark[8]) and now_click2 == False:
+                                                                          landmark[8]) and now_click2 == False \
+                        and click_angle < 1:
                     print('click')
                     pos = win32api.GetCursorPos()
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, pos[0], pos[1], 0, 0)
@@ -1071,6 +1242,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 anim = animation.FuncAnimation(fig, animate, init_func=init, frames=200, interval=20, blit=False)
 
                 plt.show()
+            print('loaded')
+
+            if ui_load.status == 0:
+                ui_load.close()
+                ui_load.status = 1
 
             while bool_state and cap.isOpened():
                 # print('cam')
@@ -1091,7 +1267,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 # pass by reference.
                 image.flags.writeable = False
                 results = hands.process(image)
-                # results_body = pose.process(image)
+                results_body = pose.process(image)
 
                 # Draw the hand annotations on the image.
                 image.flags.writeable = True
@@ -1185,15 +1361,23 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         mark_p0 = mark_p[0].to_pixel()
                         mark_p5 = mark_p[5].to_pixel()
 
+                        swipe_signal = False
                         # pixel_c = mark_c.to_pixel()
                         if len(mark_p[-1]) == 5:
                             palm_vector = HM.get_palm_vector()
                             finger_vector = HM.get_finger_vector()
 
+                            if finger_open_[1] == 1 and \
+                                    sum(finger_open_[3:]) == 0 and \
+                                    finger_open_[2] == 1 and \
+                                    get_angle(mark_p[5] - mark_p[8], mark_p[5] - mark_p[12]) < 0.3:
+                                swipe_signal = True  # swipe signal
+                                # print('swipe')
+
                             if mode_global == 2:
                                 # MODE 2 LEFT ARROW
                                 p_check_number = mode_2_pre(palm_vector, finger_vector,
-                                                                 static_gesture_num_r, p_check_number)
+                                                            static_gesture_num_r, p_check_number)
                                 # MODE 2 LASER POINTER
                                 laser_hand = np.all(finger_open_ == np.array([1, 1, 1, 0, 0]))
                                 laser_state, laser_num = mode_2_laser(laser_state, laser_num, laser_hand)
@@ -1201,17 +1385,17 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             # MODE 3 CTRL + Z
                             if mode_global == 3:
                                 ctrl_z_check_number = mode_3_ctrl_z(palm_vector, finger_vector,
-                                                                         static_gesture_num_r, ctrl_z_check_number)
+                                                                    static_gesture_num_r, ctrl_z_check_number)
                                 remove_all_number = mode_3_remove_all(palm_vector, finger_vector,
-                                                                         static_gesture_num_r, remove_all_number)
+                                                                      static_gesture_num_r, remove_all_number)
                                 board_num = mode_3_board(palm_vector, finger_vector,
-                                                                      static_gesture_num_r, board_num)
+                                                         static_gesture_num_r, board_num)
 
                             pixel_c = mark_p5
                             # gesture updating
                             if len(mark_p) == 22:
                                 # print(HM.p_list[-1])
-                                gesture.update(HM, static_gesture_num_r)
+                                gesture.update(HM, static_gesture_num_r, swipe_signal)
                                 # print(static_gesture_num)
                                 try:
                                     # print(time.time() - gesture_time)
@@ -1232,11 +1416,17 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             gesture_mode.update_right(static_gesture_num_r, palm_vector, finger_vector)
 
                         # 마우스 움직임, 드래그
+                        if mode_global == 3:
+                            pixel_c.mousemove()
+                            hand_drag2(mark_p, static_gesture_num_r)
+
                         if (get_distance(pixel_c, before_c) < get_distance(mark_p0, mark_p5)) and \
                                 sum(finger_open_[3:]) == 0 and \
                                 finger_open_[1] == 1 and \
                                 len(mark_p[-1]) == 5 and \
-                                MOUSE_USE == True:
+                                MOUSE_USE == True and \
+                                mode_global != 3:
+
                             pixel_c.mousemove()
 
                             # print(click_tr[2])
@@ -1246,7 +1436,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                             if finger_open_[2] != 1 and CLICK_USE == True:
                                 if not now_click:
-                                    click_tr = hand_click(mark_p, pixel_c)
+                                    click_tr = hand_click(mark_p, pixel_c, HM)
                             # else:
                             # win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, int(pixel_c.x), int(pixel_c.y), 0, 0)
 
@@ -1270,7 +1460,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             # print(static_gesture_num_l, straight_line, rectangular, circle)
 
                             # 직선 그리기
-                            if mode_global == 3 and static_gesture_num_l == 13:
+                            if mode_global == 3 and len(mark_p[-1]) == 4 and static_gesture_num_l == 13:
                                 straight_line = True
                                 win32api.keybd_event(0xA0, 0, 0, 0)  # LShift 누르기.
                             else:
@@ -1278,7 +1468,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                 straight_line = False
 
                             # 네모 그리기
-                            if mode_global == 3 and static_gesture_num_l == 11:
+                            if mode_global == 3 and len(mark_p[-1]) == 4 and static_gesture_num_l == 11:
                                 rectangular = True
                                 win32api.keybd_event(0xA2, 0, 0, 0)  # LCtrl 누르기.
                             else:
@@ -1286,7 +1476,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                 rectangular = False
 
                             # 원 그리기
-                            if mode_global == 3 and static_gesture_num_l == 1:
+                            if mode_global == 3 and len(mark_p[-1]) == 4 and static_gesture_num_l == 1:
                                 circle = True
                                 win32api.keybd_event(0x09, 0, 0, 0)  # TAB 누르기.
                             else:
@@ -1304,7 +1494,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                 before_time = time.time()
                 image = cv2.putText(image, str(FPS), (10, 30), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 0), 2, cv2.LINE_AA)
-                image = cv2.resize(image, (943, 707))
+                image = cv2.resize(image, (811, 608))
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
                 self.change_pixmap_signal.emit(image)
@@ -1318,77 +1508,231 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
     class Setting_window(QtWidgets.QDialog):
         def setupUi(self, Dialog):
+            self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
+            self.setWindowIcon((QtGui.QIcon('../icon1.png')))
             global language_setting
             Dialog.setObjectName("Setting")
-            Dialog.resize(400, 120)
+            Dialog.resize(600, 400)
+            Dialog.setFixedSize(600, 400)
+            Dialog.setWindowOpacity(0.85)
+            if not DARK_MODE: Dialog.setStyleSheet("background-color : rgb(238, 239, 241);");
+            else: Dialog.setStyleSheet("background-color : rgb(42, 46, 57);");
+
             icon = QtGui.QIcon()
-            icon.addPixmap(QtGui.QPixmap("../image/setting.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            icon.addPixmap(QtGui.QPixmap("../image/icon/setting.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             Dialog.setWindowIcon(icon)
-            self.buttonBox = QtWidgets.QDialogButtonBox(Dialog)
-            self.buttonBox.setGeometry(QtCore.QRect(30, 80, 341, 32))
-            self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-            self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Ok)
-            self.buttonBox.setObjectName("buttonBox")
+
+            self.pushButton_ok = QtWidgets.QPushButton(Dialog)
+            self.pushButton_ok.setGeometry(QtCore.QRect(30, 271, 261, 100))
+            self.pushButton_ok.setStyleSheet(
+                '''
+                QPushButton{
+                    color: white;
+                    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                    stop:0 rgba(0, 217, 104, 255),
+                    stop:1 rgba(144, 61, 167, 255));
+                    border-radius: 30px;
+                    image:url(./image/OK.png);
+                }
+                QPushButton:hover {
+                    background-color: rgb(0, 217, 104); border-radius: 30px;
+                }
+                QPushButton:checked{
+                    background-color: rgb(0, 217, 104); border-radius: 30px;
+                    image:url(./image/KOR/cam_off.png);
+                    }
+                ''')
+            self.pushButton_ok.setObjectName("pushButton_ok")
+            self.pushButton_ok.clicked.connect(Dialog.accept)
+            self.pushButton_ok.clicked.connect(self.getComboBoxItem)
+
+            self.pushButton_cancel = QtWidgets.QPushButton(Dialog)
+            self.pushButton_cancel.setGeometry(QtCore.QRect(310, 271, 261, 100))
+            self.pushButton_cancel.setStyleSheet(
+                '''
+                QPushButton{
+                    color: white;
+                    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                    stop:0 rgba(0, 160, 182, 255),
+                    stop:1 rgba(144, 61, 167, 255));
+                    border-radius: 30px;
+                    image:url(./image/Cancel.png);
+                }
+                QPushButton:hover {
+                    background-color: rgb(0, 160, 182); border-radius: 30px;
+                }
+                QPushButton:checked{
+                    background-color: rgb(0, 160, 182); border-radius: 30px;
+                    image:url(./image/KOR/cam_off.png);
+                    }
+                ''')
+            self.pushButton_cancel.setObjectName("pushButton_cancel")
+            self.pushButton_cancel.clicked.connect(Dialog.reject)
+
+            font = QtGui.QFont()
+            font.setFamily("서울남산 장체B")
+            font.setPointSize(18)
+
+            font2 = QtGui.QFont()
+            font2.setFamily("서울남산 장체B")
+            font2.setPointSize(15)
             self.comboBox = QtWidgets.QComboBox(Dialog)
-            self.comboBox.setGeometry(QtCore.QRect(230, 40, 121, 21))
+            self.comboBox.setGeometry(QtCore.QRect(140, 95, 321, 41))
             self.comboBox.setObjectName("comboBox")
+            self.comboBox.setFont(font2)
             if language_setting == '한국어(Korean)':
                 self.comboBox.addItem("한국어(Korean)")
                 self.comboBox.addItem("영어(English)")
             elif language_setting == '영어(English)':
                 self.comboBox.addItem("영어(English)")
                 self.comboBox.addItem("한국어(Korean)")
+            if not DARK_MODE:
+                self.comboBox.setStyleSheet("color : rgb(32, 36, 47);");
+            else:
+                self.comboBox.setStyleSheet("color : rgb(248, 249, 251);");
+
+            self.comboBox2 = QtWidgets.QComboBox(Dialog)
+            self.comboBox2.setGeometry(QtCore.QRect(140, 180, 321, 41))
+            self.comboBox2.setObjectName("comboBox2")
+            self.comboBox2.setFont(font2)
+            if DARK_MODE == True:
+                self.comboBox2.addItem("다크 모드 (Dark Mode)")
+                self.comboBox2.addItem("라이트 모드 (Light Mode)")
+            elif DARK_MODE == False:
+                self.comboBox2.addItem("라이트 모드 (Light Mode)")
+                self.comboBox2.addItem("다크 모드 (Dark Mode)")
+            if not DARK_MODE:
+                self.comboBox2.setStyleSheet("color : rgb(32, 36, 47);");
+            else:
+                self.comboBox2.setStyleSheet("color : rgb(248, 249, 251);");
+
             self.label = QtWidgets.QLabel(Dialog)
-            self.label.setGeometry(QtCore.QRect(50, 40, 181, 16))
-            font = QtGui.QFont()
-            font.setFamily("서울남산 장체B")
-            font.setPointSize(10)
+            self.label.setGeometry(QtCore.QRect(95, 37, 450, 31))
             self.label.setFont(font)
             self.label.setObjectName("label")
 
             self.retranslateUi(Dialog)
-            self.buttonBox.accepted.connect(Dialog.accept)
-            self.buttonBox.accepted.connect(self.getComboBoxItem)
-            self.buttonBox.rejected.connect(Dialog.reject)
             QtCore.QMetaObject.connectSlotsByName(Dialog)
 
         def retranslateUi(self, Dialog):
             _translate = QtCore.QCoreApplication.translate
             Dialog.setWindowTitle(_translate("Setting Window", "Setting Window"))
-            self.label.setText(_translate("Dialog", "언어 선택(Language Selection)"))
+            self.label.setText(_translate("Dialog", "언어 / 테마 설정 (Language / Theme Setting)"))
+            if not DARK_MODE:
+                self.label.setStyleSheet("color : rgb(32, 36, 47);");
+            else:
+                self.label.setStyleSheet("color : rgb(248, 249, 251);");
 
         def getComboBoxItem(self):
             global language_setting
-            crnttxt = self.comboBox.currentText()
+            global DARK_MODE
+            language = self.comboBox.currentText()
+            theme = self.comboBox2.currentText()
             # print(crnttxt)
-            if crnttxt != language_setting:
-                language_setting = crnttxt
+            # if (theme == 'Dark Mode') != DARK_MODE:
+            #     DARK_MODE = (theme == 'Dark Mode')
+            #     # ui.setupTheme(ui, theme)
+            if language != language_setting or (theme == '다크 모드 (Dark Mode)') != DARK_MODE:
+                DARK_MODE = (theme == '다크 모드 (Dark Mode)')
+                language_setting = language
                 # print("Set Language : ", crnttxt)
-                ui.setupLanguage(ui, crnttxt)
+                ui.setupLanguage(ui, language, DARK_MODE)
 
-    class Guide_window(QWidget):
-        def __init__(self):
-            super().__init__()
+    class Exit_window(QtWidgets.QDialog):
+        def setupUi(self, Dialog):
+            self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
+            global language_setting
+            Dialog.setObjectName("Exit")
+            Dialog.resize(600, 400)
+            Dialog.setFixedSize(600, 400)
+            Dialog.setWindowOpacity(0.85)
+            # msgBox.setStyleSheet("background-color:rgba(255, 255, 255, 255);")
+            if not DARK_MODE:
+                Dialog.setStyleSheet("background-color : rgb(238, 239, 241);");
+            else:
+                Dialog.setStyleSheet("background-color : rgb(42, 46, 57);");
+            icon = QtGui.QIcon()
+            icon.addPixmap(QtGui.QPixmap("../image/icon/exit.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            Dialog.setWindowIcon(icon)
 
-        def setupUi(self):
-            print('aa')
-            tab1 = QWidget()
-            tab2 = QWidget()
+            self.pushButton_ok = QtWidgets.QPushButton(Dialog)
+            self.pushButton_ok.setGeometry(QtCore.QRect(30, 271, 261, 100))
+            self.pushButton_ok.setStyleSheet(
+                '''
+                QPushButton{
+                    color: white;
+                    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                    stop:0 rgba(0, 217, 104, 255),
+                    stop:1 rgba(144, 61, 167, 255));
+                    border-radius: 30px;
+                    image:url(./image/OK.png);
+                }
+                QPushButton:hover {
+                    background-color: rgb(0, 217, 104); border-radius: 30px;
+                }
+                QPushButton:checked{
+                    background-color: rgb(0, 217, 104); border-radius: 30px;
+                    image:url(./image/KOR/cam_off.png);
+                    }
+                ''')
+            self.pushButton_ok.setObjectName("pushButton_ok")
+            self.pushButton_ok.clicked.connect(Dialog.accept)
+            self.pushButton_ok.clicked.connect(self.exitProgram)
 
-            tabs = QTabWidget()
-            tabs.addTab(tab1, 'Tab1')
-            tabs.addTab(tab2, 'Tab2')
+            self.pushButton_cancel = QtWidgets.QPushButton(Dialog)
+            self.pushButton_cancel.setGeometry(QtCore.QRect(310, 271, 261, 100))
+            self.pushButton_cancel.setStyleSheet(
+                '''
+                QPushButton{
+                    color: white;
+                    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                    stop:0 rgba(0, 160, 182, 255),
+                    stop:1 rgba(144, 61, 167, 255));
+                    border-radius: 30px;
+                    image:url(./image/Cancel.png);
+                }
+                QPushButton:hover {
+                    background-color: rgb(0, 160, 182); border-radius: 30px;
+                }
+                QPushButton:checked{
+                    background-color: rgb(0, 160, 182); border-radius: 30px;
+                    image:url(./image/KOR/cam_off.png);
+                    }
+                ''')
+            self.pushButton_cancel.setObjectName("pushButton_cancel")
+            self.pushButton_cancel.clicked.connect(Dialog.reject)
 
-            vbox = QVBoxLayout()
-            vbox.addWidget(tabs)
+            font = QtGui.QFont()
+            font.setFamily("서울남산 장체B")
+            font.setPointSize(22)
+            font2 = QtGui.QFont()
+            font2.setFamily("서울남산 장체B")
+            font2.setPointSize(15)
 
-            self.setLayout(vbox)
+            self.label = QtWidgets.QLabel(Dialog)
+            self.label.setGeometry(QtCore.QRect(130, 50, 401, 150))
+            self.label.setFont(font)
+            self.label.setObjectName("label")
 
-            self.setWindowTitle('QTabWidget')
-            self.setGeometry(300, 300, 300, 200)
-            self.show()
+            self.exitUi(Dialog)
+            QtCore.QMetaObject.connectSlotsByName(Dialog)
 
-    class Grabber(QtWidgets.QWidget):
+        def exitUi(self, Dialog):
+            _translate = QtCore.QCoreApplication.translate
+            Dialog.setWindowTitle(_translate("Exit?", "Exit?"))
+            self.label.setText(_translate("Dialog", "이용해 주셔서 감사합니다! \n \n프로그램을 종료하시겠습니까?"))
+            if not DARK_MODE:
+                self.label.setStyleSheet("color : rgb(32, 36, 47);");
+            else:
+                self.label.setStyleSheet("color : rgb(248, 249, 251);");
+
+        def exitProgram(self):
+            system("taskkill /f /im ZoomIt64.exe")
+            system("taskkill /f /im ZoomIt.exe")
+            system("taskkill /f /im Motion-Presentation.exe")
+            sys.exit()
+
+    class Grabber(QtWidgets.QMainWindow):
         click_mode = pyqtSignal(int, int)
         button6_checked = pyqtSignal(bool)
 
@@ -1398,7 +1742,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             super(Grabber, self).__init__()
             # self.showMaximized()
             self.setGeometry(0, 0, 1920, 1080)
-            self.setWindowTitle('Screen grabber')
+
+            self.setWindowIcon((QtGui.QIcon('../icon1.png')))
             # ensure that the widget always stays on top, no matter what
             self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
             layout = QtWidgets.QVBoxLayout()
@@ -1413,7 +1758,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # create a "placeholder" widget for the screen grab geometry
             self.grabWidget = QtWidgets.QWidget()
             # self.grabWidget.setGeometry(0, 0, 100, 100)
-            self.grabWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+
             layout.addWidget(self.grabWidget)
 
             # let's add a configuration panel
@@ -1459,222 +1804,414 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # panelLayout.addWidget(self.playButton)
 
             # panelLayout.addStretch(0)
+            # self.loading = Loading()
+            # self.loading.setupUi(self)
+
+        def setButtonStyle(self, pushButton):
+            pushButton.setStyleSheet(
+                '''
+                QPushButton{image:url(./image/KOR/2-1.png); border:0px;}
+                QPushButton:checked{image:url(./image/KOR/2-2.png); border:0px;}
+
+                ''')
+            return pushButton
 
         def setupUi(self, Form):
-
+            # system("ZoomIt.exe")
             Form.setObjectName("Form")
             Form.resize(1920, 1080)
             self.From_button = False
 
-            Form.setStyleSheet("background-color : #EDECEA;")
+            if not DARK_MODE: Form.setStyleSheet("background-color : rgb(248, 249, 251);");
+            else: Form.setStyleSheet("background-color : rgb(32, 36, 47);");
 
-            self.label = QtWidgets.QLabel(Form)
-            self.label.setGeometry(QtCore.QRect(30, 52, 271, 41))
+            ui_load.close()
+
+            self.label = QtWidgets.QLabel('Motion Presentation', Form)
+            self.label.setGeometry(QtCore.QRect(278, 69, 300, 48))
+
+            if not DARK_MODE: self.label.setStyleSheet("color : rgb(32, 36, 47);");
+            else: self.label.setStyleSheet("color : rgb(248, 249, 251);");
+
             font = QtGui.QFont()
             font.setFamily("서울남산 장체B")
-            font.setPointSize(36)
+            font.setPointSize(20)
             self.label.setFont(font)
-            self.label.setStyleSheet("color : #ACCCC4")
-            self.label.setObjectName("label")
 
-            self.label_2 = QtWidgets.QLabel(Form)
-            self.label_2.setGeometry(QtCore.QRect(30, 100, 341, 41))
-            font = QtGui.QFont()
-            font.setFamily("서울남산 장체B")
-            font.setPointSize(36)
-            self.label_2.setFont(font)
-            self.label_2.setStyleSheet("color : #C4BCB8;")
-            self.label_2.setObjectName("label_2")
 
-            self.label_3 = QtWidgets.QLabel(Form)
-            self.label_3.setGeometry(QtCore.QRect(373, 88, 56, 41))
-            font = QtGui.QFont()
-            font.setFamily("서울남산 장체B")
-            font.setPointSize(18)
-            self.label_3.setFont(font)
-            self.label_3.setStyleSheet("color : #ACCCC4;")
-            self.label_3.setObjectName("label_3")
 
-            self.pushButton = QtWidgets.QPushButton(Form)
-            self.pushButton.setGeometry(QtCore.QRect(30, 190, 200, 120))
-            self.pushButton.setStyleSheet(
-                '''
-                QPushButton{image:url(./image/KOR/1-1.png); border:0px;}
-                QPushButton:hover{image:url(./image/KOR/1-3.png); border:0px;}
-                QPushButton:checked{image:url(./image/KOR/1-2.png); border:0px;}
-                ''')
-            self.pushButton.setCheckable(True)
-            self.pushButton.setObjectName("pushButton")
+            # self.label.setStyleSheet("image:url(./Image/logo.png)")
+            # self.label.setObjectName("label")
 
-            self.pushButton_2 = QtWidgets.QPushButton(Form)
-            self.pushButton_2.setGeometry(QtCore.QRect(270, 190, 200, 120))
-            self.pushButton_2.setStyleSheet(
-                '''
-                QPushButton{image:url(./image/KOR/3-1.png); border:0px;}
-                QPushButton:hover{image:url(./image/KOR/3-3.png); border:0px;}
-                QPushButton:checked{image:url(./image/KOR/3-2.png); border:0px;}
-                ''')
-            self.pushButton_2.setObjectName("pushButton_2")
-            self.pushButton_2.setCheckable(True)
-            self.pushButton_3 = QtWidgets.QPushButton(Form)
-            self.pushButton_3.setGeometry(QtCore.QRect(30, 370, 200, 120))
-            self.pushButton_3.setStyleSheet(
-                '''
-                QPushButton{image:url(./image/KOR/2-1.png); border:0px;}
-                QPushButton:hover{image:url(./image/KOR/2-3.png); border:0px;}
-                QPushButton:checked{image:url(./image/KOR/2-2.png); border:0px;}
-                ''')
-            self.pushButton_3.setCheckable(True)
-            self.pushButton_3.setObjectName("pushButton_3")
-            self.pushButton_4 = QtWidgets.QPushButton(Form)
-            self.pushButton_4.setGeometry(QtCore.QRect(270, 370, 200, 120))
-            self.pushButton_4.setStyleSheet(
-                '''
-                QPushButton{image:url(./image/KOR/4-1.png); border:0px;}
-                QPushButton:hover{image:url(./image/KOR/4-3.png); border:0px;}
-                QPushButton:checked{image:url(./image/KOR/4-2.png); border:0px;}
-                ''')
-            self.pushButton_4.setCheckable(True)
-            self.pushButton_4.setObjectName("pushButton_4")
+            # self.label_2 = QtWidgets.QLabel(Form)
+            # self.label_2.setGeometry(QtCore.QRect(30, 100, 341, 41))
+            # font = QtGui.QFont()
+            # font.setFamily("서울남산 장체B")
+            # font.setPointSize(36)
+            # self.label_2.setFont(font)
+            # self.label_2.setStyleSheet("color : #C4BCB8;")
+            # self.label_2.setObjectName("label_2")
 
-            self.pushButton_7 = QtWidgets.QPushButton(Form)
-            self.pushButton_7.setGeometry(QtCore.QRect(380, 650, 111, 111))
-            self.pushButton_7.setStyleSheet("border-radius : 55; border : 2px;")
-            self.pushButton_7.setStyleSheet(
-                '''
-                QPushButton{image:url(./image/cam.png); border:0px;}
-                QPushButton:hover{image:url(./image/cam-hover.png); border:0px;}
-                ''')
-            self.pushButton_7.setObjectName("pushButton_7")
-
-            # Button 8 : Language Setting
-            self.pushButton_8 = QtWidgets.QPushButton(Form)
-            self.pushButton_8.setGeometry(QtCore.QRect(1820, 13, 35, 35))
-            self.pushButton_8.setStyleSheet("border-radius : 20;")
-            self.pushButton_8.setStyleSheet(
-                '''
-                QPushButton{image:url(./Image/setting.png); border:0px;}
-                QPushButton:hover{image:url(./Image/setting-hover.png); border:0px;}
-                ''')
-            self.pushButton_8.setObjectName("pushButton_8")
-            self.pushButton_8.clicked.connect(self.settingwindow)
+            # self.label_3 = QtWidgets.QLabel(Form)
+            # self.label_3.setGeometry(QtCore.QRect(373, 88, 56, 41))
+            # font = QtGui.QFont()
+            # font.setFamily("서울남산 장체B")
+            # font.setPointSize(18)
+            # self.label_3.setFont(font)
+            # self.label_3.setStyleSheet("color : #ACCCC4;")
+            # self.label_3.setObjectName("label_3")
 
             # Button 5 : Power
             self.pushButton_5 = QtWidgets.QPushButton(Form)
-            self.pushButton_5.setGeometry(QtCore.QRect(160, 560, 201, 201))
-            self.pushButton_5.setStyleSheet("border-radius : 100; border : 2px;")
+            self.pushButton_5.setGeometry(QtCore.QRect(30, 538, 502, 100))
             self.pushButton_5.setStyleSheet(
                 '''
-                QPushButton{image:url(./image/Power.png); border:0px;}
-                QPushButton:hover{image:url(./image/Power-hover.png); border:0px;}
-                QPushButton:checked{image:url(./image/Power-on.png); border:0px;}
+                QPushButton{
+                    color: white;
+                    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                    stop:0 rgba(226, 0, 46, 255),
+                    stop:1 rgba(144, 61, 167, 255));
+                    border-radius: 30px;
+                    image:url(./image/KOR/cam_on.png);
+                }
+                QPushButton:hover {
+                    background-color: rgb(246, 20, 66); border-radius: 30px;
+                }
+                QPushButton:checked{
+                    background-color: rgb(246, 20, 66); border-radius: 30px;
+                    image:url(./image/KOR/cam_off.png);
+                    }
                 ''')
             self.pushButton_5.setObjectName("pushButton_5")
             self.pushButton_5.setCheckable(True)
             self.pushButton_5.raise_()
 
-            # Button 6 : Question Mark
+            # Button 6 : Guide Open
             self.pushButton_6 = QtWidgets.QPushButton(Form)
-            self.pushButton_6.setGeometry(QtCore.QRect(30, 650, 111, 111))
-            self.pushButton_6.setStyleSheet("border-radius : 55; border : 2px;")
+            self.pushButton_6.setGeometry(QtCore.QRect(547, 538, 502, 100))
             self.pushButton_6.setStyleSheet(
                 '''
-                QPushButton{image:url(./Image/qmark.png); border:0px;}
-                QPushButton:hover{image:url(./Image/qmark-hover.png); border:0px;}
+                QPushButton{
+                    color: white;
+                    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                    stop:0 rgba(0, 160, 182, 255),
+                    stop:1 rgba(144, 61, 167, 255));
+                    border-radius: 30px;
+                    image:url(./Image/KOR/guide_open.png);
+                }
+                QPushButton:hover {
+                    background-color: rgb(20, 180, 202); border-radius: 30px;
+                }
                 ''')
             self.pushButton_6.setObjectName("pushButton_6")
-            # self.pushButton_6.clicked.connect(self.guidewindow)
+            self.pushButton_6.clicked.connect(self.guidewindow)
 
-            self.pushButton_7.clicked.connect(self.screenshot)
-            self.pushButton_7.raise_()
+            # Button 8 : Language Setting
+            self.pushButton_8 = QtWidgets.QPushButton(Form)
+            self.pushButton_8.setGeometry(QtCore.QRect(935, 55, 50, 50))
+            self.pushButton_8.setStyleSheet("border-radius : 20;")
+            self.pushButton_8.setStyleSheet(
+                '''
+                QPushButton{image:url(./Image/icon/setting.png); border:0px;}
+                QPushButton:hover{image:url(./Image/icon/setting_hover.png); border:0px;}
+                ''')
+            self.pushButton_8.setObjectName("pushButton_8")
+            self.pushButton_8.clicked.connect(self.settingwindow)
 
+            # Button 9 : inbody website
             self.pushButton_9 = QtWidgets.QPushButton(Form)
-            self.pushButton_9.setGeometry(QtCore.QRect(30, 860, 480, 131))
+            self.pushButton_9.setGeometry(QtCore.QRect(30, 50, 230, 60))
             self.pushButton_9.setStyleSheet(
                 '''
                 QPushButton{image:url(./image/inbody.png); border:0px;}
-                QPushButton:hover{image:url(./image/인바디.png); border:0px;}
-                
+                QPushButton:hover{image:url(./image/inbody_hover.png); border:0px;}
+
                 ''')
+
             self.pushButton_9.setObjectName("pushButton_9")
             self.pushButton_9.clicked.connect(self.Go_to_inbody)
+            # self.pushButton_9.clicked.connect(ui_load.close)
+
+            # Button 10 : Exit Button
             self.pushButton_10 = QtWidgets.QPushButton(Form)
-            self.pushButton_10.setGeometry(QtCore.QRect(1870, 10, 38, 38))
+            self.pushButton_10.setGeometry(QtCore.QRect(1000, 55, 50, 50))
             self.pushButton_10.setStyleSheet("border-radius : 20;")
             self.pushButton_10.setStyleSheet(
                 '''
-                QPushButton{image:url(./image/exit.png); border:0px;}
-                QPushButton:hover{image:url(./image/exit-hover.png); border:0px;}
+                QPushButton{image:url(./image/icon/exit.png); border:0px;}
+                QPushButton:hover{image:url(./image/icon/exit_hover.png); border:0px;}
                 ''')
             self.pushButton_10.setObjectName("pushButton_10")
-            self.pushButton_10.clicked.connect(self.exitDialog)
-            # Qmessagebox 나가는 버튼
+            self.pushButton_10.clicked.connect(self.exitwindow)
+
+            # 카메라 모니터링
             self.frame = QtWidgets.QFrame(Form)
-            self.frame.setGeometry(QtCore.QRect(530, 62, 1328, 707))
+            self.frame.setGeometry(QtCore.QRect(1079, 30, 811, 608))
             self.frame.setAutoFillBackground(False)
-            self.frame.setStyleSheet("background-color : #C6DFD6;")
+            self.frame.setStyleSheet("background-color : rgba(0, 0, 0, 0%); border-radius: 30px;")
             self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
             self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
             self.frame.setObjectName("frame")
+
             self.label_6 = QtWidgets.QLabel(self.frame)
-            self.label_6.setGeometry(QtCore.QRect(192, 0, 943, 707))
-            self.label_6.setStyleSheet("background-color : white;")
+            self.label_6.setGeometry(QtCore.QRect(0, 0, 811, 608))
+            self.label_6.setStyleSheet(
+                "background-color : white; border-radius: 30px; background: url(./image/default.jpg)", )
             self.label_6.setObjectName("label_6")
-            self.label_6.setPixmap(QtGui.QPixmap("../image/default2.jpg"))
+            self.label_6.setPixmap(QtGui.QPixmap("../image/default.jpg"))
+
+            self.cam_frame = QtWidgets.QLabel(self.frame)
+            self.cam_frame.setGeometry(QtCore.QRect(0, 0, 811, 608))
+            self.cam_frame.setStyleSheet("background-color : rgba(0,0,0,0%);")
+            self.cam_frame.setObjectName("cam_frame")
+            if DARK_MODE:
+                self.cam_frame.setPixmap(QtGui.QPixmap("../image/cam_frame_dark.png"))
+            else:
+                self.cam_frame.setPixmap(QtGui.QPixmap("../image/cam_frame.png"))
+
+            # self.loading = QtWidgets.QLabel(Form)
+            # self.loading.setGeometry(QtCore.QRect(405, 304, 300, 500))
+            # self.loading.setStyleSheet("background-color : rgba(0,0,0,0%);")
+            # self.loading.setObjectName("loading")
+
+            self.script_frame = QtWidgets.QLabel(Form)
+            self.script_frame.setGeometry(QtCore.QRect(30, 668, 100, 100))  # 1860, 350))
+            self.script_frame.setStyleSheet("background-color : rgba(0,250,255,50%);")
+            self.script_frame.setObjectName("script_frame")
+            self.script_frame.setPixmap(QtGui.QPixmap("../image/script_frame.png"))
+
+            self.pushButton_7 = QtWidgets.QPushButton(self.frame)
+            self.pushButton_7.setGeometry(QtCore.QRect(610, 540, 200, 60))
+            self.pushButton_7.setStyleSheet("border-radius : 55; border : 2px;")
+            self.pushButton_7.setStyleSheet("background-color : rgba( 255, 255, 255, 0% );, ")
+            self.pushButton_7.setStyleSheet(
+                '''
+                QPushButton{image:url(./image/KOR/capture.png); border:0px; background-color : rgba( 255, 255, 255, 0% );}
+                QPushButton:hover{image:url(./image/KOR/capture_hover.png); border:0px;}
+                ''')
+            self.pushButton_7.setObjectName("pushButton_7")
+            self.pushButton_7.clicked.connect(self.screenshot)
+            self.pushButton_7.raise_()
+
+            # 모드제어 프레임
+            self.frame_mode = QtWidgets.QFrame(Form)
+            self.frame_mode.setGeometry(QtCore.QRect(30, 188, 1019, 320))
+            self.frame_mode.setAutoFillBackground(False)
+            self.frame_mode.setStyleSheet("background-color : rgba(0, 0, 0, 0%)")
+            self.frame_mode.setFrameShape(QtWidgets.QFrame.StyledPanel)
+            self.frame_mode.setFrameShadow(QtWidgets.QFrame.Raised)
+            self.frame_mode.setObjectName("frame_mode")
+
+            self.pushButton = QtWidgets.QPushButton(self.frame_mode)
+            self.pushButton.setGeometry(QtCore.QRect(0, 0, 244, 325))
+            self.pushButton.setStyleSheet("background-color : #FFFFFF;")
+
+
+
+            if DARK_MODE:
+                self.pushButton.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/KOR/1-2.png); border:0px;}
+                    QPushButton:checked{image:url(./image/KOR/1-2.png); border:0px;}
+                    QPushButton{
+                    background-color: rgb(47, 56, 77); border-radius: 30px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(113, 128, 147); border-radius: 30px;
+                    }
+                    QPushButton:checked {
+                        background-color: rgb(0, 217, 104); border-radius: 30px;
+                    }
+                    '''
+                )
+            else:
+                self.pushButton.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/KOR/1-1.png); border:0px;}
+                    QPushButton:checked{image:url(./image/KOR/1-2.png); border:0px;}
+                    QPushButton{
+                        background-color: rgb(233, 236, 241); border-radius: 30px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(220, 223, 228); border-radius: 30px;
+                    }
+                    QPushButton:checked {
+                        background-color: rgb(0, 217, 104); border-radius: 30px;
+                    }
+                    '''
+                )
+            self.pushButton.setCheckable(True)
+            self.pushButton.setObjectName("pushButton")
+            # self.pushButton_image = QtWidgets.QLabel(self.pushButton)
+            # self.pushButton_image.setGeometry(QtCore.QRect(80, 120, 70, 70))
+            # self.pushButton_image.setStyleSheet("background-color : rgba(0, 0, 0, 0%)")
+            # self.pushButton_image.setStyleSheet(
+            #     '''
+            #     QLabel{image:url(./image/hand/hand1.png); border:0px;}
+            #     '''
+            # )
+            # self.pushButton.setObjectName("pushButton_image")
+
+            self.pushButton_2 = QtWidgets.QPushButton(self.frame_mode)
+            self.pushButton_2.setGeometry(QtCore.QRect(259, 0, 244, 325))
+            self.pushButton_2.setStyleSheet("background-color : #FFFFFF;")
+            if DARK_MODE:
+                self.pushButton_2.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/KOR/2-2.png); border:0px;}
+                    QPushButton:checked{image:url(./image/KOR/2-2.png); border:0px;}
+                    QPushButton{
+                        background-color: rgb(47, 56, 77); border-radius: 30px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(113, 128, 147); border-radius: 30px;
+                    }
+                    QPushButton:checked {
+                        background-color: rgb(0, 217, 104); border-radius: 30px;
+                    }
+                    ''')
+            else:
+                self.pushButton_2.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/KOR/2-1.png); border:0px;}
+                    QPushButton:checked{image:url(./image/KOR/2-2.png); border:0px;}
+                    QPushButton{
+                        background-color: rgb(233, 236, 241); border-radius: 30px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(220, 223, 228); border-radius: 30px;
+                    }
+                    QPushButton:checked {
+                        background-color: rgb(0, 217, 104); border-radius: 30px;
+                    }
+                    ''')
+            self.pushButton_2.setObjectName("pushButton_2")
+            self.pushButton_2.setCheckable(True)
+            self.pushButton_3 = QtWidgets.QPushButton(self.frame_mode)
+            self.pushButton_3.setGeometry(QtCore.QRect(518, 0, 244, 325))
+            if DARK_MODE:
+                self.pushButton_3.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/KOR/3-2.png); border:0px;}
+                    QPushButton:checked{image:url(./image/KOR/3-2.png); border:0px;}
+                    QPushButton{
+                        background-color: rgb(47, 56, 77); border-radius: 30px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(113, 128, 147); border-radius: 30px;
+                    }
+                    QPushButton:checked {
+                        background-color: rgb(0, 217, 104); border-radius: 30px;
+                    }
+                    ''')
+            else:
+                self.pushButton_3.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/KOR/3-1.png); border:0px;}
+                    QPushButton:checked{image:url(./image/KOR/3-2.png); border:0px;}
+                    QPushButton{
+                        background-color: rgb(233, 236, 241); border-radius: 30px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(220, 223, 228); border-radius: 30px;
+                    }
+                    QPushButton:checked {
+                        background-color: rgb(0, 217, 104); border-radius: 30px;
+                    }
+                    ''')
+            self.pushButton_3.setCheckable(True)
+            self.pushButton_3.setObjectName("pushButton_3")
+            self.pushButton_4 = QtWidgets.QPushButton(self.frame_mode)
+            self.pushButton_4.setGeometry(QtCore.QRect(777, 0, 244, 325))
+            if DARK_MODE:
+                self.pushButton_4.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/KOR/4-2.png); border:0px;}
+                    QPushButton:checked{image:url(./image/KOR/4-2.png); border:0px;}
+                    QPushButton{
+                        background-color: rgb(47, 56, 77); border-radius: 30px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(113, 128, 147); border-radius: 30px;
+                    }
+                    QPushButton:checked {
+                        background-color: rgb(0, 217, 104); border-radius: 30px;
+                    }
+                    ''')
+            else:
+                self.pushButton_4.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/KOR/4-1.png); border:0px;}
+                    QPushButton:checked{image:url(./image/KOR/4-2.png); border:0px;}
+                    QPushButton{
+                        background-color: rgb(233, 236, 241); border-radius: 30px;
+                    }
+                    QPushButton:hover {
+                        background-color: rgb(220, 223, 228); border-radius: 30px;
+                    }
+                    QPushButton:checked {
+                        background-color: rgb(0, 217, 104); border-radius: 30px;
+                    }
+                    ''')
+            self.pushButton_4.setCheckable(True)
+            self.pushButton_4.setObjectName("pushButton_4")
 
             # MainWindow.setCentralWidget(self.centralwidget)
 
-            self.line = QtWidgets.QFrame(Form)
-            self.line.setGeometry(QtCore.QRect(40, 340, 130, 16))
-            self.line.setStyleSheet("color : #C4BCB8;")
-            self.line.setFrameShadow(QtWidgets.QFrame.Plain)
-            self.line.setLineWidth(10)
-            self.line.setFrameShape(QtWidgets.QFrame.HLine)
-            self.line.setObjectName("line")
-            self.line_2 = QtWidgets.QFrame(Form)
-            self.line_2.setGeometry(QtCore.QRect(350, 340, 130, 16))
-            self.line_2.setStyleSheet("color : #C4BCB8;")
-            self.line_2.setFrameShadow(QtWidgets.QFrame.Plain)
-            self.line_2.setLineWidth(10)
-            self.line_2.setFrameShape(QtWidgets.QFrame.HLine)
-            self.line_2.setObjectName("line_2")
-            self.line_3 = QtWidgets.QFrame(Form)
-            self.line_3.setGeometry(QtCore.QRect(250, 220, 20, 100))
-            self.line_3.setStyleSheet("color : #C4BCB8;")
-            self.line_3.setFrameShadow(QtWidgets.QFrame.Plain)
-            self.line_3.setLineWidth(10)
-            self.line_3.setFrameShape(QtWidgets.QFrame.VLine)
-            self.line_3.setObjectName("line_3")
-            self.line_4 = QtWidgets.QFrame(Form)
-            self.line_4.setGeometry(QtCore.QRect(250, 376, 20, 100))
-            self.line_4.setStyleSheet("color : #C4BCB8;")
-            self.line_4.setFrameShadow(QtWidgets.QFrame.Plain)
-            self.line_4.setLineWidth(10)
-            self.line_4.setFrameShape(QtWidgets.QFrame.VLine)
-            self.line_4.setObjectName("line_4")
-            self.label_4 = QtWidgets.QLabel(Form)
-            self.label_4.setGeometry(QtCore.QRect(214, 320, 100, 56))
-            font = QtGui.QFont()
-            font.setFamily("서울남산 장체B")
-            font.setPointSize(28)
-            self.label_4.setFont(font)
-            self.label_4.setLayoutDirection(QtCore.Qt.LayoutDirectionAuto)
-            self.label_4.setStyleSheet("color : #ACCCC4;")
-            self.label_4.setObjectName("label_4")
+            # self.line = QtWidgets.QFrame(Form)
+            # self.line.setGeometry(QtCore.QRect(40, 340, 130, 16))
+            # self.line.setStyleSheet("color : #C4BCB8;")
+            # self.line.setFrameShadow(QtWidgets.QFrame.Plain)
+            # self.line.setLineWidth(10)
+            # self.line.setFrameShape(QtWidgets.QFrame.HLine)
+            # self.line.setObjectName("line")
+            # self.line_2 = QtWidgets.QFrame(Form)
+            # self.line_2.setGeometry(QtCore.QRect(350, 340, 130, 16))
+            # self.line_2.setStyleSheet("color : #C4BCB8;")
+            # self.line_2.setFrameShadow(QtWidgets.QFrame.Plain)
+            # self.line_2.setLineWidth(10)
+            # self.line_2.setFrameShape(QtWidgets.QFrame.HLine)
+            # self.line_2.setObjectName("line_2")
+            # self.line_3 = QtWidgets.QFrame(Form)
+            # self.line_3.setGeometry(QtCore.QRect(250, 220, 20, 100))
+            # self.line_3.setStyleSheet("color : #C4BCB8;")
+            # self.line_3.setFrameShadow(QtWidgets.QFrame.Plain)
+            # self.line_3.setLineWidth(10)
+            # self.line_3.setFrameShape(QtWidgets.QFrame.VLine)
+            # self.line_3.setObjectName("line_3")
+            # self.line_4 = QtWidgets.QFrame(Form)
+            # self.line_4.setGeometry(QtCore.QRect(250, 376, 20, 100))
+            # self.line_4.setStyleSheet("color : #C4BCB8;")
+            # self.line_4.setFrameShadow(QtWidgets.QFrame.Plain)
+            # self.line_4.setLineWidth(10)
+            # self.line_4.setFrameShape(QtWidgets.QFrame.VLine)
+            # self.line_4.setObjectName("line_4")
+            # self.label_4 = QtWidgets.QLabel(Form)
+            # self.label_4.setGeometry(QtCore.QRect(214, 320, 100, 56))
+            # font = QtGui.QFont()
+            # font.setFamily("서울남산 장체B")
+            # font.setPointSize(28)
+            # self.label_4.setFont(font)
+            # self.label_4.setLayoutDirection(QtCore.Qt.LayoutDirectionAuto)
+            # self.label_4.setStyleSheet("color : #ACCCC4;")
+            # self.label_4.setObjectName("label_4")
 
             self.menubar = QtWidgets.QMenuBar(Form)
             self.menubar.setGeometry(QRect(0, 0, 870, 21))
             self.menubar.setObjectName("menubar")
-
 
             self.pushButton.toggled.connect(lambda: self.togglebutton(Form, integer=0))
             self.pushButton_2.toggled.connect(lambda: self.togglebutton(Form, integer=1))
             self.pushButton_3.toggled.connect(lambda: self.togglebutton(Form, integer=2))
             self.pushButton_4.toggled.connect(lambda: self.togglebutton(Form, integer=3))
 
-            self.thread = opcv()
-
+            self.pushButton_5.toggled.connect(ui_load.open)
+            #self.pushButton_4.clicked.connect(self.loading.closeEvent)
             self.pushButton_5.toggled.connect(lambda: self.checked(Form))
+
+
+            self.thread = Opcv()
+
             self.click_mode.connect(self.thread.mode_setting)
             self.button6_checked.connect(self.thread.send_img)
             # self.power_off_signal.connect(self.thread.send_img)
@@ -1682,84 +2219,528 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.thread.mode_signal.connect(self.push_button)
 
             self.thread.start()
+
+
+            # thread_load
+            # self.thread_load = Load()
+            ui.setupLanguage(ui, language_setting, DARK_MODE)
+
             self.retranslateUi(Form)
             QtCore.QMetaObject.connectSlotsByName(Form)
 
-        def setupLanguage(self, Form, language):
+        def setupLanguage(self, Form, language, DARK_MODE):
             print('setupLanguage')
+            global language_setting
+            # global DARK_MODE
+
+            if not DARK_MODE: Form.setStyleSheet("background-color : rgb(248, 249, 251);");
+            else: Form.setStyleSheet("background-color : rgb(32, 36, 47);");
+            if not DARK_MODE: Form.label.setStyleSheet("color : rgb(32, 36, 47);");
+            else: Form.label.setStyleSheet("color : rgb(248, 249, 251);");
+            if DARK_MODE:
+                Form.cam_frame.setPixmap(QtGui.QPixmap("../image/cam_frame_dark.png"))
+            else:
+                Form.cam_frame.setPixmap(QtGui.QPixmap("../image/cam_frame.png"))
+            if DARK_MODE:
+                self.pushButton_10.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/icon/exit_dark.png); border:0px;}
+                    QPushButton:hover{image:url(./image/icon/exit_dark_hover.png); border:0px;}
+                    ''')
+                self.pushButton_8.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./Image/icon/setting_dark.png); border:0px;}
+                    QPushButton:hover{image:url(./Image/icon/setting_dark_hover.png); border:0px;}
+                    ''')
+                self.pushButton_9.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/inbody_dark.png); border:0px;}
+                    QPushButton:hover{image:url(./image/inbody_hover.png); border:0px;}
+
+                    ''')
+                self.label_6.setPixmap(QtGui.QPixmap("../image/default_dark.jpg"))
+            else:
+                self.pushButton_10.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/icon/exit.png); border:0px;}
+                    QPushButton:hover{image:url(./image/icon/exit_hover.png); border:0px;}
+                    ''')
+                self.pushButton_8.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./Image/icon/setting.png); border:0px;}
+                    QPushButton:hover{image:url(./Image/icon/setting_hover.png); border:0px;}
+                    ''')
+                self.pushButton_9.setStyleSheet(
+                    '''
+                    QPushButton{image:url(./image/inbody.png); border:0px;}
+                    QPushButton:hover{image:url(./image/inbody_hover.png); border:0px;}
+
+                    ''')
+                self.label_6.setPixmap(QtGui.QPixmap("../image/default.jpg"))
             if language == '한국어(Korean)':
-                self.pushButton.setStyleSheet(
-                    '''
-                    QPushButton{image:url(./image/KOR/1-1.png); border:0px;}
-                    QPushButton:hover{image:url(./image/KOR/1-3.png); border:0px;}
-                    QPushButton:checked{image:url(./image/KOR/1-2.png); border:0px;}
-                    ''')
-                self.pushButton_2.setStyleSheet(
-                    '''
-                    QPushButton{image:url(./image/KOR/3-1.png); border:0px;}
-                    QPushButton:hover{image:url(./image/KOR/3-3.png); border:0px;}
-                    QPushButton:checked{image:url(./image/KOR/3-2.png); border:0px;}
-                    ''')
-                self.pushButton_3.setStyleSheet(
-                    '''
-                    QPushButton{image:url(./image/KOR/2-1.png); border:0px;}
-                    QPushButton:hover{image:url(./image/KOR/2-3.png); border:0px;}
-                    QPushButton:checked{image:url(./image/KOR/2-2.png); border:0px;}
-                    ''')
-                self.pushButton_4.setStyleSheet(
-                    '''
-                    QPushButton{image:url(./image/KOR/4-1.png); border:0px;}
-                    QPushButton:hover{image:url(./image/KOR/4-3.png); border:0px;}
-                    QPushButton:checked{image:url(./image/KOR/4-2.png); border:0px;}
-                    ''')
+                if not DARK_MODE:
+                    self.pushButton.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/KOR/1-1.png); border:0px;}
+                        QPushButton:checked{image:url(./image/KOR/1-2.png); border:0px;}
+                        QPushButton{
+                        background-color: rgb(233, 236, 241); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(220, 223, 228); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_2.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/KOR/2-1.png); border:0px;}
+                        QPushButton:checked{image:url(./image/KOR/2-2.png); border:0px;}
+                                            QPushButton{
+                        background-color: rgb(233, 236, 241); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(220, 223, 228); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_3.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/KOR/3-1.png); border:0px;}
+                        QPushButton:checked{image:url(./image/KOR/3-2.png); border:0px;}
+                                            QPushButton{
+                        background-color: rgb(233, 236, 241); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(220, 223, 228); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_4.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/KOR/4-1.png); border:0px;}
+                        QPushButton:checked{image:url(./image/KOR/4-2.png); border:0px;}
+                                            QPushButton{
+                        background-color: rgb(233, 236, 241); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(220, 223, 228); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_7.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/KOR/capture.png); border:0px;}
+                        QPushButton:hover{image:url(./image/KOR/capture_hover.png); border:0px;}
+                        ''')
+                    self.pushButton_5.setStyleSheet(
+                        '''
+                        QPushButton{
+                            color: white;
+                            background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                            stop:0 rgba(226, 0, 46, 255),
+                            stop:1 rgba(144, 61, 167, 255));
+                            border-radius: 30px;
+                            image:url(./image/KOR/cam_on.png);
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(246, 20, 66); border-radius: 30px;
+                        }
+                        QPushButton:checked{
+                            background-color: rgb(246, 20, 66); border-radius: 30px;
+                            image:url(./image/KOR/cam_off.png);
+                            }
+                        ''')
+                    self.pushButton_6.setStyleSheet(
+                        '''
+                        QPushButton{
+                            color: white;
+                            background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                            stop:0 rgba(0, 160, 182, 255),
+                            stop:1 rgba(144, 61, 167, 255));
+                            border-radius: 30px;
+                            image:url(./Image/KOR/guide_open.png);
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(20, 180, 202); border-radius: 30px;
+                        }
+                        ''')
+                else:
+                    self.pushButton.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/KOR/1-2.png); border:0px;}
+                        QPushButton:checked{image:url(./image/KOR/1-2.png); border:0px;}
+                        QPushButton{
+                        background-color: rgb(47, 56, 77); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(113, 128, 147); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_2.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/KOR/2-2.png); border:0px;}
+                        QPushButton:checked{image:url(./image/KOR/2-2.png); border:0px;}
+                        QPushButton{
+                        background-color: rgb(47, 56, 77); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(113, 128, 147); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_3.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/KOR/3-2.png); border:0px;}
+                        QPushButton:checked{image:url(./image/KOR/3-2.png); border:0px;}
+                                            QPushButton{
+                        background-color: rgb(47, 56, 77); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(113, 128, 147); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_4.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/KOR/4-2.png); border:0px;}
+                        QPushButton:checked{image:url(./image/KOR/4-2.png); border:0px;}
+                                            QPushButton{
+                        background-color: rgb(47, 56, 77); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(113, 128, 147); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_7.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/KOR/capture.png); border:0px;}
+                        QPushButton:hover{image:url(./image/KOR/capture_hover.png); border:0px;}
+                        ''')
+                    self.pushButton_5.setStyleSheet(
+                        '''
+                        QPushButton{
+                            color: white;
+                            background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                            stop:0 rgba(226, 0, 46, 255),
+                            stop:1 rgba(144, 61, 167, 255));
+                            border-radius: 30px;
+                            image:url(./image/KOR/cam_on.png);
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(246, 20, 66); border-radius: 30px;
+                        }
+                        QPushButton:checked{
+                            background-color: rgb(246, 20, 66); border-radius: 30px;
+                            image:url(./image/KOR/cam_off.png);
+                            }
+                        ''')
+                    self.pushButton_6.setStyleSheet(
+                        '''
+                        QPushButton{
+                            color: white;
+                            background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                            stop:0 rgba(0, 160, 182, 255),
+                            stop:1 rgba(144, 61, 167, 255));
+                            border-radius: 30px;
+                            image:url(./Image/KOR/guide_open.png);
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(20, 180, 202); border-radius: 30px;
+                        }
+                        ''')
             elif language == '영어(English)':
-                self.pushButton.setStyleSheet(
-                    '''
-                    QPushButton{image:url(./image/ENG/1-1.png); border:0px;}
-                    QPushButton:hover{image:url(./image/ENG/1-3.png); border:0px;}
-                    QPushButton:checked{image:url(./image/ENG/1-2.png); border:0px;}
-                    ''')
-                self.pushButton_2.setStyleSheet(
-                    '''
-                    QPushButton{image:url(./image/ENG/3-1.png); border:0px;}
-                    QPushButton:hover{image:url(./image/ENG/3-3.png); border:0px;}
-                    QPushButton:checked{image:url(./image/ENG/3-2.png); border:0px;}
-                    ''')
-                self.pushButton_3.setStyleSheet(
-                    '''
-                    QPushButton{image:url(./image/ENG/2-1.png); border:0px;}
-                    QPushButton:hover{image:url(./image/ENG/2-3.png); border:0px;}
-                    QPushButton:checked{image:url(./image/ENG/2-2.png); border:0px;}
-                    ''')
-                self.pushButton_4.setStyleSheet(
-                    '''
-                    QPushButton{image:url(./image/ENG/4-1.png); border:0px;}
-                    QPushButton:hover{image:url(./image/ENG/4-3.png); border:0px;}
-                    QPushButton:checked{image:url(./image/ENG/4-2.png); border:0px;}
-                    ''')
+                if not DARK_MODE:
+                    self.pushButton.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/ENG/1-1.png); border:0px;}
+                        QPushButton:checked{image:url(./image/ENG/1-2.png); border:0px;}
+                        QPushButton{
+                        background-color: rgb(233, 236, 241); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(220, 223, 228); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_2.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/ENG/2-1.png); border:0px;}
+                        QPushButton:checked{image:url(./image/ENG/2-2.png); border:0px;}
+                        QPushButton{
+                        background-color: rgb(233, 236, 241); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(220, 223, 228); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_3.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/ENG/3-1.png); border:0px;}
+                        QPushButton:checked{image:url(./image/ENG/3-2.png); border:0px;}
+                        QPushButton{
+                        background-color: rgb(233, 236, 241); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(220, 223, 228); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_4.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/ENG/4-1.png); border:0px;}
+                        QPushButton:checked{image:url(./image/ENG/4-2.png); border:0px;}
+                        QPushButton{
+                        background-color: rgb(233, 236, 241); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(220, 223, 228); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_7.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/ENG/capture.png); border:0px;}
+                        QPushButton:hover{image:url(./image/ENG/capture_hover.png); border:0px;}
+                        ''')
+                    self.pushButton_5.setStyleSheet(
+                        '''
+                        QPushButton{
+                            color: white;
+                            background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                            stop:0 rgba(226, 0, 46, 255),
+                            stop:1 rgba(144, 61, 167, 255));
+                            border-radius: 30px;
+                            image:url(./image/ENG/cam_on.png);
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(246, 20, 66); border-radius: 30px;
+                        }
+                        QPushButton:checked{
+                            background-color: rgb(246, 20, 66); border-radius: 30px;
+                            image:url(./image/ENG/cam_off.png);
+                            }
+                        ''')
+                    self.pushButton_6.setStyleSheet(
+                        '''
+                        QPushButton{
+                            color: white;
+                            background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                            stop:0 rgba(0, 160, 182, 255),
+                            stop:1 rgba(144, 61, 167, 255));
+                            border-radius: 30px;
+                            image:url(./Image/ENG/guide_open.png);
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(20, 180, 202); border-radius: 30px;
+                        }
+                        ''')
+                else:
+                    self.pushButton.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/ENG/1-2.png); border:0px;}
+                        QPushButton:checked{image:url(./image/ENG/1-2.png); border:0px;}
+                        QPushButton{
+                        background-color: rgb(47, 56, 77); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(113, 128, 147); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_2.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/ENG/2-2.png); border:0px;}
+                        QPushButton:checked{image:url(./image/ENG/2-2.png); border:0px;}
+                        QPushButton{
+                        background-color: rgb(47, 56, 77); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(113, 128, 147); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_3.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/ENG/3-2.png); border:0px;}
+                        QPushButton:checked{image:url(./image/ENG/3-2.png); border:0px;}
+                        QPushButton{
+                        background-color: rgb(47, 56, 77); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(113, 128, 147); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_4.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/ENG/4-2.png); border:0px;}
+                        QPushButton:checked{image:url(./image/ENG/4-2.png); border:0px;}
+                        QPushButton{
+                        background-color: rgb(47, 56, 77); border-radius: 30px;
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(113, 128, 147); border-radius: 30px;
+                        }
+                        QPushButton:checked {
+                            background-color: rgb(0, 217, 104); border-radius: 30px;
+                        }
+                        ''')
+                    self.pushButton_7.setStyleSheet(
+                        '''
+                        QPushButton{image:url(./image/ENG/capture.png); border:0px;}
+                        QPushButton:hover{image:url(./image/ENG/capture_hover.png); border:0px;}
+                        ''')
+                    self.pushButton_5.setStyleSheet(
+                        '''
+                        QPushButton{
+                            color: white;
+                            background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                            stop:0 rgba(226, 0, 46, 255),
+                            stop:1 rgba(144, 61, 167, 255));
+                            border-radius: 30px;
+                            image:url(./image/ENG/cam_on.png);
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(246, 20, 66); border-radius: 30px;
+                        }
+                        QPushButton:checked{
+                            background-color: rgb(246, 20, 66); border-radius: 30px;
+                            image:url(./image/ENG/cam_off.png);
+                            }
+                        ''')
+                    self.pushButton_6.setStyleSheet(
+                        '''
+                        QPushButton{
+                            color: white;
+                            background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                            stop:0 rgba(0, 160, 182, 255),
+                            stop:1 rgba(144, 61, 167, 255));
+                            border-radius: 30px;
+                            image:url(./Image/ENG/guide_open.png);
+                        }
+                        QPushButton:hover {
+                            background-color: rgb(20, 180, 202); border-radius: 30px;
+                        }
+                        ''')
+
+            with open('../setting.json', 'r', encoding='UTF8') as json_file:
+                json_data = json.load(json_file)
+                new_data = json_data
+            new_data['DARK_MODE'] = str(DARK_MODE)
+            new_data['LANGUAGE'] = language
+            print(new_data)
+            with open('../setting.json', 'w', encoding='UTF8') as json_file:
+                json.dump(new_data, json_file, indent="\t")
 
         def retranslateUi(self, Form):
             _translate = QtCore.QCoreApplication.translate
-            Form.setWindowTitle(_translate("Form", "Hand Gesture Presentation Tool V 1.0"))
-            self.label_2.setText(_translate("Form", "Presentation Tool"))
-            self.label_3.setText(_translate("Form", "1.0"))
+            Form.setWindowTitle(_translate("Form", "Motion Presentation V 1.2"))
+            # self.label_2.setText(_translate("Form", "Presentation Tool"))
+            # self.label_3.setText(_translate("Form", "1.2"))
             # 여기다가
-            self.label.setText(_translate("Form", "Hand Gesture"))
-            self.label_4.setText(_translate("Form", "MODE"))
+            # self.label.setText(_translate("Form", "Motion Presentation"))
+            # self.label_4.setText(_translate("Form", "MODE"))
 
         def exitDialog(self):
             msgBox = QMessageBox()
+            # msgBox.setMinimumSize(QSize(1000, 500))
+            msgBox.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
             msgBox.setIcon(QMessageBox.Information)
+            # msgBox.setStyleSheet("background-color:rgba(255, 255, 255, 255);")
+            if not DARK_MODE: msgBox.setStyleSheet("background-color : rgb(248, 249, 251);");
+            else: msgBox.setStyleSheet("background-color : rgb(32, 36, 47);");
+            # msgBox.resizeEvent(500, 500)
             font = QtGui.QFont()
             font.setFamily("서울남산 장체B")
-            font.setPointSize(12)
+            font.setPointSize(22)
             msgBox.setFont(font)
             msgBox.setText("프로그램을 종료하시겠습니까?")
             msgBox.setWindowTitle("Exit?")
             msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
             returnValue = msgBox.exec()
             if returnValue == QMessageBox.Ok:
+                system("taskkill /f /im ZoomIt64.exe")
+                system("taskkill /f /im ZoomIt.exe")
                 sys.exit()
+
+            msgBox.pushButton_ok = QtWidgets.QPushButton(msgBox)
+            msgBox.pushButton_ok.setGeometry(QtCore.QRect(30, 271, 261, 100))
+            msgBox.pushButton_ok.setStyleSheet(
+                '''
+                QPushButton{
+                    color: white;
+                    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                    stop:0 rgba(0, 217, 104, 255),
+                    stop:1 rgba(144, 61, 167, 255));
+                    border-radius: 30px;
+                    image:url(./image/OK.png);
+                }
+                QPushButton:hover {
+                    background-color: rgb(0, 217, 104); border-radius: 30px;
+                }
+                QPushButton:checked{
+                    background-color: rgb(0, 217, 104); border-radius: 30px;
+                    image:url(./image/KOR/cam_off.png);
+                    }
+                ''')
+            msgBox.pushButton_ok.setObjectName("pushButton_ok")
+            msgBox.pushButton_ok.clicked.connect(msgBox.accept)
+            msgBox.pushButton_ok.clicked.connect(msgBox.getComboBoxItem)
+
+            msgBox.pushButton_cancel = QtWidgets.QPushButton(msgBox)
+            msgBox.pushButton_cancel.setGeometry(QtCore.QRect(310, 271, 261, 100))
+            msgBox.pushButton_cancel.setStyleSheet(
+                '''
+                QPushButton{
+                    color: white;
+                    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
+                    stop:0 rgba(0, 160, 182, 255),
+                    stop:1 rgba(144, 61, 167, 255));
+                    border-radius: 30px;
+                    image:url(./image/Cancel.png);
+                }
+                QPushButton:hover {
+                    background-color: rgb(246, 20, 66); border-radius: 30px;
+                }
+                QPushButton:checked{
+                    background-color: rgb(246, 20, 66); border-radius: 30px;
+                    image:url(./image/KOR/cam_off.png);
+                    }
+                ''')
+            self.pushButton_cancel.setObjectName("pushButton_cancel")
 
         @pyqtSlot(int)
         def push_button(self, integer):  # 2-1
@@ -1805,20 +2786,21 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 pass
 
         def screenshot(self):
-            print('clicked')
+            # print('clicked')
             now = datetime.datetime.now().strftime("%d_%H-%M-%S")
             filename = './screenshots/' + str(now) + ".jpg"
-            print(filename)
+            print('Saving image as ' + filename)
             image = self.label_6.pixmap()
-            image.save(filename, 'jpg')
+            # print(image.size())
+            image.save(filename)
 
-        def cvt_qt(self, img):
+        def cvt_qt(self, img, size=(811, 608)):
             # rgb_image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # cv 이미지 파일 rgb 색계열로 바꿔주기
             h, w, ch = img.shape  # image 쉐입 알기
             bytes_per_line = ch * w  # 차원?
             convert_to_Qt_format = QtGui.QImage(img.data, w, h, bytes_per_line,
                                                 QtGui.QImage.Format_RGB888)  # qt 포맷으로 바꾸기
-            p = convert_to_Qt_format.scaled(943, 707, QtCore.Qt.KeepAspectRatio)  # 디스클레이 크기로 바꿔주기.
+            p = convert_to_Qt_format.scaled(811, 608, QtCore.Qt.KeepAspectRatio)  # 디스클레이 크기로 바꿔주기.
 
             return QtGui.QPixmap.fromImage(p)  # 진정한 qt 이미지 생성
 
@@ -1828,14 +2810,34 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.label_6.setPixmap(qt_img)
 
         def checked(self, Form):
+            # self.loading.setGeometry(10, 10, 100, 200)
+            # loading_window = Load_window()
+            # loading_window.setupUi(loading_window)
+            # loading_window.exec_()
+            print('loading...')
+            # dlg = Loading()
+            # dlg.setupUi(dlg)
+            # dlg.exec_()
+            self.label_6.setStyleSheet(
+                "background-color : white; border-radius: 50px;" )
+            self.label_6.setObjectName("label_6")
+            self.label_6.setPixmap(QtGui.QPixmap("../image/default.jpg"))
+
             if self.pushButton_5.isChecked():
-                print('checked')
+                # image = cv2.imread('./image/testtest.jpg')
+                # image = self.cvt_qt(image)
+                # self.label_6.setPixmap(image)
+                # self.label_6.setPixmap(QtGui.QPixmap("./image/testtest.jpg"))
+                # self.label_6.setStyleShee
+                # loading_window.reject()
                 self.pushButton.setEnabled(True)
                 self.pushButton_2.setEnabled(True)
                 self.pushButton_3.setEnabled(True)
                 self.pushButton_4.setEnabled(True)
                 self.pushButton_7.setEnabled(True)
+
                 self.button6_checked.emit(True)
+
             else:
                 self.pushButton.setEnabled(False)
                 self.pushButton_2.setEnabled(False)
@@ -1849,7 +2851,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     if button.isChecked():
                         button.toggle()
                 self.button6_checked.emit(False)
-                self.label_6.setPixmap(QtGui.QPixmap("../image/default2.jpg"))
+                print('Default image set')
+                #self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
+                if ui_load.status == 1:
+                    ui_load.close()
+                    ui_load.status = 0
 
         def settingwindow(self):
             dlg = Setting_window()
@@ -1857,18 +2863,25 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             dlg.exec_()
 
         def guidewindow(self):
-            guide = Guide_window()
-            guide.setupUi(guide)
-            guide.exec_()
+            path = os.getcwd()
+            guide_path = path + "\\guide\\0\\0.html"
+            os.system('''../open_guide.bat''')
 
+        def exitwindow(self):
+            dlg = Exit_window()
+            dlg.setupUi(dlg)
+            dlg.exec_()
+
+        # 대본영역
         def updateMask(self):
             # get the *whole* window geometry, including its titlebar and borders
             frameRect = self.frameGeometry()
             # print(frameRect)
             # get the grabWidget geometry and remap it to global coordinates
             grabGeometry = self.grabWidget.geometry()
-            grabGeometry = QtCore.QRect(0, 0, 1328, 187)
-            grabGeometry.moveTopLeft(self.grabWidget.mapToGlobal(QtCore.QPoint(530, 871)))
+            grabGeometry = QtCore.QRect(0, 0, 1860, 350)
+            # 30, 668
+            grabGeometry.moveTopLeft(self.grabWidget.mapToGlobal(QtCore.QPoint(30, 668)))
 
             # get the actual margins between the grabWidget and the window margins
             left = frameRect.left() - grabGeometry.left()
@@ -1877,8 +2890,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             bottom = frameRect.bottom() - grabGeometry.bottom()
 
             # reset the geometries to get "0-point" rectangles for the mask
-            frameRect.moveTopLeft(QtCore.QPoint(530, 831))
-            grabGeometry.moveTopLeft(QtCore.QPoint(530, 831))
+            frameRect.moveTopLeft(QtCore.QPoint(30, 668))
+            grabGeometry.moveTopLeft(QtCore.QPoint(30, 668))
 
             # create the base mask region, adjusted to the margins between the
             # grabWidget and the window as computed above
@@ -1912,10 +2925,12 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         def Go_to_inbody(self):
             os.system('explorer https://www.inbody.com/kr/')
 
-    app = QtWidgets.QApplication(sys.argv)
+
+
     ui = Grabber()
     ui.setupUi(ui)
     ui.show()
+
     # ui.MainWindow.show()
     sys.exit(app.exec_())
 
@@ -1923,7 +2938,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 if __name__ == '__main__':
     print("This is util set program, it works well... maybe... XD")
 
-    print('Running main_1_0.py...')
-    from os import system
+    print('Running main_1_2.py...')
 
-    system('python main_1_0.py')
+    # system('ZoomIt.exe')
+
+    system('python main_1_2.py')

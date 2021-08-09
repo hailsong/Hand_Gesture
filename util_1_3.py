@@ -45,8 +45,8 @@ mp_hands = mp.solutions.hands
 mp_face_detection = mp.solutions.face_detection
 mp_pose = mp.solutions.pose
 
-now_click = False
-now_click2 = False
+# now_click = False
+# now_click2 = False
 straight_line = False
 rectangular = False
 circle = False
@@ -438,7 +438,7 @@ class Gesture_mode:
         self.right_palm_vector.pop(0)
         self.right_finger_vector.pop(0)
 
-    def select_mode(self, pixel):
+    def select_mode(self, pixel, now_click):
         mode = 0
         lpv_mode_1 = [-0.39, 0.144, -0.90]
         lfv_mode_1 = [-0.33, -0.94, 0.]
@@ -490,7 +490,7 @@ class Gesture_mode:
             if right == 4:
                 right_idx_1 += 1
         if mode_result < 23 and left_idx_1 == 10 and right_idx_1 == 10:
-            pixel.mousemove()
+            pixel.mousemove(now_click)
             mode = 3
 
         # 손모양 사 자세
@@ -624,7 +624,19 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     :param value_for_static_r: static gesture 판별하는 process 와 공유할 오른손 output data
     :return:
     '''
+    '''
+    OOP (Object-Oriented Programming) (ex. java, C++, C#, python)
+    데이터를 객체로 취급하여 프로그램에 반영한 것으로 절차지향 프로그램이 코드 순서대로 동작하는 것과 달리 객체와 객체의 상호작용으로 동작한다.
+    코드의 재사용성과 개발의 생산성이 높으며 유지보수가 편리하지만 속도가 느리고 설계/개발단계에서 많은 시간이 소요된다.
+    추상화 : 공통의 속성이나 기능을 묶어 이름을 붙이는 것
+    캡슐화 : 비슷한 속성과 메소드를 하나의 클래스로 모은 것. 은닉화는 캡슐 내부의 로직이나 변수들을 감춰 객체가 손상되지 않도록 한다. 객체가
+    상속 : 자식 클래스가 부모 클래스의 멤버를 물려받는 것. 생산성을 높이고 유지보수에 편리
+    다형성 : 같은 모양의 함수가 상황에 따라 다르게 동작. 오버로딩과 오버라이딩으로 다형성을 이용할 수 있는데 오버로딩은 같은 함수 이름을 가졌지만 매개변수의 숫자나 타입을 다르게 해 구분하는 것.
+    오버라이딩은 부모 클래스에서 정의된 메소드를 자식 클래스에서 재정의 하는 것
 
+    call by value : 원본과 다른 새로운 메모리 공간에 원본을 복사하는 것으로 복사본을 변경하여도 원본에 영향을 줄 수 없다.
+    call by reference : 원본의 주소값을 넘기는 것으로 원본의 값을 변경할 수 있다.
+    '''
 
     global image
     global MOUSE_USE
@@ -636,10 +648,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     app = QtWidgets.QApplication(sys.argv)
     #window = QtWidgets.QWidget()
     ui_load = Load_Ui2()
-    # ui_load.setupUi()
-    # ui_load.show()
 
-    # GUI Part
     def mode_2_pre(palm, finger, left, p_check):
         palm_th = np.array([-0.41607399, -0.20192736, 0.88662719])
         finger_th = np.array([-0.08736683, -0.96164491, -0.26001175])
@@ -1002,7 +1011,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     # 모니터 수, 화면 갯수별로 다르게 Return 해야함
                     return int(mod_x) - 1919, int(mod_y)
 
-                def mousemove(self):
+                def mousemove(self, now_click):
                     if now_click == True:
                         cv2.circle(image, (int(self.x / 3), int(self.y / 2.25)), 5, (255, 0, 255), -1)
                     else:
@@ -1030,12 +1039,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # def get_center(p1, p2):
             #     return Mark_pixel((p1.x + p2.x) / 2, (p1.y + p2.y) / 2, (p1.z + p2.z) / 2)
 
-            def hand_drag(landmark):
+            def hand_drag(landmark, now_click):
                 """
                 :param landmark: landmark or mark_p
                 :return: nothing, but it change mouse position and click statement
                 """
-                global now_click
                 global straight_line, rectangular, circle
                 # print(now_click, straight_line, rectangular, circle)
                 drag_threshold = 1
@@ -1057,6 +1065,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     # ctypes.windll.user32.mouse_event(0x0002, 0, 0, 0, 0)
                     now_click = True
 
+
                 elif get_distance(landmark[4], landmark[8], mode='3d') > drag_threshold * get_distance(landmark[4],
                                                                                                        landmark[3],
                                                                                                        mode='3d') \
@@ -1066,14 +1075,14 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, pos[0], pos[1], 0, 0)
                     # ctypes.windll.user32.mouse_event(0x0004, 0, 0, 0, 0)
                     now_click = False
+                return now_click
 
-            def hand_drag2(landmark, gesture):  # 1 : non_click, 13 : click
+            def hand_drag2(landmark, gesture, now_click):  # 1 : non_click, 13 : click
                 """
                 :param landmark: landmark or mark_p
                 :return: nothing, but it change mouse position and click statement
                 """
-                # print(gesture)
-                global now_click
+
                 # global straight_line, rectangular, circle
 
                 if gesture == 13 and now_click == False:
@@ -1089,9 +1098,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, pos[0], pos[1], 0, 0)
                     # ctypes.windll.user32.mouse_event(0x0004, 0, 0, 0, 0)
                     now_click = False
+                return now_click
 
-            def hand_click(landmark, pixel, HM):
-                global now_click2
+            def hand_click(landmark, pixel, HM, now_click2):
+
                 palm_v = HM.palm_vector
                 click_angle = get_angle(palm_v, np.array([0, 0, -1]))
 
@@ -1104,12 +1114,12 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     print('click off')
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, pos[0], pos[1], 0, 0)
                     now_click2 = True
-                    return -1
+                    return -1, now_click2
                 if get_distance(landmark[4], landmark[10]) > get_distance(landmark[7],
                                                                           landmark[8]) and now_click2 == True:
                     now_click2 = False
 
-                return 0
+                return 0, now_click2
 
             """
             def blurFunction(src):
@@ -1239,6 +1249,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 ui_load.close()
                 ui_load.status = 1
 
+            now_click = False
+            now_click2 = False
+            if not cap.isOpened():
+                raise IOError
             while bool_state and cap.isOpened():
                 # print('cam')
                 success, image = cap.read()
@@ -1281,6 +1295,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 '''
                 # 손!!
                 if results.multi_hand_landmarks:
+                    multi_hand = len(results.multi_hand_landmarks)
                     mark_p_list = []
 
                     for hand_landmarks in results.multi_hand_landmarks:
@@ -1408,8 +1423,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                         # 마우스 움직임, 드래그
                         if mode_global == 3:
-                            pixel_c.mousemove()
-                            hand_drag2(mark_p, static_gesture_num_r)
+                            pixel_c.mousemove(now_click)
+                            now_click2 = hand_drag2(mark_p, static_gesture_num_r, now_click2)
 
                         if (get_distance(pixel_c, before_c) < get_distance(mark_p0, mark_p5)) and \
                                 sum(finger_open_[3:]) == 0 and \
@@ -1418,16 +1433,16 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                 MOUSE_USE == True and \
                                 mode_global != 3:
 
-                            pixel_c.mousemove()
+                            pixel_c.mousemove(now_click)
 
                             # print(click_tr[2])
 
                             if finger_open_[2] != 1 and click_tr > -1 and DRAG_USE == True:
-                                hand_drag(mark_p)
+                                now_click = hand_drag(mark_p, now_click)
 
                             if finger_open_[2] != 1 and CLICK_USE == True:
                                 if not now_click:
-                                    click_tr = hand_click(mark_p, pixel_c, HM)
+                                    click_tr, now_click2 = hand_click(mark_p, pixel_c, HM, now_click2)
                             # else:
                             # win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, int(pixel_c.x), int(pixel_c.y), 0, 0)
 
@@ -1443,7 +1458,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             # MODE CHANGE
                             palm_vector = HM.get_palm_vector()
                             finger_vector = HM.get_finger_vector()
-                            mode = gesture_mode.select_mode(pixel_c)
+                            mode = gesture_mode.select_mode(pixel_c, now_click)
                             self.mode_setting(mode, mode_before)
                             mode_before = mode
 
@@ -1451,7 +1466,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             # print(static_gesture_num_l, straight_line, rectangular, circle)
 
                             # 직선 그리기
-                            if mode_global == 3 and len(mark_p[-1]) == 4 and static_gesture_num_l == 13:
+                            if mode_global == 3 and static_gesture_num_l == 13:
                                 straight_line = True
                                 win32api.keybd_event(0xA0, 0, 0, 0)  # LShift 누르기.
                             else:
@@ -1459,7 +1474,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                 straight_line = False
 
                             # 네모 그리기
-                            if mode_global == 3 and len(mark_p[-1]) == 4 and static_gesture_num_l == 11:
+                            if mode_global == 3 and static_gesture_num_l == 11:
                                 rectangular = True
                                 win32api.keybd_event(0xA2, 0, 0, 0)  # LCtrl 누르기.
                             else:
@@ -1467,7 +1482,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                 rectangular = False
 
                             # 원 그리기
-                            if mode_global == 3 and len(mark_p[-1]) == 4 and static_gesture_num_l == 1:
+                            if mode_global == 3 and static_gesture_num_l == 1:
                                 circle = True
                                 win32api.keybd_event(0x09, 0, 0, 0)  # TAB 누르기.
                             else:
@@ -1480,6 +1495,13 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                     image = self.mode_3_pen_color(palm_vector, finger_vector, image)
 
                         before_c = pixel_c
+                        if multi_hand != 2 and (straight_line + rectangular + circle):
+                            win32api.keybd_event(0xA0, 0, win32con.KEYEVENTF_KEYUP, 0)
+                            straight_line = False
+                            win32api.keybd_event(0xA2, 0, win32con.KEYEVENTF_KEYUP, 0)
+                            rectangular = False
+                            win32api.keybd_event(0x09, 0, win32con.KEYEVENTF_KEYUP, 0)
+                            circle = False
 
                 FPS = round(1 / (time.time() - before_time), 2)
 
@@ -2917,7 +2939,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             os.system('explorer https://www.inbody.com/kr/')
 
 
-
     ui = Grabber()
     ui.setupUi(ui)
     ui.show()
@@ -2929,8 +2950,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 if __name__ == '__main__':
     print("This is util set program, it works well... maybe... XD")
 
-    print('Running main_1_2.py...')
+    print('Running main_1_3.py...')
 
     # system('ZoomIt.exe')
 
-    system('python main_1_2.py')
+    system('python main_1_3.py')
