@@ -625,17 +625,20 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     :return:
     '''
     '''
-    OOP (Object-Oriented Programming) (ex. java, C++, C#, python)
-    데이터를 객체로 취급하여 프로그램에 반영한 것으로 절차지향 프로그램이 코드 순서대로 동작하는 것과 달리 객체와 객체의 상호작용으로 동작한다.
-    코드의 재사용성과 개발의 생산성이 높으며 유지보수가 편리하지만 속도가 느리고 설계/개발단계에서 많은 시간이 소요된다.
-    추상화 : 공통의 속성이나 기능을 묶어 이름을 붙이는 것
-    캡슐화 : 비슷한 속성과 메소드를 하나의 클래스로 모은 것. 은닉화는 캡슐 내부의 로직이나 변수들을 감춰 객체가 손상되지 않도록 한다. 객체가
-    상속 : 자식 클래스가 부모 클래스의 멤버를 물려받는 것. 생산성을 높이고 유지보수에 편리
-    다형성 : 같은 모양의 함수가 상황에 따라 다르게 동작. 오버로딩과 오버라이딩으로 다형성을 이용할 수 있는데 오버로딩은 같은 함수 이름을 가졌지만 매개변수의 숫자나 타입을 다르게 해 구분하는 것.
-    오버라이딩은 부모 클래스에서 정의된 메소드를 자식 클래스에서 재정의 하는 것
-
-    call by value : 원본과 다른 새로운 메모리 공간에 원본을 복사하는 것으로 복사본을 변경하여도 원본에 영향을 줄 수 없다.
-    call by reference : 원본의 주소값을 넘기는 것으로 원본의 값을 변경할 수 있다.
+    S (SRP : Single Responsibility Principle)
+    한 클래스는 하나의 책임만 가져야 한다.
+    
+    O (OCP : Open/Closed Principle)
+    확장에는 열려(Open) 있으나, 변경에는 닫혀(Closed)있어야 한다.
+    
+    L (LSP : Liskov’s Substitution Principle)
+    프로그램의 객체는 프로그램의 정확성을 깨뜨리지 않으면서 하위 타입의 인스턴스로 바꿀 수 있어야 한다.
+    
+    I (ISP : Interface Segregation Principle)
+    특정 클라이언트를 위한 인터페이스 여러 개가 범용 인터페이스 하나보다 낫다.
+    
+    D (DIP : Dependency Inversion Principle)
+    추상화에 의존한다. 구체화에 의존하면 안된다.
     '''
 
     global image
@@ -835,7 +838,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
         def __init__(self):
             super().__init__()
-
 
         def mode_3_pen_color(self, palm, finger, image):
             global pen_color
@@ -1251,8 +1253,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             now_click = False
             now_click2 = False
+
             if not cap.isOpened():
                 raise IOError
+
             while bool_state and cap.isOpened():
                 # print('cam')
                 success, image = cap.read()
