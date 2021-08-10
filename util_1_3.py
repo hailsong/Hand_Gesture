@@ -53,10 +53,7 @@ circle = False
 
 gesture_int = 0
 
-MOUSE_USE = False
-CLICK_USE = False
-WHEEL_USE = False
-DRAG_USE = False
+
 USE_TENSORFLOW = True
 USE_DYNAMIC = True
 # 왼손잡이 모드 개발 중
@@ -70,6 +67,10 @@ with open('setting.json', encoding='UTF8') as json_file:
 language_setting = json_data["LANGUAGE"]
 DARK_MODE = True if json_data["DARK_MODE"] == "True" else False
 
+MOUSE_USE = False
+CLICK_USE = False
+WHEEL_USE = False
+DRAG_USE = False
 BOARD_COLOR = 'w'
 
 VISUALIZE_GRAPH = False
@@ -641,7 +642,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     추상화에 의존한다. 구체화에 의존하면 안된다.
     '''
 
-    global image
     global MOUSE_USE
     global CLICK_USE
     global WHEEL_USE
@@ -1203,48 +1203,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             from matplotlib import pyplot as plt
             from matplotlib import animation
 
-            fig = plt.figure()
-            ax = plt.axes(xlim=(0, 50), ylim=(-1, 1))
-            line, = ax.plot([], [], 'b', lw=2)
-            line2, = ax.plot([], [], 'g', lw=2)
-            line3, = ax.plot([], [], 'r', lw=2)
-
-            '''x가 파란색 y가 빨간색 z가 초록색'''
-            max_points = 50
-            line, = ax.plot(np.arange(max_points),
-                            np.ones(max_points, dtype=np.float) * np.nan, lw=2)
-            line2, = ax.plot(np.arange(max_points),
-                             np.ones(max_points, dtype=np.float) * np.nan, lw=2)
-            line3, = ax.plot(np.arange(max_points),
-                             np.ones(max_points, dtype=np.float) * np.nan, lw=2)
-
-            if VISUALIZE_GRAPH:
-                def init():
-                    return line,
-
-                def animate():
-                    y = gesture.palm_data[0][0]
-
-                    old_y = line.get_ydata()
-                    new_y = np.r_[old_y[1:], y]
-                    line.set_ydata(new_y)
-
-                    y2 = gesture.palm_data[0][1]
-
-                    old_y2 = line2.get_ydata()
-                    new_y2 = np.r_[old_y2[1:], y2]
-                    line2.set_ydata(new_y2)
-
-                    y3 = gesture.palm_data[0][2]
-
-                    old_y3 = line3.get_ydata()
-                    new_y3 = np.r_[old_y3[1:], y3]
-                    line3.set_ydata(new_y3)
-                    return line, line2, line3,
-
-                anim = animation.FuncAnimation(fig, animate, init_func=init, frames=200, interval=20, blit=False)
-
-                plt.show()
             print('loaded')
 
             if ui_load.status == 0:
@@ -1269,34 +1227,13 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 # Flip the image horizontally for a later selfie-view display, and convert
                 # the BGR image to RGB.
                 image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
-                # image = blurFunction(image)
 
-                # x_size, y_size, channel = image.shape
-                # To improve performance, optionally mark the image as not writeable to
-                # pass by reference.
                 image.flags.writeable = False
                 results = hands.process(image)
-                results_body = pose.process(image)
-
                 # Draw the hand annotations on the image.
                 image.flags.writeable = True
                 image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
-                # 몸!!
-                '''
-                if results_body.pose_landmarks:
-                    mark_b = []
-                    body_landmark = results_body.pose_landmarks.landmark
-                    mp_drawing.draw_landmarks(
-                        image, results_body.pose_landmarks, mp_pose.UPPER_BODY_POSE_CONNECTIONS)
-
-                    for i in range(25):
-                        mark_b.append(Mark_pixel(body_landmark[i].x, body_landmark[i].y,
-                                                 body_landmark[i].z))
-                    #print(mark_b_list)
-                    #print(mark_b)
-                    BM = Handmark(mark_b)  # BODYMARK
-                '''
                 # 손!!
                 if results.multi_hand_landmarks:
                     multi_hand = len(results.multi_hand_landmarks)
@@ -2838,7 +2775,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.label_6.setStyleSheet(
                 "background-color : white; border-radius: 50px;" )
             self.label_6.setObjectName("label_6")
-            self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
+            if DARK_MODE:
+                self.label_6.setPixmap(QtGui.QPixmap("./image/default_dark.jpg"))
+            else:
+                self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
 
             if self.pushButton_5.isChecked():
                 # image = cv2.imread('./image/testtest.jpg')
