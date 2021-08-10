@@ -1,3 +1,4 @@
+
 from util_1_3 import process_static_gesture, initialize
 
 from multiprocessing import Process, Value, Array
@@ -6,7 +7,6 @@ import win32gui, win32console
 from loading import *
 
 if __name__ == "__main__":
-    from loading import *
 
     win32gui.ShowWindow(win32console.GetConsoleWindow(), 0)
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
