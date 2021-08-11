@@ -648,6 +648,31 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     Dependency Inversion Principle : 상위 모듈은 하위 모듈에 의존하면 안되고 모두 추상화에 의존해야한다. 세부사항이 추상화에 의존해야 한다.
     
     추상화, 캡슐화, 상속, 다형성
+    
+    RESTful API : REST 아키텍처의 제약 조건을 준수하는 애플리케이션 프로그래밍 인터페이스
+    REST(REpresentational State Transfer)ful API는 HTTP 통신에서 어떤 차원에 대한 CRUD 요청을 Resource와 Method로 표현하여 특정한 형태로 전달하는 방식입니다. RESTful API는 아래와 같은 것들로 구성됩니다.
+    
+    Resource(자원, URI)
+    Method(요청 방식, GET or POST 등)
+    Representation of Resource(자원의 형태, JSON or XML 등)
+     
+    
+    함수형 프로그래밍
+    외부 값을 수정하거나 SIDE Effect 등의 부수 효과가 없는 순수 함수를 1급 객체로 간주하여 파라미터로 넘기거나 반환값으로 사용할 수 있으며, 참조 투명성을 지킬 수 있다.
+    1급 객체는 변수나 데이터 구조 안에 담을 수 있고 파라미터로 전달할 수 있고 반환값으로 사용할 수 있고 할당한 이름과 무관하게 고유한 구별이 가능
+    참조 투명성은 동일한 인자에 대해 동일한 결과 반환, 기존의 값을 변경하지 않고 유지. Immutable Data
+     
+    
+     
+    
+    메모리 구조
+    (낮은 주소)
+    코드 영역 (프로그램의 코드)
+    데이터 영역 (전역/정적 변수)
+    힙 영역 (런 타임에 크기가 결정됨, 프로그래머가 직접 관리할 수 있는데 이를 동적 할당이라고 부른다. 낮->높)
+    스택 영역 (컴파일 타임에 크기가 결정됨. 함수의 호출과 함께 할당되며 지역/매개 변수가 저장되는 영역. 스택영역 함수 호출 정보를 스택프레임이라 부르고 호출이 완료되면 소멸. 높->낮)
+    (높은 주소)
+
     '''
 
     global MOUSE_USE
@@ -791,38 +816,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         else:
             return 0
 
-    # class Load_Ui(object):
-    #     def setupUi(self, MainWindow):
-    #         self.MainWindow = MainWindow
-    #         self.MainWindow.setObjectName("MainWindow")
-    #         self.MainWindow.resize(500, 500)
-    #         self.MainWindow.setWindowFlag(QtCore.Qt.FramelessWindowHint)
-    #         self.MainWindow.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint)
-    #         self.centralwidget = QtWidgets.QWidget(MainWindow)
-    #         self.centralwidget.setObjectName("centralwidget")
-    #         self.centralwidget.setWindowFlag(QtCore.Qt.FramelessWindowHint)
-    #         self.centralwidget.setStyleSheet("background-color : rgb(224,244,253)")
-    #
-    #         # create label
-    #         self.label = QtWidgets.QLabel(self.centralwidget)
-    #         self.label.setGeometry(QtCore.QRect(25, 25, 500, 500))
-    #         self.label.setMinimumSize(QtCore.QSize(500, 500))
-    #         self.label.setMaximumSize(QtCore.QSize(500, 500))
-    #         self.label.setObjectName("label")
-    #
-    #         # add label to main window
-    #         # MainWindow.setCentralWidget(self.centralwidget)
-    #
-    #         # set qmovie as label
-    #         self.movie = QMovie("./image/loading.png")
-    #         self.label.setMovie(self.movie)
-    #         self.movie.start()
-    #
-    #     def close(self):
-    #         self.MainWindow.setWindowOpacity(0)
-    #
-    #     def open(self):
-    #         self.MainWindow.setWindowOpacity(1)
 
     class Opcv(QThread):
 
@@ -1556,9 +1549,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 self.comboBox.addItem("영어(English)")
                 self.comboBox.addItem("한국어(Korean)")
             if not DARK_MODE:
-                self.comboBox.setStyleSheet("color : rgb(32, 36, 47);");
+                self.comboBox.setStyleSheet("color : rgb(32, 36, 47);")
             else:
-                self.comboBox.setStyleSheet("color : rgb(248, 249, 251);");
+                self.comboBox.setStyleSheet("color : rgb(248, 249, 251);")
 
             self.comboBox2 = QtWidgets.QComboBox(Dialog)
             self.comboBox2.setGeometry(QtCore.QRect(140, 180, 321, 41))
@@ -1571,9 +1564,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 self.comboBox2.addItem("라이트 모드 (Light Mode)")
                 self.comboBox2.addItem("다크 모드 (Dark Mode)")
             if not DARK_MODE:
-                self.comboBox2.setStyleSheet("color : rgb(32, 36, 47);");
+                self.comboBox2.setStyleSheet("color : rgb(32, 36, 47);")
             else:
-                self.comboBox2.setStyleSheet("color : rgb(248, 249, 251);");
+                self.comboBox2.setStyleSheet("color : rgb(248, 249, 251);")
 
             self.label = QtWidgets.QLabel(Dialog)
             self.label.setGeometry(QtCore.QRect(95, 37, 450, 31))
@@ -1588,9 +1581,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             Dialog.setWindowTitle(_translate("Setting Window", "Setting Window"))
             self.label.setText(_translate("Dialog", "언어 / 테마 설정 (Language / Theme Setting)"))
             if not DARK_MODE:
-                self.label.setStyleSheet("color : rgb(32, 36, 47);");
+                self.label.setStyleSheet("color : rgb(32, 36, 47);")
             else:
-                self.label.setStyleSheet("color : rgb(248, 249, 251);");
+                self.label.setStyleSheet("color : rgb(248, 249, 251);")
 
         def getComboBoxItem(self):
             global language_setting
