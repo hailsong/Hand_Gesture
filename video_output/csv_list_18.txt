@@ -13,3 +13,5 @@
 0526_13/LEFT/output_18.csv
 0526_13/RIGHT/output_18.csv
 0323_价窍老/LEFT/output_18.csv
+0323_价窍老/RIGHT/output_18.csv
+0323_价窍老/RIGHT/output_18.csv

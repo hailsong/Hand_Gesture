@@ -5,7 +5,7 @@ import time
 
 path=os.getcwd()
 
-FOLDER_NAME = '0323_송하일/LEFT/'
+FOLDER_NAME = '0323_송하일/RIGHT/'
 
 split_list = FOLDER_NAME.split('/')
 dir_1 = split_list[0]
@@ -48,5 +48,3 @@ if __name__ == '__main__':
         txt = open("../video_output/csv_list_18.txt", 'a')
         data = FOLDER_NAME + "output_18.csv\n"
         txt.write(data)
-
-
