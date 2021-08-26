@@ -1005,10 +1005,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     FULLSIZE = 1920, 1080
                     MOD_SIZE = 1600, 640
                     mod_x = x * FULLSIZE[0] / MOD_SIZE[0] - (FULLSIZE[0] - MOD_SIZE[0]) / 2
-                    mod_x = max(0, mod_x);
+                    mod_x = max(0, mod_x)
                     mod_x = min(FULLSIZE[0], mod_x)
                     mod_y = y * FULLSIZE[1] / MOD_SIZE[1] - (FULLSIZE[1] - MOD_SIZE[1]) / 2
-                    mod_y = max(0, mod_y);
+                    mod_y = max(0, mod_y)
                     mod_y = min(FULLSIZE[1], mod_y)
                     # print(mod_x, mod_y)
                     # 모니터 수, 화면 갯수별로 다르게 Return 해야함
