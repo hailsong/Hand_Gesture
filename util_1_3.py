@@ -56,8 +56,8 @@ gesture_int = 0
 
 USE_TENSORFLOW = True
 USE_DYNAMIC = True
-# 왼손잡이 모드 개발 중
-REVERSE_MODE = False
+
+LEFT = True
 
 import json
 
@@ -66,6 +66,7 @@ with open('setting.json', encoding='UTF8') as json_file:
 
 language_setting = json_data["LANGUAGE"]
 DARK_MODE = True if json_data["DARK_MODE"] == "True" else False
+LEFT = True if json_data["LEFT"] == "True" else False
 
 MOUSE_USE = False
 CLICK_USE = False
@@ -1012,7 +1013,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     mod_y = min(FULLSIZE[1], mod_y)
                     # print(mod_x, mod_y)
                     # 모니터 수, 화면 갯수별로 다르게 Return 해야함
-                    return int(mod_x) - 1919, int(mod_y)
+                    res = int(mod_x) - 1919, int(mod_y)
+                    if LEFT:
+                        res2 = (int(1920 - mod_x) - 1919), int(mod_y)
+                        return res2
+                    return res
 
                 def mousemove(self, now_click, now_click2):
                     if now_click == True:
@@ -1204,7 +1209,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             global straight_line
             global rectangular
             global circle
-            global REVERSE_MODE
+
             global laser_num, laser_state
 
             # TODO 변화량 모니터링
@@ -1234,7 +1239,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                 # Flip the image horizontally for a later selfie-view display, and convert
                 # the BGR image to RGB.
-                image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
+                if not LEFT :
+                    image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
+                else:
+                    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
 
                 image.flags.writeable = False
                 results = hands.process(image)
@@ -1261,14 +1270,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         LR_idx = results.multi_handedness[i].classification[0].label
                         # LR_idx = LR_idx[:-1]
                         # print(LR_idx)
-                        image = cv2.putText(image, LR_idx[:], (
-                            int(mark_p_list[i][17].x * image.shape[1]), int(mark_p_list[i][17].y * image.shape[0])),
-                                            cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
-                        if REVERSE_MODE == True:
-                            if len(LR_idx) == 4:
-                                LR_idx = 'Right'
-                            elif len(LR_idx) == 5:
-                                LR_idx = 'Left'
+                        if LR_idx[0] == 'R':
+                            image = cv2.putText(image, 'V', (
+                                int(mark_p_list[i][17].x * image.shape[1]), int(mark_p_list[i][17].y * image.shape[0])),
+                                                cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
+
 
                         mark_p_list[i].append(LR_idx)
 
@@ -1455,9 +1461,12 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 FPS = round(1 / (time.time() - before_time), 2)
 
                 before_time = time.time()
-                image = cv2.putText(image, str(FPS), (10, 30), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 0), 2, cv2.LINE_AA)
+
                 image = cv2.resize(image, (811, 608))
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                if LEFT:
+                    image = cv2.flip(image, 1)
+                image = cv2.putText(image, str(FPS), (10, 30), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 0), 2, cv2.LINE_AA)
 
                 self.change_pixmap_signal.emit(image)
                 if cv2.waitKey(5) & 0xFF == 27:
@@ -1474,8 +1483,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.setWindowIcon((QtGui.QIcon('icon1.png')))
             global language_setting
             Dialog.setObjectName("Setting")
-            Dialog.resize(600, 400)
-            Dialog.setFixedSize(600, 400)
+            Dialog.resize(600, 485)
+            Dialog.setFixedSize(600, 485)
             Dialog.setWindowOpacity(0.85)
             if not DARK_MODE: Dialog.setStyleSheet("background-color : rgb(238, 239, 241);");
             else: Dialog.setStyleSheet("background-color : rgb(42, 46, 57);");
@@ -1485,7 +1494,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             Dialog.setWindowIcon(icon)
 
             self.pushButton_ok = QtWidgets.QPushButton(Dialog)
-            self.pushButton_ok.setGeometry(QtCore.QRect(30, 271, 261, 100))
+            self.pushButton_ok.setGeometry(QtCore.QRect(30, 356, 261, 100))
             self.pushButton_ok.setStyleSheet(
                 '''
                 QPushButton{
@@ -1509,7 +1518,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_ok.clicked.connect(self.getComboBoxItem)
 
             self.pushButton_cancel = QtWidgets.QPushButton(Dialog)
-            self.pushButton_cancel.setGeometry(QtCore.QRect(310, 271, 261, 100))
+            self.pushButton_cancel.setGeometry(QtCore.QRect(310, 356, 261, 100))
             self.pushButton_cancel.setStyleSheet(
                 '''
                 QPushButton{
@@ -1568,6 +1577,22 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             else:
                 self.comboBox2.setStyleSheet("color : rgb(248, 249, 251);")
 
+            global LEFT
+            self.comboBox3 = QtWidgets.QComboBox(Dialog)
+            self.comboBox3.setGeometry(QtCore.QRect(140, 265, 321, 41))
+            self.comboBox3.setObjectName("comboBox3")
+            self.comboBox3.setFont(font2)
+            if LEFT:
+                self.comboBox3.addItem("왼손 모드 (Left-hand Mode)")
+                self.comboBox3.addItem("오른손 모드 (Right-hand Mode)")
+            else:
+                self.comboBox3.addItem("오른손 모드 (Right-hand Mode)")
+                self.comboBox3.addItem("왼손 모드 (Left-hand Mode)")
+            if not DARK_MODE:
+                self.comboBox3.setStyleSheet("color : rgb(32, 36, 47);")
+            else:
+                self.comboBox3.setStyleSheet("color : rgb(248, 249, 251);")
+
             self.label = QtWidgets.QLabel(Dialog)
             self.label.setGeometry(QtCore.QRect(95, 37, 450, 31))
             self.label.setFont(font)
@@ -1588,17 +1613,20 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         def getComboBoxItem(self):
             global language_setting
             global DARK_MODE
+            global LEFT
             language = self.comboBox.currentText()
             theme = self.comboBox2.currentText()
+            leftright_setting = self.comboBox3.currentText()
             # print(crnttxt)
             # if (theme == 'Dark Mode') != DARK_MODE:
             #     DARK_MODE = (theme == 'Dark Mode')
             #     # ui.setupTheme(ui, theme)
-            if language != language_setting or (theme == '다크 모드 (Dark Mode)') != DARK_MODE:
+            if language != language_setting or (theme == '다크 모드 (Dark Mode)') != DARK_MODE or ((leftright_setting == "왼손 모드 (Left-hand Mode)") != LEFT):
                 DARK_MODE = (theme == '다크 모드 (Dark Mode)')
                 language_setting = language
+                LEFT = (leftright_setting == "왼손 모드 (Left-hand Mode)")
                 # print("Set Language : ", crnttxt)
-                ui.setupLanguage(ui, language, DARK_MODE)
+                ui.setupLanguage(ui, language, DARK_MODE, LEFT)
 
     class Exit_window(QtWidgets.QDialog):
         def setupUi(self, Dialog):
@@ -2185,12 +2213,12 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # thread_load
             # self.thread_load = Load()
-            ui.setupLanguage(ui, language_setting, DARK_MODE)
+            ui.setupLanguage(ui, language_setting, DARK_MODE, LEFT)
 
             self.retranslateUi(Form)
             QtCore.QMetaObject.connectSlotsByName(Form)
 
-        def setupLanguage(self, Form, language, DARK_MODE):
+        def setupLanguage(self, Form, language, DARK_MODE, left):
             print('setupLanguage')
             global language_setting
             # global DARK_MODE
@@ -2623,6 +2651,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 new_data = json_data
             new_data['DARK_MODE'] = str(DARK_MODE)
             new_data['LANGUAGE'] = language
+            new_data['LEFT'] = left
             print(new_data)
             with open('setting.json', 'w', encoding='UTF8') as json_file:
                 json.dump(new_data, json_file, indent="\t")
