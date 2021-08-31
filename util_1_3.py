@@ -1906,7 +1906,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 QPushButton:hover{image:url(./Image/icon/setting_hover.png); border:0px;}
                 ''')
             self.pushButton_8.setObjectName("pushButton_8")
-            self.pushButton_8.clicked.connect(self.settingwindow)
+            self.pushButton_8.clicked.connect(self.settingWindow)
 
             # Button 9 : inbody website
             self.pushButton_9 = QtWidgets.QPushButton(Form)
@@ -1915,7 +1915,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 '''
                 QPushButton{image:url(./image/inbody.png); border:0px;}
                 QPushButton:hover{image:url(./image/inbody_hover.png); border:0px;}
-
                 ''')
 
             self.pushButton_9.setObjectName("pushButton_9")
@@ -2851,7 +2850,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     ui_load.close()
                     ui_load.status = 0
 
-        def settingwindow(self):
+        def settingWindow(self):
             dlg = Setting_window()
             dlg.setupUi(dlg)
             dlg.exec_()
