@@ -31,9 +31,9 @@ import os
 '''
 
 
-physical_devices = tf.config.list_physical_devices('GPU')
+# physical_devices = tf.config.list_physical_devices('GPU')
 # print(physical_devices)
-tf.config.experimental.set_memory_growth(physical_devices[0], True)
+# tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 # For webcam input:
 # hands = mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5)
@@ -625,55 +625,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     :param array_for_static_r: static gesture 판별하는 process 와 공유할 오른손 input data
     :param value_for_static_r: static gesture 판별하는 process 와 공유할 오른손 output data
     :return:
-    '''
-    '''
-    S (SRP : Single Responsibility Principle)
-    한 클래스는 하나의 책임만 가져야 한다.
-    
-    O (OCP : Open/Closed Principle)
-    확장에는 열려(Open) 있으나, 변경에는 닫혀(Closed)있어야 한다.
-    
-    L (LSP : Liskov’s Substitution Principle)
-    프로그램의 객체는 프로그램의 정확성을 깨뜨리지 않으면서 하위 타입의 인스턴스로 바꿀 수 있어야 한다.
-    
-    I (ISP : Interface Segregation Principle)
-    특정 클라이언트를 위한 인터페이스 여러 개가 범용 인터페이스 하나보다 낫다.
-    
-    D (DIP : Dependency Inversion Principle)
-    추상화에 의존한다. 구체화에 의존하면 안된다.
-    
-    Single Responsibility Principle : 한 클래스는 하나의 책임만 진다.
-    Open/Close Principle : 확장에는 열려있고 변경에는 닫혀있어야 한다. 
-    Liskov's Substitution Principle : 어떤 자료형이 다른 자료형의 하위형이라면 상위형 객체를 하위형 객체로 치환 가능
-    Interface Segregation Principle : 객체를 위한 통합 인터페이스보다 여러 인터페이스로 분리하는게 낫다 (사용하지 않는 메서드에 의존하면 안된다.
-    Dependency Inversion Principle : 상위 모듈은 하위 모듈에 의존하면 안되고 모두 추상화에 의존해야한다. 세부사항이 추상화에 의존해야 한다.
-    
-    추상화, 캡슐화, 상속, 다형성
-    
-    RESTful API : REST 아키텍처의 제약 조건을 준수하는 애플리케이션 프로그래밍 인터페이스
-    REST(REpresentational State Transfer)ful API는 HTTP 통신에서 어떤 차원에 대한 CRUD 요청을 Resource와 Method로 표현하여 특정한 형태로 전달하는 방식입니다. RESTful API는 아래와 같은 것들로 구성됩니다.
-    
-    Resource(자원, URI)
-    Method(요청 방식, GET or POST 등)
-    Representation of Resource(자원의 형태, JSON or XML 등)
-     
-    
-    함수형 프로그래밍
-    외부 값을 수정하거나 SIDE Effect 등의 부수 효과가 없는 순수 함수를 1급 객체로 간주하여 파라미터로 넘기거나 반환값으로 사용할 수 있으며, 참조 투명성을 지킬 수 있다.
-    1급 객체는 변수나 데이터 구조 안에 담을 수 있고 파라미터로 전달할 수 있고 반환값으로 사용할 수 있고 할당한 이름과 무관하게 고유한 구별이 가능
-    참조 투명성은 동일한 인자에 대해 동일한 결과 반환, 기존의 값을 변경하지 않고 유지. Immutable Data
-     
-    
-     
-    
-    메모리 구조
-    (낮은 주소)
-    코드 영역 (프로그램의 코드)
-    데이터 영역 (전역/정적 변수)
-    힙 영역 (런 타임에 크기가 결정됨, 프로그래머가 직접 관리할 수 있는데 이를 동적 할당이라고 부른다. 낮->높)
-    스택 영역 (컴파일 타임에 크기가 결정됨. 함수의 호출과 함께 할당되며 지역/매개 변수가 저장되는 영역. 스택영역 함수 호출 정보를 스택프레임이라 부르고 호출이 완료되면 소멸. 높->낮)
-    (높은 주소)
-
     '''
 
     global MOUSE_USE
@@ -1829,7 +1780,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.label.setFont(font)
 
 
-
             # self.label.setStyleSheet("image:url(./Image/logo.png)")
             # self.label.setObjectName("label")
 
@@ -1957,6 +1907,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 self.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame_dark.png"))
             else:
                 self.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame.png"))
+
 
             # self.loading = QtWidgets.QLabel(Form)
             # self.loading.setGeometry(QtCore.QRect(405, 304, 300, 500))
@@ -2206,6 +2157,13 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # self.power_off_signal.connect(self.thread.send_img)
             self.thread.change_pixmap_signal.connect(self.update_img)
             self.thread.mode_signal.connect(self.push_button)
+
+            # self.pushButton.setEnabled(False)
+            # self.pushButton_2.setEnabled(False)
+            # self.pushButton_3.setEnabled(False)
+            # self.pushButton_4.setEnabled(False)
+            # self.pushButton_7.setEnabled(False)
+            # self.button6_checked.emit(False)
 
             self.thread.start()
 
@@ -2676,6 +2634,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             font = QtGui.QFont()
             font.setFamily("서울남산 장체B")
             font.setPointSize(22)
+
             msgBox.setFont(font)
             msgBox.setText("프로그램을 종료하시겠습니까?")
             msgBox.setWindowTitle("Exit?")
