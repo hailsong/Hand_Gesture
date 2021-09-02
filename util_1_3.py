@@ -1671,6 +1671,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             system("taskkill /f /im ZoomIt64.exe")
             system("taskkill /f /im ZoomIt.exe")
             system("taskkill /f /im Motion-Presentation.exe")
+            os.system('''open_survey.bat''')
             sys.exit()
 
     class Grabber(QtWidgets.QMainWindow):
@@ -2254,6 +2255,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             background-color: rgb(0, 217, 104); border-radius: 30px;
                         }
                         ''')
+
                     self.pushButton_3.setStyleSheet(
                         '''
                         QPushButton{image:url(./image/KOR/3-1.png); border:0px;}
