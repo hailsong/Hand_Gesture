@@ -42,7 +42,7 @@ x_size, y_size = pyautogui.size().width, pyautogui.size().height
 
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
-mp_face_detection = mp.solutions.face_detection
+# mp_face_detection = mp.solutions.face_detection
 # mp_pose = mp.solutions.pose
 
 # now_click = False
@@ -1672,6 +1672,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             system("taskkill /f /im ZoomIt.exe")
             system("taskkill /f /im Motion-Presentation.exe")
             os.system('''open_survey.bat''')
+
             sys.exit()
 
     class Grabber(QtWidgets.QMainWindow):
@@ -2886,6 +2887,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
     # ui.MainWindow.show()
     sys.exit(app.exec_())
+    sys.exit(ui.exec_())
 
 
 if __name__ == '__main__':
