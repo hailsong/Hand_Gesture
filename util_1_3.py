@@ -415,7 +415,6 @@ class Gesture_mode:
         self.right_palm_vector = [[0.] * 3] * self.QUEUE_SIZE
         self.left_finger_vector = [[0.] * 3] * self.QUEUE_SIZE
         self.right_finger_vector = [[0.] * 3] * self.QUEUE_SIZE
-        self.right_finger_vector = [[0.] * 3] * self.QUEUE_SIZE
 
     def __str__(self):
         """
@@ -1190,81 +1189,143 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 plt.rcParams['axes.grid'] = True
                 plt.rcParams["figure.figsize"] = (10, 4)
 
-                ax = plt.subplot(211, xlim=(0, 50), ylim=(-1, 1))
-                ax_2 = plt.subplot(212, xlim=(0, 50), ylim=(-1, 1))
+                leftPalmSubplot = plt.subplot(221, xlim=(0, 50), ylim=(-1, 1))
+                leftFingerSubplot = plt.subplot(223, xlim=(0, 50), ylim=(-1, 1))
+                rightPalmSubplot = plt.subplot(222, xlim=(0, 50), ylim=(-1, 1))
+                rightFingerSubplot = plt.subplot(224, xlim=(0, 50), ylim=(-1, 1))
 
                 plt.subplots_adjust(left=0.125, bottom=0.1, right=0.9, top=0.9, wspace=0.2, hspace=0.6)
 
-                ax.set_title('Palm Vector')
-                ax_2.set_title('Finger Vector')
-                ax.set_xlabel('time')
-                ax.set_ylabel('value')
-                ax_2.set_xlabel('time')
-                ax_2.set_ylabel('value')
-
-
+                leftPalmSubplot.set_title('Left Palm Vector')
+                leftFingerSubplot.set_title('Left Finger Vector')
+                leftPalmSubplot.set_xlabel('time')
+                leftPalmSubplot.set_ylabel('value')
+                leftFingerSubplot.set_xlabel('time')
+                leftFingerSubplot.set_ylabel('value')
+                rightPalmSubplot.set_title('Right Palm Vector')
+                rightFingerSubplot.set_title('Right Finger Vector')
+                rightPalmSubplot.set_xlabel('time')
+                rightPalmSubplot.set_ylabel('value')
+                rightFingerSubplot.set_xlabel('time')
+                rightFingerSubplot.set_ylabel('value')
 
                 max_points = 50
-                max_points_2 = 50
 
-                line, = ax.plot(np.arange(max_points),
+                lineLP, = leftPalmSubplot.plot(np.arange(max_points),
                                 np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='blue', ms=1)
-                line2, = ax.plot(np.arange(max_points),
+                lineLP2, = leftPalmSubplot.plot(np.arange(max_points),
                                 np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='red', ms=1)
-                line3, = ax.plot(np.arange(max_points),
+                lineLP3, = leftPalmSubplot.plot(np.arange(max_points),
                                 np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='green', ms=1)
-                line_, = ax_2.plot(np.arange(max_points),
+                lineLF, = leftFingerSubplot.plot(np.arange(max_points),
                                 np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='blue', ms=1)
-                line_2, = ax_2.plot(np.arange(max_points),
+                lineLF2, = leftFingerSubplot.plot(np.arange(max_points),
                                 np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='red', ms=1)
-                line_3, = ax_2.plot(np.arange(max_points),
+                lineLF3, = leftFingerSubplot.plot(np.arange(max_points),
+                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='green', ms=1)
+                lineRP, = rightPalmSubplot.plot(np.arange(max_points),
+                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='blue', ms=1)
+                lineRP2, = rightPalmSubplot.plot(np.arange(max_points),
+                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='red', ms=1)
+                lineRP3, = rightPalmSubplot.plot(np.arange(max_points),
+                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='green', ms=1)
+                lineRF, = rightFingerSubplot.plot(np.arange(max_points),
+                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='blue', ms=1)
+                lineRF2, = rightFingerSubplot.plot(np.arange(max_points),
+                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='red', ms=1)
+                lineRF3, = rightFingerSubplot.plot(np.arange(max_points),
                                 np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='green', ms=1)
 
-                def init():
-                    return line, line2, line3
+                def initLP():
+                    return lineLP, lineLP2, lineLP3
 
-                def init_2():
-                    return line_, line_2, line_3
+                def initLF():
+                    return lineLF, lineLF2, lineLF3
 
-                def animate(i):
-                    y = HM.palm_vector[0]
-                    old_y = line.get_ydata()
+                def initRP():
+                    return lineRP, lineRP2, lineRP3
+
+                def initRF():
+                    return lineRF, lineRF2, lineRF3
+
+                def animateLP(i):
+                    y = gesture_mode.left_palm_vector[-1][0]
+                    old_y = lineLP.get_ydata()
                     new_y = np.r_[old_y[1:], y]
-                    line.set_ydata(new_y)
+                    lineLP.set_ydata(new_y)
 
-                    y2 = HM.palm_vector[1]
-                    old_y2 = line2.get_ydata()
+                    y2 = gesture_mode.left_palm_vector[-1][1]
+                    old_y2 = lineLP2.get_ydata()
                     new_y2 = np.r_[old_y2[1:], y2]
-                    line2.set_ydata(new_y2)
+                    lineLP2.set_ydata(new_y2)
 
-                    y3 = HM.palm_vector[2]
-                    old_y3 = line3.get_ydata()
+                    y3 = gesture_mode.left_palm_vector[-1][2]
+                    old_y3 = lineLP3.get_ydata()
                     new_y3 = np.r_[old_y3[1:], y3]
-                    line3.set_ydata(new_y3)
+                    lineLP3.set_ydata(new_y3)
                     # print(new_y)
-                    return line, line2, line3
+                    return lineLP, lineLP2, lineLP3
 
-                def animate_2(i):
-                    y = HM.finger_vector[0]
-                    old_y = line_.get_ydata()
+                def animateLF(i):
+                    y = gesture_mode.left_finger_vector[-1][0]
+                    old_y = lineLF.get_ydata()
                     new_y = np.r_[old_y[1:], y]
-                    line_.set_ydata(new_y)
+                    lineLF.set_ydata(new_y)
 
-                    y2 = HM.finger_vector[1]
-                    old_y2 = line_2.get_ydata()
+                    y2 = gesture_mode.left_finger_vector[-1][1]
+                    old_y2 = lineLF2.get_ydata()
                     new_y2 = np.r_[old_y2[1:], y2]
-                    line_2.set_ydata(new_y2)
+                    lineLF2.set_ydata(new_y2)
 
-                    y3 = HM.finger_vector[2]
-                    old_y3 = line_3.get_ydata()
+                    y3 = gesture_mode.left_finger_vector[-1][2]
+                    old_y3 = lineLF3.get_ydata()
                     new_y3 = np.r_[old_y3[1:], y3]
-                    line_3.set_ydata(new_y3)
+                    lineLF3.set_ydata(new_y3)
                     # print(new_y)
-                    return line_, line_2, line_3
+                    return lineLF, lineLF2, lineLF3
 
-                anim = animation.FuncAnimation(fig, animate, init_func=init, frames=200, interval=50, blit=False)
-                anim_2 = animation.FuncAnimation(fig, animate_2, init_func=init_2, frames=200, interval=50, blit=False)
-                plt.legend([line, line2, line3], ["X", "Y", "Z"], loc="lower left")
+                def animateRP(i):
+                    y = gesture_mode.right_palm_vector[-1][0]
+                    old_y = lineRP.get_ydata()
+                    new_y = np.r_[old_y[1:], y]
+                    lineRP.set_ydata(new_y)
+
+                    y2 = gesture_mode.right_palm_vector[-1][1]
+                    old_y2 = lineRP2.get_ydata()
+                    new_y2 = np.r_[old_y2[1:], y2]
+                    lineRP2.set_ydata(new_y2)
+
+                    y3 = gesture_mode.right_palm_vector[-1][2]
+                    old_y3 = lineRP3.get_ydata()
+                    new_y3 = np.r_[old_y3[1:], y3]
+                    lineRP3.set_ydata(new_y3)
+                    # print(new_y)
+                    return lineRP, lineRP2, lineRP3
+
+                def animateRF(i):
+                    y = gesture_mode.right_finger_vector[-1][0]
+                    old_y = lineRF.get_ydata()
+                    new_y = np.r_[old_y[1:], y]
+                    lineRF.set_ydata(new_y)
+
+                    y2 = gesture_mode.right_finger_vector[-1][1]
+                    old_y2 = lineRF2.get_ydata()
+                    new_y2 = np.r_[old_y2[1:], y2]
+                    lineRF2.set_ydata(new_y2)
+
+                    y3 = gesture_mode.right_finger_vector[-1][2]
+                    old_y3 = lineRF3.get_ydata()
+                    new_y3 = np.r_[old_y3[1:], y3]
+                    lineRF3.set_ydata(new_y3)
+                    # print(new_y)
+                    return lineRF, lineRF2, lineRF3
+
+                animLP = animation.FuncAnimation(fig, animateLP, init_func=initLP, frames=200, interval=50, blit=False)
+                animLF = animation.FuncAnimation(fig, animateLF, init_func=initLF, frames=200, interval=50, blit=False)
+                animRP = animation.FuncAnimation(fig, animateRP, init_func=initRP, frames=200, interval=50, blit=False)
+                animRF = animation.FuncAnimation(fig, animateRF, init_func=initRF, frames=200, interval=50, blit=False)
+
+                plt.legend([lineLP, lineLP2, lineLP3], ["X", "Y", "Z"], loc="lower left")
                 plt.show()
 
             if not cap.isOpened():
