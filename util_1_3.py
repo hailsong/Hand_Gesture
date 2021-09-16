@@ -12,6 +12,9 @@ from os import system
 
 import tensorflow as tf
 
+from matplotlib import pyplot as plt
+from matplotlib import animation
+
 tf.config.experimental.set_visible_devices([], 'GPU')
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -55,7 +58,7 @@ gesture_int = 0
 
 
 USE_TENSORFLOW = True
-USE_DYNAMIC = True
+# USE_DYNAMIC = True
 
 LEFT = True
 
@@ -74,7 +77,8 @@ WHEEL_USE = False
 DRAG_USE = False
 BOARD_COLOR = 'w'
 
-VISUALIZE_GRAPH = False
+VISUALIZE_GRAPH = True
+EXIT_SURVEY = False
 
 gesture_check = False
 mode_global = 0
@@ -91,8 +95,8 @@ Gesture : 손의 제스처를 판단하기 위한 랜드마크들의 Queue
 
 # TODO 손가락 굽힘 판단, 손바닥 상태, 오른손 왼손 확인
 class Handmark:
-    def __init__(self, mark_p):
-        self._p_list = mark_p
+    def __init__(self):
+        # self._p_list = mark_p
         self.finger_state = [0 for _ in range(5)]
         self.palm_vector = np.array([0., 0., 0.])
         self.finger_vector = np.array([0., 0., 0.])
@@ -1163,9 +1167,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             global laser_num, laser_state
 
-            # TODO 변화량 모니터링
-            from matplotlib import pyplot as plt
-            from matplotlib import animation
+
 
             print('loaded')
 
@@ -1175,6 +1177,95 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             now_click = False
             now_click2 = False
+
+
+            HM = Handmark()
+
+            import random
+
+            if VISUALIZE_GRAPH:
+                fig = plt.figure(figsize=(10, 6))  # figure(도표) 생성
+                fig.canvas.set_window_title('Hand Vector Visualization Ver 1')
+
+                plt.rcParams['axes.grid'] = True
+                plt.rcParams["figure.figsize"] = (10, 4)
+
+                ax = plt.subplot(211, xlim=(0, 50), ylim=(-1, 1))
+                ax_2 = plt.subplot(212, xlim=(0, 50), ylim=(-1, 1))
+
+                plt.subplots_adjust(left=0.125, bottom=0.1, right=0.9, top=0.9, wspace=0.2, hspace=0.6)
+
+                ax.set_title('Palm Vector')
+                ax_2.set_title('Finger Vector')
+                ax.set_xlabel('time')
+                ax.set_ylabel('value')
+                ax_2.set_xlabel('time')
+                ax_2.set_ylabel('value')
+
+
+
+                max_points = 50
+                max_points_2 = 50
+
+                line, = ax.plot(np.arange(max_points),
+                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='blue', ms=1)
+                line2, = ax.plot(np.arange(max_points),
+                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='red', ms=1)
+                line3, = ax.plot(np.arange(max_points),
+                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='green', ms=1)
+                line_, = ax_2.plot(np.arange(max_points),
+                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='blue', ms=1)
+                line_2, = ax_2.plot(np.arange(max_points),
+                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='red', ms=1)
+                line_3, = ax_2.plot(np.arange(max_points),
+                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='green', ms=1)
+
+                def init():
+                    return line, line2, line3
+
+                def init_2():
+                    return line_, line_2, line_3
+
+                def animate(i):
+                    y = HM.palm_vector[0]
+                    old_y = line.get_ydata()
+                    new_y = np.r_[old_y[1:], y]
+                    line.set_ydata(new_y)
+
+                    y2 = HM.palm_vector[1]
+                    old_y2 = line2.get_ydata()
+                    new_y2 = np.r_[old_y2[1:], y2]
+                    line2.set_ydata(new_y2)
+
+                    y3 = HM.palm_vector[2]
+                    old_y3 = line3.get_ydata()
+                    new_y3 = np.r_[old_y3[1:], y3]
+                    line3.set_ydata(new_y3)
+                    # print(new_y)
+                    return line, line2, line3
+
+                def animate_2(i):
+                    y = HM.finger_vector[0]
+                    old_y = line_.get_ydata()
+                    new_y = np.r_[old_y[1:], y]
+                    line_.set_ydata(new_y)
+
+                    y2 = HM.finger_vector[1]
+                    old_y2 = line_2.get_ydata()
+                    new_y2 = np.r_[old_y2[1:], y2]
+                    line_2.set_ydata(new_y2)
+
+                    y3 = HM.finger_vector[2]
+                    old_y3 = line_3.get_ydata()
+                    new_y3 = np.r_[old_y3[1:], y3]
+                    line_3.set_ydata(new_y3)
+                    # print(new_y)
+                    return line_, line_2, line_3
+
+                anim = animation.FuncAnimation(fig, animate, init_func=init, frames=200, interval=50, blit=False)
+                anim_2 = animation.FuncAnimation(fig, animate_2, init_func=init_2, frames=200, interval=50, blit=False)
+                plt.legend([line, line2, line3], ["X", "Y", "Z"], loc="lower left")
+                plt.show()
 
             if not cap.isOpened():
                 raise IOError
@@ -1235,7 +1326,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         # print(mark_p[-1], " / ", mark_p[0])
 
                         if len(mark_p) == 22 and hm_idx == False:
-                            HM = Handmark(mark_p)
+                            HM.p_list = mark_p
                             hm_idx = True
                         # print(HM.p_list[-1])
                         # palm_vector 저장
@@ -1671,7 +1762,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             system("taskkill /f /im ZoomIt64.exe")
             system("taskkill /f /im ZoomIt.exe")
             system("taskkill /f /im Motion-Presentation.exe")
-            os.system('''open_survey.bat''')
+
+            if EXIT_SURVEY:
+                os.system('''open_survey.bat''')
 
             sys.exit()
 
