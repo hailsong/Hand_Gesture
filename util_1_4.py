@@ -77,7 +77,7 @@ WHEEL_USE = False
 DRAG_USE = False
 BOARD_COLOR = 'w'
 
-VISUALIZE_GRAPH = True
+VISUALIZE_GRAPH = False
 EXIT_SURVEY = False
 
 gesture_check = False
@@ -1567,7 +1567,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                 before_time = time.time()
 
-                image = cv2.resize(image, (811, 608))
+                image = cv2.resize(image, (577, 433))
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
                 if LEFT:
                     image = cv2.flip(image, 1)
@@ -1843,6 +1843,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.setGeometry(0, 0, 1920, 1080)
 
             self.setWindowIcon((QtGui.QIcon('icon1.png')))
+
             # ensure that the widget always stays on top, no matter what
             self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
             layout = QtWidgets.QVBoxLayout()
@@ -1927,14 +1928,14 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             ui_load.close()
 
             self.label = QtWidgets.QLabel('Motion Presentation', Form)
-            self.label.setGeometry(QtCore.QRect(278, 69, 300, 48))
+            self.label.setGeometry(QtCore.QRect(198, 49, 213, 34)) #
 
             if not DARK_MODE: self.label.setStyleSheet("color : rgb(32, 36, 47);");
             else: self.label.setStyleSheet("color : rgb(248, 249, 251);");
 
             font = QtGui.QFont()
             font.setFamily("서울남산 장체B")
-            font.setPointSize(20)
+            font.setPointSize(14)
             self.label.setFont(font)
 
 
@@ -1961,7 +1962,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # Button 5 : Power
             self.pushButton_5 = QtWidgets.QPushButton(Form)
-            self.pushButton_5.setGeometry(QtCore.QRect(30, 538, 502, 100))
+            self.pushButton_5.setGeometry(QtCore.QRect(21, 383, 357, 71))
             self.pushButton_5.setStyleSheet(
                 '''
                 QPushButton{
@@ -1986,7 +1987,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # Button 6 : Guide Open
             self.pushButton_6 = QtWidgets.QPushButton(Form)
-            self.pushButton_6.setGeometry(QtCore.QRect(547, 538, 502, 100))
+            self.pushButton_6.setGeometry(QtCore.QRect(389, 383, 357, 71))
             self.pushButton_6.setStyleSheet(
                 '''
                 QPushButton{
@@ -2006,7 +2007,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # Button 8 : Language Setting
             self.pushButton_8 = QtWidgets.QPushButton(Form)
-            self.pushButton_8.setGeometry(QtCore.QRect(935, 55, 50, 50))
+            self.pushButton_8.setGeometry(QtCore.QRect(665, 39, 36, 36))
             self.pushButton_8.setStyleSheet("border-radius : 20;")
             self.pushButton_8.setStyleSheet(
                 '''
@@ -2018,7 +2019,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # Button 9 : inbody website
             self.pushButton_9 = QtWidgets.QPushButton(Form)
-            self.pushButton_9.setGeometry(QtCore.QRect(30, 50, 230, 60))
+            self.pushButton_9.setGeometry(QtCore.QRect(21, 36, 164, 43))
             self.pushButton_9.setStyleSheet(
                 '''
                 QPushButton{image:url(./image/inbody.png); border:0px;}
@@ -2031,7 +2032,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # Button 10 : Exit Button
             self.pushButton_10 = QtWidgets.QPushButton(Form)
-            self.pushButton_10.setGeometry(QtCore.QRect(1000, 55, 50, 50))
+            self.pushButton_10.setGeometry(QtCore.QRect(711, 39, 36, 36))
             self.pushButton_10.setStyleSheet("border-radius : 20;")
             self.pushButton_10.setStyleSheet(
                 '''
@@ -2043,7 +2044,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # 카메라 모니터링
             self.frame = QtWidgets.QFrame(Form)
-            self.frame.setGeometry(QtCore.QRect(1079, 30, 811, 608))
+            self.frame.setGeometry(QtCore.QRect(768, 21, 577, 433))
             self.frame.setAutoFillBackground(False)
             self.frame.setStyleSheet("background-color : rgba(0, 0, 0, 0%); border-radius: 30px;")
             self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -2051,20 +2052,20 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.frame.setObjectName("frame")
 
             self.label_6 = QtWidgets.QLabel(self.frame)
-            self.label_6.setGeometry(QtCore.QRect(0, 0, 811, 608))
+            self.label_6.setGeometry(QtCore.QRect(0, 0, 577, 433))
             self.label_6.setStyleSheet(
-                "background-color : white; border-radius: 30px; background: url(./image/default.jpg)", )
+                "background-color : white; border-radius: 30px; background: url(./image/default_1366.jpg)", )
             self.label_6.setObjectName("label_6")
-            self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
+            self.label_6.setPixmap(QtGui.QPixmap("./image/default_1366.jpg"))
 
             self.cam_frame = QtWidgets.QLabel(self.frame)
-            self.cam_frame.setGeometry(QtCore.QRect(0, 0, 811, 608))
+            self.cam_frame.setGeometry(QtCore.QRect(0, 0, 577, 433))
             self.cam_frame.setStyleSheet("background-color : rgba(0,0,0,0%);")
             self.cam_frame.setObjectName("cam_frame")
             if DARK_MODE:
-                self.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame_dark.png"))
+                self.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame_dark_1366.png"))
             else:
-                self.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame.png"))
+                self.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame_1366.png"))
 
 
             # self.loading = QtWidgets.QLabel(Form)
@@ -2072,11 +2073,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # self.loading.setStyleSheet("background-color : rgba(0,0,0,0%);")
             # self.loading.setObjectName("loading")
 
-            self.script_frame = QtWidgets.QLabel(Form)
-            self.script_frame.setGeometry(QtCore.QRect(30, 668, 100, 100))  # 1860, 350))
-            self.script_frame.setStyleSheet("background-color : rgba(0,250,255,50%);")
-            self.script_frame.setObjectName("script_frame")
-            self.script_frame.setPixmap(QtGui.QPixmap("./image/script_frame.png"))
+            # self.script_frame = QtWidgets.QLabel(Form)
+            # self.script_frame.setGeometry(QtCore.QRect(30, 668, 100, 100))  # 1860, 350))
+            # self.script_frame.setStyleSheet("background-color : rgba(0,250,255,50%);")
+            # self.script_frame.setObjectName("script_frame")
+            # self.script_frame.setPixmap(QtGui.QPixmap("./image/script_frame.png"))
 
             self.pushButton_7 = QtWidgets.QPushButton(self.frame)
             self.pushButton_7.setGeometry(QtCore.QRect(610, 540, 200, 60))
@@ -2093,7 +2094,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # 모드제어 프레임
             self.frame_mode = QtWidgets.QFrame(Form)
-            self.frame_mode.setGeometry(QtCore.QRect(30, 188, 1019, 320))
+            self.frame_mode.setGeometry(QtCore.QRect(21, 134, 725, 228))
             self.frame_mode.setAutoFillBackground(False)
             self.frame_mode.setStyleSheet("background-color : rgba(0, 0, 0, 0%)")
             self.frame_mode.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -2101,7 +2102,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.frame_mode.setObjectName("frame_mode")
 
             self.pushButton = QtWidgets.QPushButton(self.frame_mode)
-            self.pushButton.setGeometry(QtCore.QRect(0, 0, 244, 325))
+            self.pushButton.setGeometry(QtCore.QRect(0, 0, 174, 228))
             self.pushButton.setStyleSheet("background-color : #FFFFFF;")
 
 
@@ -2151,7 +2152,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # self.pushButton.setObjectName("pushButton_image")
 
             self.pushButton_2 = QtWidgets.QPushButton(self.frame_mode)
-            self.pushButton_2.setGeometry(QtCore.QRect(259, 0, 244, 325))
+            self.pushButton_2.setGeometry(QtCore.QRect(184, 0, 174, 228))
             self.pushButton_2.setStyleSheet("background-color : #FFFFFF;")
             if DARK_MODE:
                 self.pushButton_2.setStyleSheet(
@@ -2186,7 +2187,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_2.setObjectName("pushButton_2")
             self.pushButton_2.setCheckable(True)
             self.pushButton_3 = QtWidgets.QPushButton(self.frame_mode)
-            self.pushButton_3.setGeometry(QtCore.QRect(518, 0, 244, 325))
+            self.pushButton_3.setGeometry(QtCore.QRect(369, 0, 174, 228))
             if DARK_MODE:
                 self.pushButton_3.setStyleSheet(
                     '''
@@ -2220,7 +2221,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_3.setCheckable(True)
             self.pushButton_3.setObjectName("pushButton_3")
             self.pushButton_4 = QtWidgets.QPushButton(self.frame_mode)
-            self.pushButton_4.setGeometry(QtCore.QRect(777, 0, 244, 325))
+            self.pushButton_4.setGeometry(QtCore.QRect(553, 0, 174, 228))
             if DARK_MODE:
                 self.pushButton_4.setStyleSheet(
                     '''
@@ -2343,9 +2344,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             if not DARK_MODE: Form.label.setStyleSheet("color : rgb(32, 36, 47);");
             else: Form.label.setStyleSheet("color : rgb(248, 249, 251);");
             if DARK_MODE:
-                Form.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame_dark.png"))
+                Form.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame_dark_1366.png"))
             else:
-                Form.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame.png"))
+                Form.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame_1366.png"))
             if DARK_MODE:
                 self.pushButton_10.setStyleSheet(
                     '''
@@ -2363,7 +2364,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     QPushButton:hover{image:url(./image/inbody_hover.png); border:0px;}
 
                     ''')
-                self.label_6.setPixmap(QtGui.QPixmap("./image/default_dark.jpg"))
+                self.label_6.setPixmap(QtGui.QPixmap("./image/default_dark_1366.jpg"))
             else:
                 self.pushButton_10.setStyleSheet(
                     '''
@@ -2381,7 +2382,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     QPushButton:hover{image:url(./image/inbody_hover.png); border:0px;}
 
                     ''')
-                self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
+                self.label_6.setPixmap(QtGui.QPixmap("./image/default_1366.jpg"))
             if language == '한국어(Korean)':
                 if not DARK_MODE:
                     self.pushButton.setStyleSheet(
@@ -2774,7 +2775,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
         def retranslateUi(self, Form):
             _translate = QtCore.QCoreApplication.translate
-            Form.setWindowTitle(_translate("Form", "Motion Presentation V 1.2"))
+            Form.setWindowTitle(_translate("Form", "Motion Presentation V 1.4"))
             # self.label_2.setText(_translate("Form", "Presentation Tool"))
             # self.label_3.setText(_translate("Form", "1.2"))
             # 여기다가
@@ -2902,13 +2903,13 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # print(image.size())
             image.save(filename)
 
-        def cvt_qt(self, img, size=(811, 608)):
+        def cvt_qt(self, img, size=(577, 433)):
             # rgb_image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # cv 이미지 파일 rgb 색계열로 바꿔주기
             h, w, ch = img.shape  # image 쉐입 알기
             bytes_per_line = ch * w  # 차원?
             convert_to_Qt_format = QtGui.QImage(img.data, w, h, bytes_per_line,
                                                 QtGui.QImage.Format_RGB888)  # qt 포맷으로 바꾸기
-            p = convert_to_Qt_format.scaled(811, 608, QtCore.Qt.KeepAspectRatio)  # 디스클레이 크기로 바꿔주기.
+            p = convert_to_Qt_format.scaled(577, 433, QtCore.Qt.KeepAspectRatio)  # 디스클레이 크기로 바꿔주기.
 
             return QtGui.QPixmap.fromImage(p)  # 진정한 qt 이미지 생성
 
@@ -2930,9 +2931,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 "background-color : white; border-radius: 50px;" )
             self.label_6.setObjectName("label_6")
             if DARK_MODE:
-                self.label_6.setPixmap(QtGui.QPixmap("./image/default_dark.jpg"))
+                self.label_6.setPixmap(QtGui.QPixmap("./image/default_dark_1366.jpg"))
             else:
-                self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
+                self.label_6.setPixmap(QtGui.QPixmap("./image/default_dark_1366.jpg"))
 
             if self.pushButton_5.isChecked():
                 # image = cv2.imread('./image/testtest.jpg')
@@ -2990,7 +2991,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # print(frameRect)
             # get the grabWidget geometry and remap it to global coordinates
             grabGeometry = self.grabWidget.geometry()
-            grabGeometry = QtCore.QRect(0, 0, 1860, 350)
+            grabGeometry = QtCore.QRect(0, 0, 1323, 249)
             # 30, 668
             grabGeometry.moveTopLeft(self.grabWidget.mapToGlobal(QtCore.QPoint(30, 668)))
 
@@ -3001,8 +3002,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             bottom = frameRect.bottom() - grabGeometry.bottom()
 
             # reset the geometries to get "0-point" rectangles for the mask
-            frameRect.moveTopLeft(QtCore.QPoint(30, 668))
-            grabGeometry.moveTopLeft(QtCore.QPoint(30, 668))
+            frameRect.moveTopLeft(QtCore.QPoint(21, 475))
+            grabGeometry.moveTopLeft(QtCore.QPoint(21, 475))
 
             # create the base mask region, adjusted to the margins between the
             # grabWidget and the window as computed above
@@ -3049,8 +3050,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 if __name__ == '__main__':
     print("This is util set program, it works well... maybe... XD")
 
-    print('Running main_1_3.py...')
+    print('Running main_1_4.py...')
 
     # system('ZoomIt.exe')
 
-    system('python main_1_3.py')
+    system('python main_1_4.py')
