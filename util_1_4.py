@@ -77,7 +77,7 @@ WHEEL_USE = False
 DRAG_USE = False
 BOARD_COLOR = 'w'
 
-VISUALIZE_GRAPH = False
+VISUALIZE_GRAPH = True
 EXIT_SURVEY = False
 
 gesture_check = False
