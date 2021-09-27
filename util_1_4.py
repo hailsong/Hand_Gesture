@@ -527,25 +527,6 @@ def get_angle(l1, l2):
     # return np.arccos(np.dot(l1_, l2_) / (norm(l1) * norm(l2)))
 
 
-def mod_cursor_position(pos: tuple):
-    """
-    :param pos: position data (tuple)
-    :return: modified cursor position x, y (tuple)
-    """
-    x, y = pos[0], pos[1]
-    FULLSIZE = 1920, 1080
-    MOD_SIZE = 1600, 640
-    mod_x = x * FULLSIZE[0] / MOD_SIZE[0] - (FULLSIZE[0] - MOD_SIZE[0]) / 2
-    mod_x = max(0, mod_x);
-    mod_x = min(FULLSIZE[0], mod_x)
-    mod_y = y * FULLSIZE[1] / MOD_SIZE[1] - (FULLSIZE[1] - MOD_SIZE[1]) / 2
-    mod_y = max(0, mod_y);
-    mod_y = min(FULLSIZE[1], mod_y)
-    # print(mod_x, mod_y)
-    # 모니터 수, 화면 갯수별로 다르게 Return 해야함
-    return int(mod_x) - 1919, int(mod_y)
-
-
 def vector_magnitude(one_d_array):
     """
     :param one_d_array: 1D Array
@@ -959,12 +940,16 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     x, y = pos[0], pos[1]
                     FULLSIZE = 1920, 1080
                     MOD_SIZE = 1600, 640
-                    mod_x = x * FULLSIZE[0] / MOD_SIZE[0] - (FULLSIZE[0] - MOD_SIZE[0]) / 2
+                    INPUT_SIZE = 1366, 768
+                    RATIO = FULLSIZE[0] / INPUT_SIZE[0]
+
+                    mod_x = (x * FULLSIZE[0] / MOD_SIZE[0] - (FULLSIZE[0] - MOD_SIZE[0]) / 2) * RATIO
                     mod_x = max(0, mod_x)
                     mod_x = min(FULLSIZE[0], mod_x)
-                    mod_y = y * FULLSIZE[1] / MOD_SIZE[1] - (FULLSIZE[1] - MOD_SIZE[1]) / 2
+                    mod_y = (y * FULLSIZE[1] / MOD_SIZE[1] - (FULLSIZE[1] - MOD_SIZE[1]) / 2) * RATIO
                     mod_y = max(0, mod_y)
                     mod_y = min(FULLSIZE[1], mod_y)
+
                     # print(mod_x, mod_y)
                     # 모니터 수, 화면 갯수별로 다르게 Return 해야함
                     res = int(mod_x) - 1919, int(mod_y)
@@ -974,19 +959,22 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     return res
 
                 def mousemove(self, now_click, now_click2):
-                    if now_click == True:
-                        cv2.circle(image, (int(self.x / 3), int(self.y / 2.25)), 5, (100, 150, 255), -1)
-                    else:
-                        cv2.circle(image, (int(self.x / 3), int(self.y / 2.25)), 5, (255, 255, 0), -1)
 
-                    if now_click2 == True:
-                        cv2.circle(image, (int(self.x / 3), int(self.y / 2.25)), 5, (255, 110, 0), -1)
-                    else:
-                        cv2.circle(image, (int(self.x / 3), int(self.y / 2.25)), 5, (255, 255, 0), -1)
-
-                    # self.x, self.y = convert_offset(self.x, self.y)
                     cursor_position = (int(self.x), int(self.y))
                     m_cursor_position = self.mod_cursor_position(cursor_position)
+
+                    if now_click == True:
+                        cv2.circle(image, (int(self.x * 1.406 / 3), int(self.y * 1.406 / 2.25)), 5, (100, 150, 255), -1)
+                    else:
+                        cv2.circle(image, (int(self.x * 1.406 / 3), int(self.y * 1.406 / 2.25)), 5, (255, 255, 0), -1)
+
+                    if now_click2 == True:
+                        cv2.circle(image, (int(self.x * 1.406 / 3), int(self.y * 1.406 / 2.25)), 5, (255, 110, 0), -1)
+                    else:
+                        cv2.circle(image, (int(self.x * 1.406 / 3), int(self.y * 1.406 / 2.25)), 5, (255, 255, 0), -1)
+
+                    # self.x, self.y = convert_offset(self.x, self.y)
+
                     # print(m_cursor_position)
                     win32api.SetCursorPos(m_cursor_position)
 
