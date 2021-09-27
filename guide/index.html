@@ -1,25 +1,63 @@
 <!doctype html>
 <html>
 <head>
-  <title>WEB - CSS</title>
-  <meta charset="utf-8">
-  <link rel="Stylesheet" href="style.css">
-
+    <title>Motion Presentation Guide</title>
+    <link rel="Stylesheet" href="./style.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
 </head>
 <body>
-  <h1><a href="index.html">WEB</a></h1>
-  <div id="grid">
-    <ol>
-      <li><a href="1.html" class="saw">HTML</a></li>
-      <li><a href="2.html" class="saw" id="active">CSS</a></li>
-      <li><a href="3.html">JavaScript</a></li>
-    </ol>
-    <div class="article">
-      <h2>HOME</h2>
-      <p>
-        This is Web Demo
-      </p>
+
+  <div id="header">
+    <div id="logo">
+      <h1 id="index_logo"><a href="./0/0.html">Motion Presentation Guide ✋</a></h1>
+    </div>
+    <div id="gridmenu">
+      <ul class="myMenu">
+        <li class="menu"><a href="./0/0.html">시작</a></li>
+        <li class="menu"><a href="./1/0.html">화면구성</a></li>
+        <li class="menu">
+            <a>모드</a>
+            <ul class="menu3_s submenu">
+                <li><a href="./2/0.html">모드란?</a></li>
+                <li><a href="./2/1.html">대기 모드</a></li>
+                <li><a href="./2/2.html">발표 모드</a></li>
+                <li><a href="./2/3.html">필기 모드</a></li>
+                <li><a href="./2/4.html">자유 모드</a></li>
+            </ul>
+        </li>
+        <li class="menu">
+          <a>기타</a>
+          <ul class="menu3_s submenu">
+              <li><a href="./3/1.html">화면 캡쳐</a></li>
+              <li><a href="./3/2.html">설정</a></li>
+              <li><a href="./3/3.html">종료</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+
+  </div>
+  <div id="index_video">
+    <video autoplay controls loop muted poster="aaa" preload="bbb">
+    <source src="./image/시연영상1.mp4" type="video/mp4">
+    zzz
+    </video>
+  </div>
+
+  <div class="footer">
+    <div id="grid">
+      <a href="http://inbody.kr/kr/">
+        <img src="./image/inbody.png">
+      </a>
+      <b>
+        <br>
+        Motion Presentation Guide, 2021
+      </b>
+      <div>
+        <br>
+        contact : hail2141@gmail.com
+      </div>
     </div>
   </div>
-  </body>
-  </html>
+</body>
+</html>

@@ -3,38 +3,105 @@
 <head>
     <title>Motion Presentation Guide</title>
     <link rel="Stylesheet" href="../style.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
 </head>
 <body>
+
   <div id="header">
-    <h1><a href="../0/0.html">Motion Presentation Guide</a></h1>
-    <ul class="myMenu">
-      <li class="menu"><a href="../0/0.html">시작</a></li>
-      <li class="menu"><a href="../1/0.html">화면구성</a></li>
-      <li class="menu" id="selected">
-          <a>모드</a>
-          <ul class="menu3_s submenu">
-              <li><a href="../2/1.html">대기 모드</a></li>
-              <li><a href="../2/2.html">발표 모드</a></li>
-              <li><a href="../2/3.html">필기 모드</a></li>
-              <li><a href="../2/4.html">자유 모드</a></li>
-          </ul>
-      </li>
-      <li class="menu">
-        <a>기타</a>
-        <ul class="menu3_s submenu">
-            <li><a href="../3/1.html">화면 캡쳐</a></li>
-            <li><a href="../3/2.html">설정</a></li>
-            <li><a href="../3/3.html">종료</a></li>
+    <div id="grid">
+      <div id="logo">
+        <h1><a href="../index.html">Motion Presentation Guide ✋</a></h1>
+      </div>
+      <div id="gridmenu">
+        <ul class="myMenu">
+          <li class="menu"><a href="../0/0.html">시작</a></li>
+          <li class="menu"><a href="../1/0.html">화면구성</a></li>
+          <li class="menu" id="selected">
+              <a>모드</a>
+              <ul class="menu3_s submenu">
+                  <li><a href="../2/0.html">모드란?</a></li>
+                  <li><a href="../2/1.html">대기 모드</a></li>
+                  <li><a href="../2/2.html">발표 모드</a></li>
+                  <li><a href="../2/3.html">필기 모드</a></li>
+                  <li><a href="../2/4.html">자유 모드</a></li>
+              </ul>
+          </li>
+          <li class="menu">
+            <a>기타</a>
+            <ul class="menu3_s submenu">
+                <li><a href="../3/1.html">화면 캡쳐</a></li>
+                <li><a href="../3/2.html">설정</a></li>
+                <li><a href="../3/3.html">종료</a></li>
+            </ul>
+          </li>
         </ul>
-      </li>
-    </ul>
+      </div>
+    </div>
   </div>
-<div id="container">
-  <div id="content">
-    Motion Project는 네 가지 모드 중 하나를 선택해 발표를 진행합니다. 대기, 필기, 발표, 자유 네 가지 모드는 터치패널의 버튼을 누르거나 양 손으로 각 모드에 해당하는 손 모양을 카메라를 향해 취해 전환할 수 있습니다.
 
+      <div class="navi">
+        <a href="../2/3.html">
+            <img src="../image/pre.png">
+          </a>
+      </div>
+      <div class="navi2">
+          <a href="../3/0.html">
+            <img src="../image/post.png">
+          </a>
+      </div>
+      <div class="article">
+        <h3>자유 모드 🖱</h3>
+        <figure>
+          <img src="../image/2/3.png">
+          <figcaption>자유 모드가 선택된 터치패널</figcaption>
+        </figure><br>
+        <blockquote>
+          자유 모드는 웹서핑을 위해 추가적으로 제공되는 모드로 일반적인 마우스 움직임 / 클릭 / 드래그 / 휠 기능을 포함합니다. 터치패널의 자유 모드 버튼을 누르거나 자유 모드 글자 밑의 제스쳐를 양손으로 취해 자유 모드로 전환할 수 있습니다.
+        </blockquote>
+        <figure>
+          <img src="../image/2/33.jpg">
+          <figcaption>자유 모드로 전환하기 위한 제스쳐</figcaption>
+        </figure>
+      <h3>자유 모드 기능 ✅</h3>
+        <blockquote>
+          자유 모드에서는 마우스 움직임 / 클릭 / 드래그 / 휠 기능을 사용할 수 있습니다. <br>
+          자유 모드에서는 마우스 제어가 활성화 됩니다. <b>엄지와 검지만 편 손 모양</b>으로 마우스를 이동시키고 엄지를 중지에 살짝 부딪혀 클릭을 할 수 있습니다.
+        </blockquote>
+        <figure>
+          <img src="../image/2/자유.gif">
+          <figcaption>마우스 움직임과 클릭</figcaption>
+        </figure>
+        <blockquote>
+          필기 모드에서는 드래그 기능이 제공됩니다. <b>엄지 끝과 검지 끝을 붙혀</b> 드래그를 활성화 해보세요. 화면에 글씨를 쓰듯이 엄지와 검지를 포함하는 면이 화면과 평행하게 유지할수록 더 잘 작동합니다.
+        </blockquote>
+        <figure>
+          <img src="../image/2/드래그.gif">
+          <figcaption>드래그 기능</figcaption>
+        </figure>
+        <blockquote>
+          마우스를 움직이다 휠을 이용하고 싶을 때 <b>검지와 중지를 세워 화면을 쓸듯이 움직여 보세요.</b> 휠 기능을 활성화해 웹 서핑을 돕습니다. 검지와 중지 사이의 거리가 멀어지면 휠을 사용하지 않는 점을 이용해 페이지의 위, 아래를 탐색할 수 있습니다. 아래 영상을 참조해 주세요.
+        </blockquote>
+        <figure>
+          <img src="../image/2/휠.gif">
+          <figcaption>휠 기능</figcaption>
+        </figure>
+        <p></p>
+      </div>
+
+  <div class="footer">
+    <div id="grid">
+      <a href="http://inbody.kr/kr/">
+        <img src="../image/inbody.png">
+      </a>
+      <b>
+        <br>
+        Motion Presentation Guide, 2021
+      </b>
+      <div>
+        <br>
+        contact : hail2141@gmail.com
+      </div>
+    </div>
   </div>
-</div>
-
 </body>
 </html>

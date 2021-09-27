@@ -3,38 +3,105 @@
 <head>
     <title>Motion Presentation Guide</title>
     <link rel="Stylesheet" href="../style.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
 </head>
 <body>
+
   <div id="header">
-    <h1><a href="../0/0.html">Motion Presentation Guide</a></h1>
-    <ul class="myMenu">
-      <li class="menu"><a href="../0/0.html">시작</a></li>
-      <li class="menu"><a href="../1/0.html">화면구성</a></li>
-      <li class="menu" id="selected">
-          <a>모드</a>
-          <ul class="menu3_s submenu">
-              <li><a href="../2/1.html">대기 모드</a></li>
-              <li><a href="../2/2.html">발표 모드</a></li>
-              <li><a href="../2/3.html">필기 모드</a></li>
-              <li><a href="../2/4.html">자유 모드</a></li>
-          </ul>
-      </li>
-      <li class="menu">
-        <a>기타</a>
-        <ul class="menu3_s submenu">
-            <li><a href="../3/1.html">화면 캡쳐</a></li>
-            <li><a href="../3/2.html">설정</a></li>
-            <li><a href="../3/3.html">종료</a></li>
+    <div id="grid">
+      <div id="logo">
+        <h1><a href="../index.html">Motion Presentation Guide ✋</a></h1>
+      </div>
+      <div id="gridmenu">
+        <ul class="myMenu">
+          <li class="menu"><a href="../0/0.html">시작</a></li>
+          <li class="menu"><a href="../1/0.html">화면구성</a></li>
+          <li class="menu" id="selected">
+              <a>모드</a>
+              <ul class="menu3_s submenu">
+                  <li><a href="../2/0.html">모드란?</a></li>
+                  <li><a href="../2/1.html">대기 모드</a></li>
+                  <li><a href="../2/2.html">발표 모드</a></li>
+                  <li><a href="../2/3.html">필기 모드</a></li>
+                  <li><a href="../2/4.html">자유 모드</a></li>
+              </ul>
+          </li>
+          <li class="menu">
+            <a>기타</a>
+            <ul class="menu3_s submenu">
+                <li><a href="../3/1.html">화면 캡쳐</a></li>
+                <li><a href="../3/2.html">설정</a></li>
+                <li><a href="../3/3.html">종료</a></li>
+            </ul>
+          </li>
         </ul>
-      </li>
-    </ul>
+      </div>
+    </div>
   </div>
-<div id="container">
-  <div id="content">
-    Motion Project는 네 가지 모드 중 하나를 선택해 발표를 진행합니다. 대기, 필기, 발표, 자유 네 가지 모드는 터치패널의 버튼을 누르거나 양 손으로 각 모드에 해당하는 손 모양을 카메라를 향해 취해 전환할 수 있습니다.
 
+      <div class="navi">
+        <a href="../2/1.html">
+            <img src="../image/pre.png">
+          </a>
+      </div>
+      <div class="navi2">
+          <a href="../2/3.html">
+            <img src="../image/post.png">
+          </a>
+      </div>
+      <div class="article">
+        <h3>발표 모드 🗣</h3>
+          <figure>
+            <img src="../image/2/1.png">
+            <figcaption>발표 모드가 선택된 터치패널</figcaption>
+          </figure><br>
+          <blockquote>
+            발표 모드는 일반적인 발표를 위한 모드로 마우스 제어, 다음 페이지 / 이전 페이지 이동, 포인터 강조 (레이저 포인터) 의 기능을 활성화하는 모드입니다. 터치패널의 발표 모드 버튼을 누르거나 발표 모드 글자 밑의 제스쳐를 양손으로 취해 발표 모드로 전환할 수 있습니다.
+          </blockquote>
+          <figure>
+            <img src="../image/2/11.jpg">
+            <figcaption>발표 모드로 전환하기 위한 제스쳐</figcaption>
+          </figure>
+        <h3>발표 모드 기능 ✅</h3>
+          <blockquote>
+            발표 모드에서는 마우스 제어, 다음 페이지 / 이전 페이지 이동, 포인터 강조 (레이저 포인터) 기능을 사용할 수 있습니다. <br>
+            발표 모드에서는 마우스 제어가 활성화 됩니다. <b>엄지와 검지만 편 손 모양</b>으로 마우스를 이동시킬 수 있습니다.
+          </blockquote>
+          <figure>
+            <img src="../image/2/마우스움직임.gif">
+            <figcaption>마우스 움직임</figcaption>
+          </figure>
+          <blockquote>
+            마우스 제어할 수 있는 손모양 (<b>엄지와 검지만 편 손 모양</b>)을 취한 상태에서 엄지를 접은 상태의 중지에 살짝 부딪혀 페이지를 넘길 수 있습니다. 또한 제어 손모양을 취한 상태에서 검지를 하늘 방향으로 한채 엄지를 아래 동영상과 같이 돌리면 이전 페이지로 돌아갈 수 있습니다. 아래 영상에서 확인해보세요!
+          </blockquote>
+          <figure>
+            <img src="../image/2/클릭되돌리기.gif">
+            <figcaption>다음 페이지 / 이전 페이지 이동</figcaption>
+          </figure>
+          <blockquote>
+            <b>엄지, 검지, 중지를 편 손 모양</b>으로 마우스의 움직임을 하는 동시에 마우스 포인터를 레이저 포인터 모양으로 바꿔 청자들을 집중하게 할 수 있습니다. 특정 부분을 강조하고 싶을 때 사용해 보세요!
+          </blockquote>
+          <figure>
+            <img src="../image/2/강조.gif">
+            <figcaption>마우스 포인터 강조 (레이저 포인터))</figcaption>
+          </figure>
+        <p></p>
+      </div>
+
+  <div class="footer">
+    <div id="grid">
+      <a href="http://inbody.kr/kr/">
+        <img src="../image/inbody.png">
+      </a>
+      <b>
+        <br>
+        Motion Presentation Guide, 2021
+      </b>
+      <div>
+        <br>
+        contact : hail2141@gmail.com
+      </div>
+    </div>
   </div>
-</div>
-
 </body>
 </html>
