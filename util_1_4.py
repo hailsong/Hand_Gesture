@@ -77,7 +77,7 @@ WHEEL_USE = False
 DRAG_USE = False
 BOARD_COLOR = 'w'
 
-VISUALIZE_GRAPH = True
+VISUALIZE_GRAPH = False
 EXIT_SURVEY = False
 
 gesture_check = False
@@ -1559,7 +1559,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
                 if LEFT:
                     image = cv2.flip(image, 1)
-                image = cv2.putText(image, str(FPS), (10, 30), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 0), 2, cv2.LINE_AA)
+                image = cv2.putText(image, str(FPS), (18, 30), cv2.FONT_HERSHEY_DUPLEX, 0.65, (42, 46, 57), 1, cv2.LINE_AA)
 
                 self.change_pixmap_signal.emit(image)
                 if cv2.waitKey(5) & 0xFF == 27:
@@ -2921,7 +2921,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             if DARK_MODE:
                 self.label_6.setPixmap(QtGui.QPixmap("./image/default_dark_1366.jpg"))
             else:
-                self.label_6.setPixmap(QtGui.QPixmap("./image/default_dark_1366.jpg"))
+                self.label_6.setPixmap(QtGui.QPixmap("./image/default_1366.jpg"))
 
             if self.pushButton_5.isChecked():
                 # image = cv2.imread('./image/testtest.jpg')
