@@ -44,7 +44,7 @@ a {
 img
 {
   border-radius: 15px;
-  width:70%;
+  width:50%;
   display:block;
   margin:auto;
   padding: 40px;
@@ -108,10 +108,10 @@ img
   padding:10px;
 }
 .navi > a > img{
-  width:30px;
+  width:20px;
 }
 .navi2 > a > img{
-  width:30px;
+  width:20px;
 }
 
 
@@ -140,10 +140,10 @@ figcaption {
   padding: 1em;
   line-height: 1;
   color:gray;
-  font-size: 11;
+  font-size: 12px;
 
   position: absolute;
-  margin-bottom: -6px;
+  margin-bottom:1px;
 
   width:100%;
   left: 0;
@@ -193,7 +193,7 @@ figure {
   padding:10px;
   margin:150px;
   margin-top:160px;
-
+  font-size: 13px;
 }
 
 .article > p{
@@ -225,7 +225,7 @@ figure {
 
 
 h1 {
-  font-size: 30px;
+  font-size: 25px;
   text-align: center;
   margin: 0px;
   padding-top: 50px;
@@ -242,6 +242,7 @@ h1:hover{
 
 h3{
   margin-top : 50px;
+  font-size: 16px;
 }
 .page{
   text-align: center;
@@ -364,15 +365,15 @@ ul.myMenu {z-index:9999;  }
 ul.myMenu > li > a{
   display: block;
 }
-ul.myMenu > li { display:inline-block; width:100px; padding:20px 40px; background:#eee;     border:1px solid #eee; text-align:center; position:relative;
+ul.myMenu > li { display:inline-block; width:80px; padding:20px 40px; background:#eee;     border:1px solid #eee; text-align:center; position:relative;
   background-color: rgb(233, 236, 241);
   -webkit-transition:-webkit-transform 1s;
   transition: background-color 0.7s;
-  z-index:9999;}
+  z-index:9999; font-size: 15px;}
 ul.myMenu > li:hover { background:rgb(220, 223, 228); color:black; }
 ul.myMenu > li ul.submenu { display:none; position:absolute; top:60px; left:0; color:black; }
 ul.myMenu > li:hover ul.submenu { display:block; }
-ul.myMenu > li ul.submenu > li { display:inline-block; width:90px; padding:20px 40px; background:rgb(220, 223, 228); border:2px solid #eee; text-align:center; font-weight: normal;}
+ul.myMenu > li ul.submenu > li { display:inline-block; width:70px; padding:20px 40px; background:rgb(220, 223, 228); border:2px solid #eee; text-align:center; font-weight: normal; font-size: 15px;}
 ul.myMenu > li ul.submenu > li:hover { background:#CB0D36; color:white; }
 
 

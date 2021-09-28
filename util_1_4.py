@@ -41,7 +41,8 @@ import os
 # For webcam input:
 # hands = mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5)
 
-x_size, y_size = pyautogui.size().width, pyautogui.size().height
+# x_size, y_size = pyautogui.size().width, pyautogui.size().height
+x_size, y_size = 1366, 768
 
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
