@@ -427,7 +427,7 @@ class Gesture_mode:
             self.right_finger_vector[-1])
 
     def update_left(self, left, palm_vector, finger_vector):
-        print(left, 'left')
+        # print(left, 'left')
         self.left.append(left)
         self.left_palm_vector.append(palm_vector)
         self.left_finger_vector.append(finger_vector)
@@ -436,7 +436,7 @@ class Gesture_mode:
         self.left_finger_vector.pop(0)
 
     def update_right(self, right, palm_vector, finger_vector):
-        print(right, 'right')
+        # print(right, 'right')
         self.right.append(right)
         self.right_palm_vector.append(palm_vector)
         self.right_finger_vector.append(finger_vector)
@@ -594,6 +594,7 @@ def process_static_gesture(array_for_static, value_for_static):
         input_ = input_[np.newaxis]
         try:
             prediction = MODEL_STATIC.predict(input_)
+            # print(f"predict : {prediction}\n", end='')
             if np.max(prediction[0]) > 0.8:
                 value_for_static.value = np.argmax(prediction[0])
                 # print(value_for_static.value)
@@ -942,15 +943,15 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     FULLSIZE = 1920, 1080
                     MOD_SIZE = 1600, 640
                     INPUT_SIZE = 1366, 768
-                    RATIO = FULLSIZE[0] / INPUT_SIZE[0]
+                    RATIO = FULLSIZE[0] / INPUT_SIZE[0], FULLSIZE[1] / INPUT_SIZE[1]
 
-                    mod_x = (x * FULLSIZE[0] / MOD_SIZE[0] - (FULLSIZE[0] - MOD_SIZE[0]) / 2) * RATIO
+                    mod_x = (x * FULLSIZE[0] / MOD_SIZE[0] - (FULLSIZE[0] - MOD_SIZE[0]) / 2) * RATIO[0]
                     mod_x = max(0, mod_x)
                     mod_x = min(FULLSIZE[0], mod_x)
-                    mod_y = (y * FULLSIZE[1] / MOD_SIZE[1] - (FULLSIZE[1] - MOD_SIZE[1]) / 2) * RATIO
+                    mod_y = (y * FULLSIZE[1] / MOD_SIZE[1] - (FULLSIZE[1] - MOD_SIZE[1]) / 2) * RATIO[1]
                     mod_y = max(0, mod_y)
                     mod_y = min(FULLSIZE[1], mod_y)
-
+                    # print(f"{x, y}  >>>  {mod_x, mod_y}")
                     # print(mod_x, mod_y)
                     # 모니터 수, 화면 갯수별로 다르게 Return 해야함
                     res = int(mod_x) - 1919, int(mod_y)
@@ -1068,7 +1069,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     print('click')
                     pos = win32api.GetCursorPos()
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, pos[0], pos[1], 0, 0)
-                    print(pos)
+                    # print(pos)
                     print('click off')
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, pos[0], pos[1], 0, 0)
                     now_click2 = True
