@@ -1527,9 +1527,22 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             gesture_mode.update_right(static_gesture_num_r, palm_vector, finger_vector)
 
                         # 마우스 움직임, 드래그
-                        if mode_global == 3:
-                            pixel_c.mousemove(now_click, now_click2)
-                            now_click2 = hand_drag2(mark_p, static_gesture_num_r, now_click2)
+
+                        if mode_global == 3 and len(mark_p[-1]) == 5:
+                            # 왼손 오른손 구분 모델이 잘 작동하지 않는 경우 있어 손바닥, 손가락의 벡터를 이용해 추가 검증
+                            palm_vector_drag = HM.get_palm_vector()
+                            finger_vector_drag = HM.get_finger_vector()
+                            # lpv_mode_1 = [-0.39, 0.144, -0.90]
+                            # lfv_mode_1 = [-0.33, -0.94, 0.]
+                            rpv_mode_1 = [-0.40, -0.14, -0.9]
+                            rfv_mode_1 = [-0.33, -0.94, 0.]
+                            pv_angle = get_angle(palm_vector_drag, rpv_mode_1)
+                            fv_angle = get_angle(finger_vector_drag, rfv_mode_1)
+                            # print(f"{pv_angle} /// {fv_angle}")
+                            
+                            if pv_angle + fv_angle < 2:
+                                pixel_c.mousemove(now_click, now_click2)
+                                now_click2 = hand_drag2(mark_p, static_gesture_num_r, now_click2)
 
                         if (get_distance(pixel_c, before_c) < get_distance(mark_p0, mark_p5)) and \
                                 sum(finger_open_[3:]) == 0 and \
