@@ -627,6 +627,26 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     #window = QtWidgets.QWidget()
     ui_load = Load_Ui2()
 
+    # 소리 추가
+    import pygame
+    pygame.mixer.init()
+    pygame.mixer.pre_init(44100, -16, 2, 2048)
+    pygame.init()
+
+    sounds = []
+    sounds.append(pygame.mixer.Sound('sound/writing.wav'))
+    sounds.append(pygame.mixer.Sound('sound/click.wav'))
+    sounds.append(pygame.mixer.Sound('sound/page.wav'))
+    sounds.append(pygame.mixer.Sound('sound/mode1.wav'))
+    sounds.append(pygame.mixer.Sound('sound/mode2.wav'))
+    sounds.append(pygame.mixer.Sound('sound/mode3.wav'))
+    sounds.append(pygame.mixer.Sound('sound/mode4.wav'))
+
+    # OLD VER.
+    # from pygame import mixer
+    # mixer.init()
+    # mixer.music.load("sound/writing.wav")
+
     def mode_2_pre(palm, finger, left, p_check):
         palm_th = np.array([-0.41607399, -0.20192736, 0.88662719])
         finger_th = np.array([-0.08736683, -0.96164491, -0.26001175])
@@ -634,6 +654,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         parameter = get_angle(palm, palm_th) + get_angle(finger, finger_th)
         if p_check == 0 and left == 3 and parameter < 1.2:
             print('이전 페이지 (Left Arrow)')
+
+            sound = sounds[2]
+            sound.play()
+
             win32api.keybd_event(0x25, 0, 0, 0)  # Left Arrow 누르기.
             win32api.keybd_event(0x25, 0, win32con.KEYEVENTF_KEYUP, 0)
             time.sleep(0.1)
@@ -836,6 +860,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     WHEEL_USE = False
                     laser_state = mode_2_off(mode_global, laser_state)
                     print('MODE 1, 대기 모드')
+                    sound = sounds[3]
+                    sound.play()
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 100, 100, 0, 0)
 
                     # win32api.keybd_event(0x74, 0, 0, 0)  # F5 DOWN
@@ -860,6 +886,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         win32api.keybd_event(0x1B, 0, 0, 0)  # ESC DOWN
                         win32api.keybd_event(0x1B, 0, win32con.KEYEVENTF_KEYUP, 0)  # ESC UP
                     print('MODE 2, 기본 발표 모드')
+                    sound = sounds[4]
+                    sound.play()
                     mode_3_interrupt(mode_global)
                     mode_global = mode
 
@@ -879,6 +907,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     win32api.keybd_event(0xa2, 0, win32con.KEYEVENTF_KEYUP, 0)
                     win32api.keybd_event(0x32, 0, win32con.KEYEVENTF_KEYUP, 0)
                     print('MODE 3, 필기 발표 모드')  # 3, # 2-5
+                    sound = sounds[5]
+                    sound.play()
                     mode_global = mode
 
                 if mode == 4 and mode_global != mode:
@@ -888,6 +918,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     WHEEL_USE = True
                     laser_state = mode_2_off(mode_global, laser_state)
                     print('MODE 4, 웹서핑 발표 모드')
+                    sound = sounds[6]
+                    sound.play()
                     mode_3_interrupt(mode_global)
                     mode_global = mode
 
@@ -1050,6 +1082,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 """
 
                 # global straight_line, rectangular, circle
+                sound = sounds[0]
 
                 if gesture == 13 and now_click == False:
                     print('drag on')
@@ -1058,7 +1091,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     # ctypes.windll.user32.mouse_event(0x0002, 0, 0, 0, 0)
                     now_click = True
 
-                    mixer.music.play(-1)
+                    # mixer.music.play(-1)
+
+                    sound.play(-1)
 
                 elif (gesture == 1 or gesture == 6) and now_click == True:
                     print('drag off')
@@ -1067,7 +1102,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     # ctypes.windll.user32.mouse_event(0x0004, 0, 0, 0, 0)
                     now_click = False
 
-                    mixer.music.stop()
+                    # mixer.music.stop()
+                    sound.stop()
 
                 return now_click
 
@@ -1080,6 +1116,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                                                           landmark[8]) and now_click2 == False \
                         and click_angle < 1:
                     print('click')
+
+                    sound = sounds[1]
+                    sound.play()
                     pos = win32api.GetCursorPos()
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, pos[0], pos[1], 0, 0)
                     # print(pos)
@@ -1168,6 +1207,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             global circle
 
             global laser_num, laser_state
+
 
 
 
@@ -1335,11 +1375,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             if not cap.isOpened():
                 raise IOError
-            
-            # 소리 추가
-            from pygame import mixer
-            mixer.init()
-            mixer.music.load("sound/wr.mp3")
+
 
 
             while bool_state and cap.isOpened():
