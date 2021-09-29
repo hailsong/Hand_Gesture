@@ -8,6 +8,7 @@ import time
 import numpy as np
 from PIL import Image
 
+
 from os import system
 
 import tensorflow as tf
@@ -28,6 +29,8 @@ from loading import *
 import datetime
 import sys
 import os
+
+
 
 '''
 키 코드 링크 : https://lab.cliel.com/entry/%EA%B0%80%EC%83%81-Key-Code%ED%91%9C
@@ -588,6 +591,7 @@ def process_static_gesture(array_for_static, value_for_static):
     MODEL_STATIC = keras.models.load_model(
         'keras_util/model_save/my_model_18.h5'
     )
+
     while True:
         input_ = np.copy(array_for_static[:])
         # print(input_)
@@ -954,11 +958,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     # print(f"{x, y}  >>>  {mod_x, mod_y}")
                     # print(mod_x, mod_y)
                     # 모니터 수, 화면 갯수별로 다르게 Return 해야함
-                    res = int(mod_x) - 1919, int(mod_y)
+
                     if LEFT:
-                        res2 = (int(1920 - mod_x) - 1919), int(mod_y)
-                        return res2
-                    return res
+                        return (int(1920 - mod_x) - 1919), int(mod_y)
+                    else:
+                        return int(mod_x) - 1919, int(mod_y)
 
                 def mousemove(self, now_click, now_click2):
 
