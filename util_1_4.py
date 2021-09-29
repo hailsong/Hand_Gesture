@@ -1027,6 +1027,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     # ctypes.windll.user32.mouse_event(0x0002, 0, 0, 0, 0)
                     now_click = True
 
+                    # mixer.music.play(-1)
 
                 elif get_distance(landmark[4], landmark[8], mode='3d') > drag_threshold * get_distance(landmark[4],
                                                                                                        landmark[3],
@@ -1037,6 +1038,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, pos[0], pos[1], 0, 0)
                     # ctypes.windll.user32.mouse_event(0x0004, 0, 0, 0, 0)
                     now_click = False
+
+                    # mixer.music.stop()
+
                 return now_click
 
             def hand_drag2(landmark, gesture, now_click):  # 1 : non_click, 13 : click
@@ -1054,12 +1058,17 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     # ctypes.windll.user32.mouse_event(0x0002, 0, 0, 0, 0)
                     now_click = True
 
+                    mixer.music.play(-1)
+
                 elif (gesture == 1 or gesture == 6) and now_click == True:
                     print('drag off')
                     pos = win32api.GetCursorPos()
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, pos[0], pos[1], 0, 0)
                     # ctypes.windll.user32.mouse_event(0x0004, 0, 0, 0, 0)
                     now_click = False
+
+                    mixer.music.stop()
+
                 return now_click
 
             def hand_click(landmark, pixel, HM, now_click2):
@@ -1326,6 +1335,12 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             if not cap.isOpened():
                 raise IOError
+            
+            # 소리 추가
+            from pygame import mixer
+            mixer.init()
+            mixer.music.load("sound/wr.mp3")
+
 
             while bool_state and cap.isOpened():
                 # print('cam')
