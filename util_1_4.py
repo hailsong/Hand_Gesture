@@ -721,7 +721,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         finger_th = np.array([-0.08736683, -0.96164491, -0.26001175])
         # print(ctrl_z_check, left)
         parameter = get_angle(palm, palm_th) + get_angle(finger, finger_th)
-        if ctrl_z_check == 0 and left == 6:  # and parameter < 1:
+        # print(parameter)
+        if ctrl_z_check == 0 and left == 6 and parameter < 3.5:
             print('되돌리기 (CTRL + Z)')
             win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
             win32api.keybd_event(0x5a, 0, 0, 0)  # Z 누르기.
