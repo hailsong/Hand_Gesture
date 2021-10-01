@@ -31,7 +31,6 @@ import sys
 import os
 
 
-
 '''
 키 코드 링크 : https://lab.cliel.com/entry/%EA%B0%80%EC%83%81-Key-Code%ED%91%9C
 '''
@@ -641,6 +640,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     sounds.append(pygame.mixer.Sound('sound/mode2.wav'))
     sounds.append(pygame.mixer.Sound('sound/mode3.wav'))
     sounds.append(pygame.mixer.Sound('sound/mode4.wav'))
+    sounds.append(pygame.mixer.Sound('sound/ctrlz.wav'))
+    sounds.append(pygame.mixer.Sound('sound/tick.mp3'))
+    sounds.append(pygame.mixer.Sound('sound/window.mp3'))
 
     # OLD VER.
     # from pygame import mixer
@@ -724,6 +726,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         # print(parameter)
         if ctrl_z_check == 0 and left == 6 and parameter < 3.5:
             print('되돌리기 (CTRL + Z)')
+            sound = sounds[7]
+            sound.play()
             win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
             win32api.keybd_event(0x5a, 0, 0, 0)  # Z 누르기.
             time.sleep(0.1)
@@ -824,6 +828,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         color_name = color_name_l[0]
                         pill_image.paste(self.LAYER_SET[color_name], (0, 280), mask=self.LAYER_SET[color_name])
                     if color_name != pen_color:
+                        sound = sounds[8]
+                        sound.play()
                         if color_name == 'R':
                             win32api.keybd_event(0x52, 0, 0, 0)
                             win32api.keybd_event(0x52, 0, win32con.KEYEVENTF_KEYUP, 0)
@@ -926,6 +932,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
         @pyqtSlot(bool)
         def send_img(self, bool_state):  # p를 보는 emit 함수
+
+            sound = sounds[9]
+            sound.play()
+
             # ui.label_6.setPixmap(QtGui.QPixmap("./icon1.png"))
             # Grabber.label_6.setStyleSheet("background-color : white; border-radius: 100px;", )
             # Grabber.label_6.setPixmap(image)
@@ -1381,6 +1391,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             while bool_state and cap.isOpened():
                 # print('cam')
+
+
                 success, image = cap.read()
 
                 if not success:
@@ -1426,6 +1438,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                 int(mark_p_list[i][17].x * image.shape[1]), int(mark_p_list[i][17].y * image.shape[0])),
                                                 cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
 
+                        # sd_check = np.array(mark_p_list)
+                        # print(np.std(sd_check))
 
                         mark_p_list[i].append(LR_idx)
 
@@ -1539,9 +1553,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             rfv_mode_1 = [-0.33, -0.94, 0.]
                             pv_angle = get_angle(palm_vector_drag, rpv_mode_1)
                             fv_angle = get_angle(finger_vector_drag, rfv_mode_1)
-                            # print(f"{pv_angle} /// {fv_angle}")
+                            print(f"{pv_angle} /// {fv_angle}")
                             
-                            if pv_angle + fv_angle < 2:
+                            if pv_angle + fv_angle < 3:
                                 pixel_c.mousemove(now_click, now_click2)
                                 now_click2 = hand_drag2(mark_p, static_gesture_num_r, now_click2)
 
@@ -3029,16 +3043,22 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     ui_load.status = 0
 
         def settingWindow(self):
+            sound = sounds[9]
+            sound.play()
             dlg = Setting_window()
             dlg.setupUi(dlg)
             dlg.exec_()
 
         def guidewindow(self):
+            sound = sounds[9]
+            sound.play()
             path = os.getcwd()
             guide_path = path + "\\guide\\0\\0.html"
             os.system('''open_guide.bat''')
 
         def exitwindow(self):
+            sound = sounds[9]
+            sound.play()
             dlg = Exit_window()
             dlg.setupUi(dlg)
             dlg.exec_()
