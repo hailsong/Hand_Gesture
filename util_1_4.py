@@ -3127,7 +3127,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
 
 if __name__ == '__main__':
-    print("This is util set program, it works well... maybe... XD")
+    # print("")
 
     print('Running main_1_4.py...')
 

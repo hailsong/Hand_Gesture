@@ -13,6 +13,7 @@ if __name__ == "__main__":
 
     print("Copyright 2021. INBODY inc. all rights reserved")
     print("Contact : shi@inbody.com, HAIL SONG")
+    print("Motion Presentation ver 1.4")
 
     os.system('start ZoomIt.exe')
     # physical_devices = tf.config.list_physical_devices('GPU')
