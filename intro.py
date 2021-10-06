@@ -1,20 +1,22 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QDialog
+from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QCoreApplication
 import os
 
-class MyApp(QDialog):
+class MyApp(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.setupUI(QDialog)
+        self.setupUI(self)
         # self.setGeometry(0, 0, 1366, 768)
 
         self.setWindowIcon((QtGui.QIcon('icon1.png')))
         self.setStyleSheet("background-color : rgb(248, 249, 251);")
 
-    def setupUI(self, Dialog):
+
+    def setupUI(self, QWidget):
+        # self.center()
         exit_btn = QtWidgets.QPushButton(' ', self)
         exit_btn.resize(exit_btn.sizeHint())
 
@@ -26,7 +28,7 @@ class MyApp(QDialog):
             QPushButton:hover{image:url(./image/icon/exit_hover.png); border:0px;}
             ''')
         exit_btn.setObjectName("pushButton_10")
-        exit_btn.clicked.connect(Dialog.reject)
+        exit_btn.clicked.connect(QCoreApplication.instance().quit)
 
         # frame set
         self.frame = QtWidgets.QFrame(self)
