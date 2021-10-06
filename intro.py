@@ -81,9 +81,6 @@ class MyApp(QWidget):
         self.full_Button.setObjectName("full_Button")
         self.full_Button.clicked.connect(self.full)
 
-
-
-
         self.setWindowTitle('Motion Presentation Intro')
 
         self.resize(1280, 720)
@@ -93,7 +90,6 @@ class MyApp(QWidget):
         print('lite')
         os.system('''start gesture_detection_lite.bat''')
         sys.exit()
-
 
     def full(self):
         print('full')
