@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QCoreApplication
 import os
+import win32gui, win32console
 
 class MyApp(QWidget):
 
@@ -81,9 +82,31 @@ class MyApp(QWidget):
         self.full_Button.setObjectName("full_Button")
         self.full_Button.clicked.connect(self.full)
 
+
+        # self.logo = QtWidgets.QLabel('Motion Presentation', QWidget)
+        # self.logo.setGeometry(QtCore.QRect(198, 49, 213, 34))  #
+        #
+        # self.logo.setStyleSheet("color : rgb(32, 36, 47);");
+
+
+
+        self.label = QtWidgets.QLabel('※ 처음 사용자 모드를 이용하면 일부 기능이 제한됩니다.', QWidget)
+        self.label.setGeometry(QtCore.QRect(100, 650, 500, 34))  #
+
+        self.label.setStyleSheet("color : rgb(32, 36, 47);");
+
+
+        font = QtGui.QFont()
+        font.setFamily("서울남산 장체B")
+        font.setPointSize(14)
+        self.label.setFont(font)
+        # self.logo.setFont(font)
+
+
         self.setWindowTitle('Motion Presentation Intro')
 
         self.resize(1280, 720)
+
         self.show()
 
     def lite(self):
@@ -98,6 +121,8 @@ class MyApp(QWidget):
 
 
 if __name__ == '__main__':
-   app = QApplication(sys.argv)
-   ex = MyApp()
-   sys.exit(app.exec_())
+    win32gui.ShowWindow(win32console.GetConsoleWindow(), 0)
+
+    app = QApplication(sys.argv)
+    ex = MyApp()
+    sys.exit(app.exec_())
