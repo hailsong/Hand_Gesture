@@ -48,7 +48,8 @@ class MyApp(QDialog):
                 stop:0 rgba(0, 160, 182, 255),
                 stop:1 rgba(144, 61, 167, 255));\
                 border-radius: 30px;
-                image:url(./Image/KOR/guide_open.png);
+                image:url(./image/intro/lite.png);
+                padding-top: 50px;
             }
             QPushButton:hover {
                 background-color: rgb(20, 180, 202); border-radius: 30px;
@@ -68,7 +69,8 @@ class MyApp(QDialog):
                 stop:0 rgba(226, 0, 46, 255),
                 stop:1 rgba(144, 61, 167, 255));
                 border-radius: 30px;
-                image:url(./Image/KOR/guide_open.png);
+                image:url(./image/intro/pro.png);
+                padding-top: 50px;
             }
             QPushButton:hover {
                 background-color: rgb(246, 20, 66); border-radius: 30px;
@@ -87,11 +89,14 @@ class MyApp(QDialog):
 
     def lite(self):
         print('lite')
+        os.system('''start gesture_detection_lite.bat''')
+        sys.exit()
+
 
     def full(self):
         print('full')
-
-        os.system('''gesture_detection.bat''')
+        os.system('''start gesture_detection.bat''')
+        sys.exit()
 
 
 if __name__ == '__main__':
