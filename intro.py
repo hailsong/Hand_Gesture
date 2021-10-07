@@ -14,10 +14,12 @@ class MyApp(QWidget):
 
         self.setWindowIcon((QtGui.QIcon('icon1.png')))
         self.setStyleSheet("background-color : rgb(248, 249, 251);")
+        self.move(43,24)
 
 
     def setupUI(self, QWidget):
         # self.center()
+        self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)
         exit_btn = QtWidgets.QPushButton(' ', self)
         exit_btn.resize(exit_btn.sizeHint())
 
