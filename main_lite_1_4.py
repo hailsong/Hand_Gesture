@@ -15,7 +15,7 @@ if __name__ == "__main__":
     print("Contact : shi@inbody.com, HAIL SONG")
     print("Motion Presentation ver 1.4")
 
-    os.system('start ZoomIt.exe')
+
     # physical_devices = tf.config.list_physical_devices('GPU')
     # print(physical_devices)
     # tf.config.experimental.set_memory_growth(physical_devices[0], True)

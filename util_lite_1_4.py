@@ -1848,7 +1848,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         def __init__(self):
             super(Grabber, self).__init__()
             # self.showMaximized()
-            self.setGeometry(0, 0, 1920, 1080)
+            self.setGeometry(0, 0, 1366, 768)
 
             self.setWindowIcon((QtGui.QIcon('icon1.png')))
 

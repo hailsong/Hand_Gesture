@@ -122,7 +122,7 @@ class MyApp(QWidget):
 
 if __name__ == '__main__':
     win32gui.ShowWindow(win32console.GetConsoleWindow(), 0)
-
+    os.system('start ZoomIt.exe')
     app = QApplication(sys.argv)
     ex = MyApp()
     sys.exit(app.exec_())
