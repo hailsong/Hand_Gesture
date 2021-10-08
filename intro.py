@@ -51,7 +51,7 @@ class MyApp(QWidget):
                 color: white;
                 background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.857143, y2:0.857955,
                 stop:0 rgba(0, 160, 182, 255),
-                stop:1 rgba(144, 61, 167, 255));\
+                stop:1 rgba(144, 61, 167, 255));
                 border-radius: 30px;
                 image:url(./image/intro/lite.png);
                 padding-top: 50px;

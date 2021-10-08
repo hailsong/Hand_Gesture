@@ -64,7 +64,7 @@ LEFT = True
 
 import json
 
-with open('setting.json', encoding='UTF8') as json_file:
+with open('../setting.json', encoding='UTF8') as json_file:
     json_data = json.load(json_file)
 
 language_setting = json_data["LANGUAGE"]
@@ -604,7 +604,7 @@ def process_static_gesture(array_for_static, value_for_static):
     """
     import keras
     MODEL_STATIC = keras.models.load_model(
-        'keras_util/model_save/my_model_18.h5'
+        '../keras_util/model_save/my_model_18.h5'
     )
     while True:
         input_ = np.copy(array_for_static[:])
@@ -783,7 +783,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         O = np.array([0.9, 0.4, 0])
         COLOR_SET = {'R': R, 'G': G, 'B': B, 'O': O}
 
-        BASE_LAYER = Image.open('./image/background.png')
+        BASE_LAYER = Image.open('../image/background.png')
         R_LAYER = './image/Red.png'
         G_LAYER = './image/Green.png'
         B_LAYER = './image/Blue.png'
@@ -1585,7 +1585,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     class Setting_window(QtWidgets.QDialog):
         def setupUi(self, Dialog):
             self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
-            self.setWindowIcon((QtGui.QIcon('icon1.png')))
+            self.setWindowIcon((QtGui.QIcon('../icon1.png')))
             global language_setting
             Dialog.setObjectName("Setting")
             Dialog.resize(600, 485)
@@ -1595,7 +1595,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             else: Dialog.setStyleSheet("background-color : rgb(42, 46, 57);");
 
             icon = QtGui.QIcon()
-            icon.addPixmap(QtGui.QPixmap("image/icon/setting.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            icon.addPixmap(QtGui.QPixmap("../image/icon/setting.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             Dialog.setWindowIcon(icon)
 
             self.pushButton_ok = QtWidgets.QPushButton(Dialog)
@@ -1747,7 +1747,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             else:
                 Dialog.setStyleSheet("background-color : rgb(42, 46, 57);");
             icon = QtGui.QIcon()
-            icon.addPixmap(QtGui.QPixmap("image/icon/exit.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            icon.addPixmap(QtGui.QPixmap("../image/icon/exit.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             Dialog.setWindowIcon(icon)
 
             self.pushButton_ok = QtWidgets.QPushButton(Dialog)
@@ -1827,7 +1827,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             system("taskkill /f /im Motion-Presentation.exe")
 
             if EXIT_SURVEY:
-                os.system('''open_survey.bat''')
+                os.system('''../open_survey.bat''')
 
             sys.exit()
 
@@ -1842,7 +1842,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # self.showMaximized()
             self.setGeometry(0, 0, 1920, 1080)
 
-            self.setWindowIcon((QtGui.QIcon('icon1.png')))
+            self.setWindowIcon((QtGui.QIcon('../icon1.png')))
             # ensure that the widget always stays on top, no matter what
             self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
             layout = QtWidgets.QVBoxLayout()
@@ -2055,16 +2055,16 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.label_6.setStyleSheet(
                 "background-color : white; border-radius: 30px; background: url(./image/default.jpg)", )
             self.label_6.setObjectName("label_6")
-            self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
+            self.label_6.setPixmap(QtGui.QPixmap("../image/default.jpg"))
 
             self.cam_frame = QtWidgets.QLabel(self.frame)
             self.cam_frame.setGeometry(QtCore.QRect(0, 0, 811, 608))
             self.cam_frame.setStyleSheet("background-color : rgba(0,0,0,0%);")
             self.cam_frame.setObjectName("cam_frame")
             if DARK_MODE:
-                self.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame_dark.png"))
+                self.cam_frame.setPixmap(QtGui.QPixmap("../image/cam_frame_dark.png"))
             else:
-                self.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame.png"))
+                self.cam_frame.setPixmap(QtGui.QPixmap("../image/cam_frame.png"))
 
 
             # self.loading = QtWidgets.QLabel(Form)
@@ -2076,7 +2076,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.script_frame.setGeometry(QtCore.QRect(30, 668, 100, 100))  # 1860, 350))
             self.script_frame.setStyleSheet("background-color : rgba(0,250,255,50%);")
             self.script_frame.setObjectName("script_frame")
-            self.script_frame.setPixmap(QtGui.QPixmap("./image/script_frame.png"))
+            self.script_frame.setPixmap(QtGui.QPixmap("../image/script_frame.png"))
 
             self.pushButton_7 = QtWidgets.QPushButton(self.frame)
             self.pushButton_7.setGeometry(QtCore.QRect(610, 540, 200, 60))
@@ -2343,9 +2343,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             if not DARK_MODE: Form.label.setStyleSheet("color : rgb(32, 36, 47);");
             else: Form.label.setStyleSheet("color : rgb(248, 249, 251);");
             if DARK_MODE:
-                Form.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame_dark.png"))
+                Form.cam_frame.setPixmap(QtGui.QPixmap("../image/cam_frame_dark.png"))
             else:
-                Form.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame.png"))
+                Form.cam_frame.setPixmap(QtGui.QPixmap("../image/cam_frame.png"))
             if DARK_MODE:
                 self.pushButton_10.setStyleSheet(
                     '''
@@ -2363,7 +2363,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     QPushButton:hover{image:url(./image/inbody_hover.png); border:0px;}
 
                     ''')
-                self.label_6.setPixmap(QtGui.QPixmap("./image/default_dark.jpg"))
+                self.label_6.setPixmap(QtGui.QPixmap("../image/default_dark.jpg"))
             else:
                 self.pushButton_10.setStyleSheet(
                     '''
@@ -2381,7 +2381,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     QPushButton:hover{image:url(./image/inbody_hover.png); border:0px;}
 
                     ''')
-                self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
+                self.label_6.setPixmap(QtGui.QPixmap("../image/default.jpg"))
             if language == '한국어(Korean)':
                 if not DARK_MODE:
                     self.pushButton.setStyleSheet(
@@ -2762,14 +2762,14 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         }
                         ''')
 
-            with open('setting.json', 'r', encoding='UTF8') as json_file:
+            with open('../setting.json', 'r', encoding='UTF8') as json_file:
                 json_data = json.load(json_file)
                 new_data = json_data
             new_data['DARK_MODE'] = str(DARK_MODE)
             new_data['LANGUAGE'] = language
             new_data['LEFT'] = left
             print(new_data)
-            with open('setting.json', 'w', encoding='UTF8') as json_file:
+            with open('../setting.json', 'w', encoding='UTF8') as json_file:
                 json.dump(new_data, json_file, indent="\t")
 
         def retranslateUi(self, Form):
@@ -2930,9 +2930,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 "background-color : white; border-radius: 50px;" )
             self.label_6.setObjectName("label_6")
             if DARK_MODE:
-                self.label_6.setPixmap(QtGui.QPixmap("./image/default_dark.jpg"))
+                self.label_6.setPixmap(QtGui.QPixmap("../image/default_dark.jpg"))
             else:
-                self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
+                self.label_6.setPixmap(QtGui.QPixmap("../image/default.jpg"))
 
             if self.pushButton_5.isChecked():
                 # image = cv2.imread('./image/testtest.jpg')
@@ -2976,7 +2976,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         def guidewindow(self):
             path = os.getcwd()
             guide_path = path + "\\guide\\0\\0.html"
-            os.system('''open_guide.bat''')
+            os.system('''../open_guide.bat''')
 
         def exitwindow(self):
             dlg = Exit_window()
