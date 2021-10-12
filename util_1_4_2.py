@@ -1164,7 +1164,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 # global straight_line, rectangular, circle
                 sound = sounds[0]
 
-                print(gesture)
+                # print(gesture)
 
                 if gesture == 13 and now_click == False:
                     print('drag on')
@@ -1663,8 +1663,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                         if len(mark_p[-1]) == 5:
                             mode = gesture_mode.select_mode(pixel_c, now_click, now_click2)
-                            self.mode_setting(mode, mode_before)
-                            mode_before = mode
+                            if mode != 4 and mode_before != 4 and mode_global:
+                                self.mode_setting(mode, mode_before)
+                                mode_before = mode
 
                         # MODE 3 색 변경
                         if len(mark_p[-1]) == 4:
@@ -3190,6 +3191,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # have been already updated, we can mark the geometries "clean" and then
             # actually apply the mask.
             if self.dirty:
+                # 대본 영역 없앨 것 (1.4.2)
                 self.updateMask()
                 self.dirty = False
 

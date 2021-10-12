@@ -8,7 +8,6 @@ import time
 import numpy as np
 from PIL import Image
 
-
 from os import system
 
 import tensorflow as tf
@@ -25,16 +24,13 @@ from PyQt5.QtWidgets import *
 
 from loading import *
 
-
 import datetime
 import sys
 import os
 
-
 '''
 키 코드 링크 : https://lab.cliel.com/entry/%EA%B0%80%EC%83%81-Key-Code%ED%91%9C
 '''
-
 
 # physical_devices = tf.config.list_physical_devices('GPU')
 # print(physical_devices)
@@ -58,7 +54,6 @@ rectangular = False
 circle = False
 
 gesture_int = 0
-
 
 USE_TENSORFLOW = True
 # USE_DYNAMIC = True
@@ -488,30 +483,59 @@ class Gesture_mode:
         if mode_result < 23 and left_idx_1 == 10 and right_idx_1 == 10:
             mode = 2
 
-        # 손모양 삼 자세
-        left_idx_1 = 0
-        for left in self.left:
-            if left == 4:
-                left_idx_1 += 1
-        right_idx_1 = 0
-        for right in self.right:
-            if right == 4:
-                right_idx_1 += 1
-        if mode_result < 23 and left_idx_1 == 10 and right_idx_1 == 10:
-            pixel.mousemove(now_click, now_click2)
-            mode = 3
+        return mode
 
-        # 손모양 사 자세
-        left_idx_1 = 0
-        for left in self.left:
-            if left == 7:
-                left_idx_1 += 1
+    # 한 손으로 모드 제어
+    def select_mode_one_hand(self, pixel, now_click, now_click2):
+        mode = 0
+        lpv_mode_1 = [-0.39, 0.144, -0.90]
+        lfv_mode_1 = [-0.33, -0.94, 0.]
+        rpv_mode_1 = [-0.40, -0.14, -0.9]
+        rfv_mode_1 = [-0.33, -0.94, 0.]
+        mode_result = 0
+        # print(self.left_palm_vector[0], self.left_finger_vector[0])
+        # self.right_palm_vector[0], self.right_finger_vector[0])
+        # for lpv in self.left_palm_vector:
+        #     mode_result = mode_result + get_angle(lpv, lpv_mode_1)
+        # for lfv in self.left_finger_vector:
+        #     mode_result = mode_result + get_angle(lfv, lfv_mode_1)
+
+        for rpv in self.right_palm_vector:
+            mode_result = mode_result + get_angle(rpv, rpv_mode_1)
+        for rfv in self.right_finger_vector:
+            mode_result = mode_result + get_angle(rfv, rfv_mode_1)
+
+
+
+        # 손바닥 펴서 앞에 보여주기
+        # left_idx_1 = 0
+        # for left in self.left:
+        #     if left == 6:
+        #         left_idx_1 += 1
+
         right_idx_1 = 0
         for right in self.right:
-            if right == 7:
+            if right == 6:
                 right_idx_1 += 1
-        if mode_result < 23 and left_idx_1 == 10 and right_idx_1 == 10:
-            mode = 4
+
+        if mode_result < 10 and right_idx_1 == 10: # and left_idx_1 == 10
+            mode = 1
+
+        # print(mode_result, self.right[0], right_idx_1)
+
+
+        # 탈모빔 자세
+        # left_idx_1 = 0
+        # for left in self.left:
+        #     if left == 3:
+        #         left_idx_1 += 1
+        right_idx_1 = 0
+        for right in self.right:
+            if right == 3:
+                right_idx_1 += 1
+        if mode_result < 10 and right_idx_1 == 10: # and left_idx_1 == 10
+            mode = 2
+
         return mode
 
 
@@ -623,7 +647,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     global pen_color
 
     app = QtWidgets.QApplication(sys.argv)
-    #window = QtWidgets.QWidget()
+    # window = QtWidgets.QWidget()
     ui_load = Load_Ui2()
 
     # 소리 추가
@@ -787,7 +811,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         else:
             return 0
 
-
     class Opcv(QThread):
 
         change_pixmap_signal = pyqtSignal(np.ndarray)
@@ -898,37 +921,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     mode_3_interrupt(mode_global)
                     mode_global = mode
 
-                if mode == 3 and mode_global != mode:
-                    MOUSE_USE = True
-                    CLICK_USE = False
-                    DRAG_USE = True
-                    WHEEL_USE = False
-                    laser_state = mode_2_off(mode_global, laser_state)
-                    # print(mod_cursor_position(200, 200))
-                    win32api.SetCursorPos((-1920 + 200, 200))
-                    time.sleep(0.1)
 
-                    win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
-                    win32api.keybd_event(0x32, 0, 0, 0)  # 2 누르기.
-                    time.sleep(0.1)
-                    win32api.keybd_event(0xa2, 0, win32con.KEYEVENTF_KEYUP, 0)
-                    win32api.keybd_event(0x32, 0, win32con.KEYEVENTF_KEYUP, 0)
-                    print('MODE 3, 필기 발표 모드')  # 3, # 2-5
-                    sound = sounds[5]
-                    sound.play()
-                    mode_global = mode
-
-                if mode == 4 and mode_global != mode:
-                    MOUSE_USE = True
-                    CLICK_USE = True
-                    DRAG_USE = True
-                    WHEEL_USE = True
-                    laser_state = mode_2_off(mode_global, laser_state)
-                    print('MODE 4, 웹서핑 발표 모드')
-                    sound = sounds[6]
-                    sound.play()
-                    mode_3_interrupt(mode_global)
-                    mode_global = mode
 
         @pyqtSlot(bool)
         def send_img(self, bool_state):  # p를 보는 emit 함수
@@ -1219,9 +1212,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             global laser_num, laser_state
 
-
-
-
             print('loaded')
 
             if ui_load.status == 0:
@@ -1230,7 +1220,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             now_click = False
             now_click2 = False
-
 
             HM = Handmark()
 
@@ -1267,30 +1256,29 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 max_points = 50
 
                 lineLP, = leftPalmSubplot.plot(np.arange(max_points),
-                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='blue', ms=1)
+                                               np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='blue', ms=1)
                 lineLP2, = leftPalmSubplot.plot(np.arange(max_points),
-                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='red', ms=1)
+                                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='red', ms=1)
                 lineLP3, = leftPalmSubplot.plot(np.arange(max_points),
-                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='green', ms=1)
+                                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='green', ms=1)
                 lineLF, = leftFingerSubplot.plot(np.arange(max_points),
-                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='blue', ms=1)
+                                                 np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='blue', ms=1)
                 lineLF2, = leftFingerSubplot.plot(np.arange(max_points),
-                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='red', ms=1)
+                                                  np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='red', ms=1)
                 lineLF3, = leftFingerSubplot.plot(np.arange(max_points),
-                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='green', ms=1)
+                                                  np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='green', ms=1)
                 lineRP, = rightPalmSubplot.plot(np.arange(max_points),
-                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='blue', ms=1)
+                                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='blue', ms=1)
                 lineRP2, = rightPalmSubplot.plot(np.arange(max_points),
-                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='red', ms=1)
+                                                 np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='red', ms=1)
                 lineRP3, = rightPalmSubplot.plot(np.arange(max_points),
-                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='green', ms=1)
+                                                 np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='green', ms=1)
                 lineRF, = rightFingerSubplot.plot(np.arange(max_points),
-                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='blue', ms=1)
+                                                  np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='blue', ms=1)
                 lineRF2, = rightFingerSubplot.plot(np.arange(max_points),
-                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='red', ms=1)
+                                                   np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='red', ms=1)
                 lineRF3, = rightFingerSubplot.plot(np.arange(max_points),
-                                np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='green', ms=1)
-
+                                                   np.ones(max_points, dtype=np.float) * np.nan, lw=1, c='green', ms=1)
 
                 def initLP():
                     return lineLP, lineLP2, lineLP3
@@ -1387,11 +1375,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             if not cap.isOpened():
                 raise IOError
 
-
-
             while bool_state and cap.isOpened():
                 # print('cam')
-
 
                 success, image = cap.read()
 
@@ -1402,11 +1387,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                 # Flip the image horizontally for a later selfie-view display, and convert
                 # the BGR image to RGB.
-                if not LEFT :
+                if not LEFT:
                     image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
                 else:
                     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
 
                 image.flags.writeable = False
                 results = hands.process(image)
@@ -1554,7 +1538,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             pv_angle = get_angle(palm_vector_drag, rpv_mode_1)
                             fv_angle = get_angle(finger_vector_drag, rfv_mode_1)
                             print(f"{pv_angle} /// {fv_angle}")
-                            
+
                             if pv_angle + fv_angle < 3:
                                 pixel_c.mousemove(now_click, now_click2)
                                 now_click2 = hand_drag2(mark_p, static_gesture_num_r, now_click2)
@@ -1584,6 +1568,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                                                                         mark_p[5] - mark_p[12]) < 0.3:
                                 pixel_c.wheel(before_c)
 
+                        if len(mark_p[-1]) == 5:
+                            mode = gesture_mode.select_mode_one_hand(pixel_c, now_click, now_click2)
+                            self.mode_setting(mode, mode_before)
+                            mode_before = mode
+
                         # MODE 3 색 변경
                         if len(mark_p[-1]) == 4:
                             gesture_mode.update_left(static_gesture_num_l, palm_vector, finger_vector)
@@ -1591,9 +1580,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             # MODE CHANGE
                             palm_vector = HM.get_palm_vector()
                             finger_vector = HM.get_finger_vector()
-                            mode = gesture_mode.select_mode(pixel_c, now_click, now_click2)
-                            self.mode_setting(mode, mode_before)
-                            mode_before = mode
+                            # mode = gesture_mode.select_mode(pixel_c, now_click, now_click2)
 
                             # 입력 모양 모니터링
                             # print(static_gesture_num_l, straight_line, rectangular, circle)
@@ -1644,7 +1631,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
                 if LEFT:
                     image = cv2.flip(image, 1)
-                image = cv2.putText(image, str(FPS), (18, 30), cv2.FONT_HERSHEY_DUPLEX, 0.65, (42, 46, 57), 1, cv2.LINE_AA)
+                image = cv2.putText(image, str(FPS), (18, 30), cv2.FONT_HERSHEY_DUPLEX, 0.65, (42, 46, 57), 1,
+                                    cv2.LINE_AA)
 
                 self.change_pixmap_signal.emit(image)
                 if cv2.waitKey(5) & 0xFF == 27:
@@ -1664,8 +1652,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             Dialog.resize(600, 485)
             Dialog.setFixedSize(600, 485)
             Dialog.setWindowOpacity(0.85)
-            if not DARK_MODE: Dialog.setStyleSheet("background-color : rgb(238, 239, 241);");
-            else: Dialog.setStyleSheet("background-color : rgb(42, 46, 57);");
+            if not DARK_MODE:
+                Dialog.setStyleSheet("background-color : rgb(238, 239, 241);");
+            else:
+                Dialog.setStyleSheet("background-color : rgb(42, 46, 57);");
 
             icon = QtGui.QIcon()
             icon.addPixmap(QtGui.QPixmap("image/icon/setting.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -1799,7 +1789,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # if (theme == 'Dark Mode') != DARK_MODE:
             #     DARK_MODE = (theme == 'Dark Mode')
             #     # ui.setupTheme(ui, theme)
-            if language != language_setting or (theme == '다크 모드 (Dark Mode)') != DARK_MODE or ((leftright_setting == "왼손 모드 (Left-hand Mode)") != LEFT):
+            if language != language_setting or (theme == '다크 모드 (Dark Mode)') != DARK_MODE or (
+                    (leftright_setting == "왼손 모드 (Left-hand Mode)") != LEFT):
                 DARK_MODE = (theme == '다크 모드 (Dark Mode)')
                 language_setting = language
                 LEFT = (leftright_setting == "왼손 모드 (Left-hand Mode)")
@@ -1913,7 +1904,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         def __init__(self):
             super(Grabber, self).__init__()
             # self.showMaximized()
-            self.setGeometry(0, 0, 1920, 1080)
+            self.setGeometry(0, 0, 1366, 768)
 
             self.setWindowIcon((QtGui.QIcon('icon1.png')))
 
@@ -1995,22 +1986,25 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             Form.resize(1920, 1080)
             self.From_button = False
 
-            if not DARK_MODE: Form.setStyleSheet("background-color : rgb(248, 249, 251);");
-            else: Form.setStyleSheet("background-color : rgb(32, 36, 47);");
+            if not DARK_MODE:
+                Form.setStyleSheet("background-color : rgb(248, 249, 251);");
+            else:
+                Form.setStyleSheet("background-color : rgb(32, 36, 47);");
 
             ui_load.close()
 
             self.label = QtWidgets.QLabel('Motion Presentation', Form)
-            self.label.setGeometry(QtCore.QRect(198, 49, 213, 34)) #
+            self.label.setGeometry(QtCore.QRect(198, 49, 213, 34))  #
 
-            if not DARK_MODE: self.label.setStyleSheet("color : rgb(32, 36, 47);");
-            else: self.label.setStyleSheet("color : rgb(248, 249, 251);");
+            if not DARK_MODE:
+                self.label.setStyleSheet("color : rgb(32, 36, 47);");
+            else:
+                self.label.setStyleSheet("color : rgb(248, 249, 251);");
 
             font = QtGui.QFont()
             font.setFamily("서울남산 장체B")
             font.setPointSize(14)
             self.label.setFont(font)
-
 
             # self.label.setStyleSheet("image:url(./Image/logo.png)")
             # self.label.setObjectName("label")
@@ -2035,7 +2029,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # Button 5 : Power
             self.pushButton_5 = QtWidgets.QPushButton(Form)
-            self.pushButton_5.setGeometry(QtCore.QRect(21, 383, 357, 71))
+            self.pushButton_5.setGeometry(QtCore.QRect(21, 134, 357, 71))
             self.pushButton_5.setStyleSheet(
                 '''
                 QPushButton{
@@ -2060,7 +2054,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # Button 6 : Guide Open
             self.pushButton_6 = QtWidgets.QPushButton(Form)
-            self.pushButton_6.setGeometry(QtCore.QRect(389, 383, 357, 71))
+            self.pushButton_6.setGeometry(QtCore.QRect(389, 134, 357, 71))
             self.pushButton_6.setStyleSheet(
                 '''
                 QPushButton{
@@ -2140,7 +2134,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             else:
                 self.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame_1366.png"))
 
-
             # self.loading = QtWidgets.QLabel(Form)
             # self.loading.setGeometry(QtCore.QRect(405, 304, 300, 500))
             # self.loading.setStyleSheet("background-color : rgba(0,0,0,0%);")
@@ -2167,7 +2160,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # 모드제어 프레임
             self.frame_mode = QtWidgets.QFrame(Form)
-            self.frame_mode.setGeometry(QtCore.QRect(21, 134, 725, 228))
+            self.frame_mode.setGeometry(QtCore.QRect(21, 226, 725, 228))
             self.frame_mode.setAutoFillBackground(False)
             self.frame_mode.setStyleSheet("background-color : rgba(0, 0, 0, 0%)")
             self.frame_mode.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -2175,10 +2168,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.frame_mode.setObjectName("frame_mode")
 
             self.pushButton = QtWidgets.QPushButton(self.frame_mode)
-            self.pushButton.setGeometry(QtCore.QRect(0, 0, 174, 228))
+            self.pushButton.setGeometry(QtCore.QRect(0, 0, 357, 228))
             self.pushButton.setStyleSheet("background-color : #FFFFFF;")
-
-
 
             if DARK_MODE:
                 self.pushButton.setStyleSheet(
@@ -2225,7 +2216,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # self.pushButton.setObjectName("pushButton_image")
 
             self.pushButton_2 = QtWidgets.QPushButton(self.frame_mode)
-            self.pushButton_2.setGeometry(QtCore.QRect(184, 0, 174, 228))
+            self.pushButton_2.setGeometry(QtCore.QRect(369, 0, 357, 228))
             self.pushButton_2.setStyleSheet("background-color : #FFFFFF;")
             if DARK_MODE:
                 self.pushButton_2.setStyleSheet(
@@ -2260,7 +2251,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_2.setObjectName("pushButton_2")
             self.pushButton_2.setCheckable(True)
             self.pushButton_3 = QtWidgets.QPushButton(self.frame_mode)
-            self.pushButton_3.setGeometry(QtCore.QRect(369, 0, 174, 228))
+            self.pushButton_3.setGeometry(QtCore.QRect(369, 0, 0, 0))
             if DARK_MODE:
                 self.pushButton_3.setStyleSheet(
                     '''
@@ -2294,7 +2285,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_3.setCheckable(True)
             self.pushButton_3.setObjectName("pushButton_3")
             self.pushButton_4 = QtWidgets.QPushButton(self.frame_mode)
-            self.pushButton_4.setGeometry(QtCore.QRect(553, 0, 174, 228))
+            self.pushButton_4.setGeometry(QtCore.QRect(553, 0, 0, 0))
             if DARK_MODE:
                 self.pushButton_4.setStyleSheet(
                     '''
@@ -2374,13 +2365,12 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             self.pushButton.toggled.connect(lambda: self.togglebutton(Form, integer=0))
             self.pushButton_2.toggled.connect(lambda: self.togglebutton(Form, integer=1))
-            self.pushButton_3.toggled.connect(lambda: self.togglebutton(Form, integer=2))
-            self.pushButton_4.toggled.connect(lambda: self.togglebutton(Form, integer=3))
+            # self.pushButton_3.toggled.connect(lambda: self.togglebutton(Form, integer=2))
+            # self.pushButton_4.toggled.connect(lambda: self.togglebutton(Form, integer=3))
 
             self.pushButton_5.toggled.connect(ui_load.open)
-            #self.pushButton_4.clicked.connect(self.loading.closeEvent)
+            # self.pushButton_4.clicked.connect(self.loading.closeEvent)
             self.pushButton_5.toggled.connect(lambda: self.checked(Form))
-
 
             self.thread = Opcv()
 
@@ -2399,7 +2389,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             self.thread.start()
 
-
             # thread_load
             # self.thread_load = Load()
             ui.setupLanguage(ui, language_setting, DARK_MODE, LEFT)
@@ -2412,10 +2401,14 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             global language_setting
             # global DARK_MODE
 
-            if not DARK_MODE: Form.setStyleSheet("background-color : rgb(248, 249, 251);");
-            else: Form.setStyleSheet("background-color : rgb(32, 36, 47);");
-            if not DARK_MODE: Form.label.setStyleSheet("color : rgb(32, 36, 47);");
-            else: Form.label.setStyleSheet("color : rgb(248, 249, 251);");
+            if not DARK_MODE:
+                Form.setStyleSheet("background-color : rgb(248, 249, 251);");
+            else:
+                Form.setStyleSheet("background-color : rgb(32, 36, 47);");
+            if not DARK_MODE:
+                Form.label.setStyleSheet("color : rgb(32, 36, 47);");
+            else:
+                Form.label.setStyleSheet("color : rgb(248, 249, 251);");
             if DARK_MODE:
                 Form.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame_dark_1366.png"))
             else:
@@ -2858,11 +2851,14 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         def exitDialog(self):
             msgBox = QMessageBox()
             # msgBox.setMinimumSize(QSize(1000, 500))
-            msgBox.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
+            msgBox.setWindowFlags(
+                self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
             msgBox.setIcon(QMessageBox.Information)
             # msgBox.setStyleSheet("background-color:rgba(255, 255, 255, 255);")
-            if not DARK_MODE: msgBox.setStyleSheet("background-color : rgb(248, 249, 251);");
-            else: msgBox.setStyleSheet("background-color : rgb(32, 36, 47);");
+            if not DARK_MODE:
+                msgBox.setStyleSheet("background-color : rgb(248, 249, 251);");
+            else:
+                msgBox.setStyleSheet("background-color : rgb(32, 36, 47);");
             # msgBox.resizeEvent(500, 500)
             font = QtGui.QFont()
             font.setFamily("서울남산 장체B")
@@ -3001,7 +2997,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # dlg.setupUi(dlg)
             # dlg.exec_()
             self.label_6.setStyleSheet(
-                "background-color : white; border-radius: 50px;" )
+                "background-color : white; border-radius: 50px;")
             self.label_6.setObjectName("label_6")
             if DARK_MODE:
                 self.label_6.setPixmap(QtGui.QPixmap("./image/default_dark_1366.jpg"))
@@ -3037,7 +3033,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         button.toggle()
                 self.button6_checked.emit(False)
                 print('Default image set')
-                #self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
+                # self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
                 if ui_load.status == 1:
                     ui_load.close()
                     ui_load.status = 0
@@ -3116,7 +3112,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         def Go_to_inbody(self):
             os.system('explorer https://www.inbody.com/kr/')
 
-
     ui = Grabber()
     ui.setupUi(ui)
     ui.show()
@@ -3129,8 +3124,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 if __name__ == '__main__':
     # print("")
 
-    print('Running main_1_4.py...')
+    print('Running main_lite_1_5.py...')
 
     # system('ZoomIt.exe')
 
-    system('python main_1_4.py')
+    system('python main_lite_1_5.py')
