@@ -409,7 +409,7 @@ class Gesture_mode:
     """
     전체 MODE 결정하기 위한 Class
     """
-    QUEUE_SIZE = 10
+    QUEUE_SIZE = 15
 
     def __init__(self):
         self.left = [0] * self.QUEUE_SIZE
@@ -474,7 +474,7 @@ class Gesture_mode:
         for right in self.right:
             if right == 6:
                 right_idx_1 += 1
-        if mode_result < 20 and right_idx_1 == 10:
+        if mode_result < 20 and right_idx_1 == 15:
             mode = 1
 
         # 탈모빔 자세
@@ -486,7 +486,7 @@ class Gesture_mode:
         for right in self.right:
             if right == 3:
                 right_idx_1 += 1
-        if mode_result < 23 and right_idx_1 == 10:
+        if mode_result < 23 and right_idx_1 == 15:
             mode = 2
 
         # 손모양 주먹
@@ -498,7 +498,7 @@ class Gesture_mode:
         for right in self.right:
             if right == 1:
                 right_idx_1 += 1
-        if mode_result < 23 and right_idx_1 == 10:
+        if mode_result < 23 and right_idx_1 == 15:
             pixel.mousemove(now_click, now_click2)
             mode = 3
 
@@ -511,7 +511,7 @@ class Gesture_mode:
         for right in self.right:
             if right == 7:
                 right_idx_1 += 1
-        if mode_result < 23 and right_idx_1 == 10:
+        if mode_result < 23 and right_idx_1 == 15:
             mode = 4
         return mode
 
@@ -1671,7 +1671,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                         if len(mark_p[-1]) == 5:
                             mode = gesture_mode.select_mode(pixel_c, now_click, now_click2)
-                            if mode != 4 and mode_before != 4:
+
+                            if mode != 4 and mode_before != 4 and mode_global != 4:
                                 self.mode_setting(mode, mode_before)
                                 mode_before = mode
 
