@@ -1270,6 +1270,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             """
             before_c = Mark_pixel(0, 0, 0)
             pixel_c = Mark_pixel(0, 0, 0)
+            mark_p0 = Mark_2d(0, 0)
+            mark_p5 = Mark_2d(0, 0)
             hm_idx = False
             finger_open_ = [False for _ in range(5)]
             gesture_time = time.time()
@@ -1563,14 +1565,26 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                 # static_gesture_detect(finger_open_for_ml, mark_p[-1])
                             finger_open_ = HM.return_finger_state()
 
-                        mark_p0 = mark_p[0].to_pixel()
-                        mark_p5 = mark_p[5].to_pixel()
-
                         swipe_signal = False
                         # pixel_c = mark_c.to_pixel()
                         if len(mark_p[-1]) == 5:
                             palm_vector = HM.get_palm_vector()
                             finger_vector = HM.get_finger_vector()
+
+                            palm_vector_markset = HM.get_palm_vector()
+                            finger_vector_markset = HM.get_finger_vector()
+                            # lpv_mode_1 = [-0.39, 0.144, -0.90]
+                            # lfv_mode_1 = [-0.33, -0.94, 0.]
+                            rpv_mode_1 = [-0.40, -0.14, -0.9]
+                            rfv_mode_1 = [-0.33, -0.94, 0.]
+                            pv_angle = get_angle(palm_vector_markset, rpv_mode_1)
+                            fv_angle = get_angle(finger_vector_markset, rfv_mode_1)
+                            # print(f"{pv_angle} /// {fv_angle}")
+
+
+                            if pv_angle + fv_angle < 3:
+                                mark_p0 = mark_p[0].to_pixel()
+                                mark_p5 = mark_p[5].to_pixel()
 
                             if finger_open_[1] == 1 and \
                                     sum(finger_open_[3:]) == 0 and \
@@ -1639,7 +1653,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             pv_angle = get_angle(palm_vector_drag, rpv_mode_1)
                             fv_angle = get_angle(finger_vector_drag, rfv_mode_1)
                             # print(f"{pv_angle} /// {fv_angle}")
-                            
+
                             if pv_angle + fv_angle < 3:
                                 pixel_c.mousemove(now_click, now_click2)
                                 now_click2 = hand_drag2(mark_p, static_gesture_num_r, now_click2)
@@ -1670,11 +1684,21 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                 pixel_c.wheel(before_c)
 
                         if len(mark_p[-1]) == 5:
-                            mode = gesture_mode.select_mode(pixel_c, now_click, now_click2)
+                            palm_vector_markset = HM.get_palm_vector()
+                            finger_vector_markset = HM.get_finger_vector()
+                            # lpv_mode_1 = [-0.39, 0.144, -0.90]
+                            # lfv_mode_1 = [-0.33, -0.94, 0.]
+                            rpv_mode_1 = [-0.40, -0.14, -0.9]
+                            rfv_mode_1 = [-0.33, -0.94, 0.]
+                            pv_angle = get_angle(palm_vector_markset, rpv_mode_1)
+                            fv_angle = get_angle(finger_vector_markset, rfv_mode_1)
+                            # print(f"{pv_angle} /// {fv_angle}")
 
-                            if mode != 4 and mode_before != 4 and mode_global != 4:
-                                self.mode_setting(mode, mode_before)
-                                mode_before = mode
+                            if pv_angle + fv_angle < 3:
+                                mode = gesture_mode.select_mode(pixel_c, now_click, now_click2)
+                                if mode != 4 and mode_before != 4 and mode_global != 4:
+                                    self.mode_setting(mode, mode_before)
+                                    mode_before = mode
 
                         # MODE 3 색 변경
                         if len(mark_p[-1]) == 4:
