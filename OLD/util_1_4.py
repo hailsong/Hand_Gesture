@@ -67,7 +67,7 @@ LEFT = True
 
 import json
 
-with open('setting.json', encoding='UTF8') as json_file:
+with open('../setting.json', encoding='UTF8') as json_file:
     json_data = json.load(json_file)
 
 language_setting = json_data["LANGUAGE"]
@@ -455,15 +455,14 @@ class Gesture_mode:
         mode_result = 0
         # print(self.left_palm_vector[0], self.left_finger_vector[0],
         # self.right_palm_vector[0], self.right_finger_vector[0])
-
-        # for lpv in self.left_palm_vector:
-        #     mode_result = mode_result + get_angle(lpv, lpv_mode_1)
-        # for lfv in self.left_finger_vector:
-        #     mode_result = mode_result + get_angle(lfv, lfv_mode_1)
-        # for rpv in self.right_palm_vector:
-        #     mode_result = mode_result + get_angle(rpv, rpv_mode_1)
-        # for rfv in self.right_finger_vector:
-        #     mode_result = mode_result + get_angle(rfv, rfv_mode_1)
+        for lpv in self.left_palm_vector:
+            mode_result = mode_result + get_angle(lpv, lpv_mode_1)
+        for lfv in self.left_finger_vector:
+            mode_result = mode_result + get_angle(lfv, lfv_mode_1)
+        for rpv in self.right_palm_vector:
+            mode_result = mode_result + get_angle(rpv, rpv_mode_1)
+        for rfv in self.right_finger_vector:
+            mode_result = mode_result + get_angle(rfv, rfv_mode_1)
 
         # 손바닥 펴서 앞에 보여주기
         left_idx_1 = 0
@@ -474,7 +473,7 @@ class Gesture_mode:
         for right in self.right:
             if right == 6:
                 right_idx_1 += 1
-        if mode_result < 20 and right_idx_1 == 10:
+        if mode_result < 20 and left_idx_1 == 10 and right_idx_1 == 10:
             mode = 1
 
         # 탈모빔 자세
@@ -486,19 +485,19 @@ class Gesture_mode:
         for right in self.right:
             if right == 3:
                 right_idx_1 += 1
-        if mode_result < 23 and right_idx_1 == 10:
+        if mode_result < 23 and left_idx_1 == 10 and right_idx_1 == 10:
             mode = 2
 
-        # 손모양 주먹
+        # 손모양 삼 자세
         left_idx_1 = 0
         for left in self.left:
             if left == 4:
                 left_idx_1 += 1
         right_idx_1 = 0
         for right in self.right:
-            if right == 1:
+            if right == 4:
                 right_idx_1 += 1
-        if mode_result < 23 and right_idx_1 == 10:
+        if mode_result < 23 and left_idx_1 == 10 and right_idx_1 == 10:
             pixel.mousemove(now_click, now_click2)
             mode = 3
 
@@ -511,7 +510,7 @@ class Gesture_mode:
         for right in self.right:
             if right == 7:
                 right_idx_1 += 1
-        if mode_result < 23 and right_idx_1 == 10:
+        if mode_result < 23 and left_idx_1 == 10 and right_idx_1 == 10:
             mode = 4
         return mode
 
@@ -589,7 +588,7 @@ def process_static_gesture(array_for_static, value_for_static):
     """
     import keras
     MODEL_STATIC = keras.models.load_model(
-        'keras_util/model_save/my_model_18.h5'
+        '../keras_util/model_save/my_model_18.h5'
     )
 
     while True:
@@ -634,16 +633,16 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     pygame.init()
 
     sounds = []
-    sounds.append(pygame.mixer.Sound('sound/writing.wav'))
-    sounds.append(pygame.mixer.Sound('sound/click.wav'))
-    sounds.append(pygame.mixer.Sound('sound/page.wav'))
-    sounds.append(pygame.mixer.Sound('sound/mode1.wav'))
-    sounds.append(pygame.mixer.Sound('sound/mode2.wav'))
-    sounds.append(pygame.mixer.Sound('sound/mode3.wav'))
-    sounds.append(pygame.mixer.Sound('sound/mode4.wav'))
-    sounds.append(pygame.mixer.Sound('sound/ctrlz.wav'))
-    sounds.append(pygame.mixer.Sound('sound/tick.mp3'))
-    sounds.append(pygame.mixer.Sound('sound/window.mp3'))
+    sounds.append(pygame.mixer.Sound('../sound/writing.wav'))
+    sounds.append(pygame.mixer.Sound('../sound/click.wav'))
+    sounds.append(pygame.mixer.Sound('../sound/page.wav'))
+    sounds.append(pygame.mixer.Sound('../sound/mode1.wav'))
+    sounds.append(pygame.mixer.Sound('../sound/mode2.wav'))
+    sounds.append(pygame.mixer.Sound('../sound/mode3.wav'))
+    sounds.append(pygame.mixer.Sound('../sound/mode4.wav'))
+    sounds.append(pygame.mixer.Sound('../sound/ctrlz.wav'))
+    sounds.append(pygame.mixer.Sound('../sound/tick.mp3'))
+    sounds.append(pygame.mixer.Sound('../sound/window.mp3'))
 
     # OLD VER.
     # from pygame import mixer
@@ -697,7 +696,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         return state, num
 
     def mode_3_interrupt(mode_global):
-        global now_click
         if mode_global == 3:
             # win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
             # win32api.keybd_event(0x31, 0, 0, 0)  # 1 누르기.
@@ -706,16 +704,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # win32api.keybd_event(0x31, 0, win32con.KEYEVENTF_KEYUP, 0)
             win32api.keybd_event(0x1B, 0, 0, 0)  # ESC DOWN
             win32api.keybd_event(0x1B, 0, win32con.KEYEVENTF_KEYUP, 0)  # ESC UP
-            print('drag off')
-            pos = win32api.GetCursorPos()
-            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, pos[0], pos[1], 0, 0)
-            # ctypes.windll.user32.mouse_event(0x0004, 0, 0, 0, 0)
-            now_click = False
-
-            sound = sounds[0]
-            # mixer.music.stop()
-            sound.stop()
-
 
     def mode_2_off(mode_before, laser_state):
         """
@@ -752,50 +740,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         else:
             return 0
 
-    # def mode_3_ctrl_z2(palm, finger, right, ctrl_z_check):
-    #     palm_th = np.array([-0.41607399, -0.20192736, 0.88662719])
-    #     finger_th = np.array([-0.08736683, -0.96164491, -0.26001175])
-    #     # print(ctrl_z_check, left)
-    #     parameter = get_angle(palm, palm_th) + get_angle(finger, finger_th)
-    #     # print(parameter)
-    #     if ctrl_z_check == 0 and left == 6 and parameter < 3.5:
-    #         print('되돌리기 (CTRL + Z)')
-    #         sound = sounds[7]
-    #         sound.play()
-    #         win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
-    #         win32api.keybd_event(0x5a, 0, 0, 0)  # Z 누르기.
-    #         time.sleep(0.1)
-    #         win32api.keybd_event(0xa2, 0, win32con.KEYEVENTF_KEYUP, 0)
-    #         win32api.keybd_event(0x5a, 0, win32con.KEYEVENTF_KEYUP, 0)
-    #         # 최소 N 프레임마다 Control + Z 상황과 가까운지 확인
-    #         return 15
-    #     elif ctrl_z_check > 0:
-    #         return ctrl_z_check - 1
-    #     else:
-    #         return 0
-
-    def mode_3_ctrl_z2(palm, finger, right, p_check):
-        palm_th = np.array([-0.41607399, -0.20192736, 0.88662719])
-        finger_th = np.array([-0.08736683, -0.96164491, -0.26001175])
-        # print(ctrl_z_check, left)
-        parameter = get_angle(palm, palm_th) + get_angle(finger, finger_th)
-        if p_check == 0 and right == 1 and parameter < 1.2:
-            print('되돌리기 (CTRL + Z)')
-            sound = sounds[7]
-            sound.play()
-
-            win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
-            win32api.keybd_event(0x5a, 0, 0, 0)  # Z 누르기.
-            time.sleep(0.1)
-            win32api.keybd_event(0xa2, 0, win32con.KEYEVENTF_KEYUP, 0)
-            win32api.keybd_event(0x5a, 0, win32con.KEYEVENTF_KEYUP, 0)
-            # 최소 N 프레임마다 Control + Z 상황과 가까운지 확인
-            return 15
-        elif p_check > 0:
-            return p_check - 1
-        else:
-            return 0
-
     def mode_3_remove_all(palm, finger, left, remove_check):
         # 60 means 60 frames to trigger 'REMOVE ALL'
         REMOVE_THRESHOLD = 60
@@ -804,25 +748,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         # print(ctrl_z_check, left)
         parameter = get_angle(palm, palm_th) + get_angle(finger, finger_th)
         if left == 3 and parameter < 2 and remove_check < REMOVE_THRESHOLD:
-            return remove_check + 1
-        elif remove_check == REMOVE_THRESHOLD:
-            # N 프레임 쌓이면 전체 지움
-            print('Remove all (E)')
-            win32api.keybd_event(0x45, 0, 0, 0)  # E 누르기.
-            time.sleep(0.03)
-            win32api.keybd_event(0x45, 0, win32con.KEYEVENTF_KEYUP, 0)
-            return 0
-        else:
-            return max(0, remove_check - 1)
-
-    def mode_3_remove_all2(palm, finger, right, remove_check):
-        # 60 means 60 frames to trigger 'REMOVE ALL'
-        REMOVE_THRESHOLD = 60
-        palm_th = np.array([-0.41607399, -0.20192736, 0.88662719])
-        finger_th = np.array([-0.08736683, -0.96164491, -0.26001175])
-        # print(ctrl_z_check, left)
-        parameter = get_angle(palm, palm_th) + get_angle(finger, finger_th)
-        if right == 1 and parameter < 1.2 and remove_check < REMOVE_THRESHOLD:
             return remove_check + 1
         elif remove_check == REMOVE_THRESHOLD:
             # N 프레임 쌓이면 전체 지움
@@ -874,7 +799,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         O = np.array([0.9, 0.4, 0])
         COLOR_SET = {'R': R, 'G': G, 'B': B, 'O': O}
 
-        BASE_LAYER = Image.open('./image/background.png')
+        BASE_LAYER = Image.open('../image/background.png')
         R_LAYER = './image/Red.png'
         G_LAYER = './image/Green.png'
         B_LAYER = './image/Blue.png'
@@ -959,12 +884,18 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     DRAG_USE = False
                     WHEEL_USE = False
 
-                    mode_3_interrupt(mode_global)
-
+                    if mode_global == 3:
+                        # win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
+                        # win32api.keybd_event(0x31, 0, 0, 0)  # 1 누르기.
+                        # time.sleep(0.1)
+                        # win32api.keybd_event(0xa2, 0, win32con.KEYEVENTF_KEYUP, 0)
+                        # win32api.keybd_event(0x31, 0, win32con.KEYEVENTF_KEYUP, 0)
+                        win32api.keybd_event(0x1B, 0, 0, 0)  # ESC DOWN
+                        win32api.keybd_event(0x1B, 0, win32con.KEYEVENTF_KEYUP, 0)  # ESC UP
                     print('MODE 2, 기본 발표 모드')
                     sound = sounds[4]
                     sound.play()
-
+                    mode_3_interrupt(mode_global)
                     mode_global = mode
 
                 if mode == 3 and mode_global != mode:
@@ -1164,8 +1095,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 # global straight_line, rectangular, circle
                 sound = sounds[0]
 
-                # print(gesture)
-
                 if gesture == 13 and now_click == False:
                     print('drag on')
                     pos = win32api.GetCursorPos()
@@ -1177,7 +1106,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                     sound.play(-1)
 
-                elif (gesture == 1 or gesture == 6 or gesture == 11) and now_click == True:
+                elif (gesture == 1 or gesture == 6) and now_click == True:
                     print('drag off')
                     pos = win32api.GetCursorPos()
                     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, pos[0], pos[1], 0, 0)
@@ -1581,16 +1510,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                             # MODE 3 CTRL + Z
                             if mode_global == 3:
-                                # ctrl_z_check_number = mode_3_ctrl_z(palm_vector, finger_vector,
-                                #                                     static_gesture_num_r, ctrl_z_check_number)
-                                # remove_all_number = mode_3_remove_all(palm_vector, finger_vector,
-                                #                                       static_gesture_num_r, remove_all_number)
-                                remove_all_number = mode_3_remove_all2(palm_vector, finger_vector,
-                                                                      static_gesture_num_r, remove_all_number)
-
-                                ctrl_z_check_number = mode_3_ctrl_z2(palm_vector, finger_vector,
+                                ctrl_z_check_number = mode_3_ctrl_z(palm_vector, finger_vector,
                                                                     static_gesture_num_r, ctrl_z_check_number)
-
+                                remove_all_number = mode_3_remove_all(palm_vector, finger_vector,
+                                                                      static_gesture_num_r, remove_all_number)
                                 board_num = mode_3_board(palm_vector, finger_vector,
                                                          static_gesture_num_r, board_num)
 
@@ -1630,7 +1553,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             rfv_mode_1 = [-0.33, -0.94, 0.]
                             pv_angle = get_angle(palm_vector_drag, rpv_mode_1)
                             fv_angle = get_angle(finger_vector_drag, rfv_mode_1)
-                            # print(f"{pv_angle} /// {fv_angle}")
+                            print(f"{pv_angle} /// {fv_angle}")
                             
                             if pv_angle + fv_angle < 3:
                                 pixel_c.mousemove(now_click, now_click2)
@@ -1661,12 +1584,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                                                                         mark_p[5] - mark_p[12]) < 0.3:
                                 pixel_c.wheel(before_c)
 
-                        if len(mark_p[-1]) == 5:
-                            mode = gesture_mode.select_mode(pixel_c, now_click, now_click2)
-                            if mode != 4 and mode_before != 4 and mode_global:
-                                self.mode_setting(mode, mode_before)
-                                mode_before = mode
-
                         # MODE 3 색 변경
                         if len(mark_p[-1]) == 4:
                             gesture_mode.update_left(static_gesture_num_l, palm_vector, finger_vector)
@@ -1674,7 +1591,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             # MODE CHANGE
                             palm_vector = HM.get_palm_vector()
                             finger_vector = HM.get_finger_vector()
-
+                            mode = gesture_mode.select_mode(pixel_c, now_click, now_click2)
+                            self.mode_setting(mode, mode_before)
+                            mode_before = mode
 
                             # 입력 모양 모니터링
                             # print(static_gesture_num_l, straight_line, rectangular, circle)
@@ -1739,7 +1658,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     class Setting_window(QtWidgets.QDialog):
         def setupUi(self, Dialog):
             self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
-            self.setWindowIcon((QtGui.QIcon('icon1.png')))
+            self.setWindowIcon((QtGui.QIcon('../icon1.png')))
             global language_setting
             Dialog.setObjectName("Setting")
             Dialog.resize(600, 485)
@@ -1749,7 +1668,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             else: Dialog.setStyleSheet("background-color : rgb(42, 46, 57);");
 
             icon = QtGui.QIcon()
-            icon.addPixmap(QtGui.QPixmap("image/icon/setting.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            icon.addPixmap(QtGui.QPixmap("../image/icon/setting.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             Dialog.setWindowIcon(icon)
 
             self.pushButton_ok = QtWidgets.QPushButton(Dialog)
@@ -1901,7 +1820,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             else:
                 Dialog.setStyleSheet("background-color : rgb(42, 46, 57);");
             icon = QtGui.QIcon()
-            icon.addPixmap(QtGui.QPixmap("image/icon/exit.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            icon.addPixmap(QtGui.QPixmap("../image/icon/exit.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             Dialog.setWindowIcon(icon)
 
             self.pushButton_ok = QtWidgets.QPushButton(Dialog)
@@ -1981,7 +1900,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             system("taskkill /f /im Motion-Presentation.exe")
 
             if EXIT_SURVEY:
-                os.system('''open_survey.bat''')
+                os.system('''../open_survey.bat''')
 
             sys.exit()
 
@@ -1996,7 +1915,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # self.showMaximized()
             self.setGeometry(0, 0, 1920, 1080)
 
-            self.setWindowIcon((QtGui.QIcon('icon1.png')))
+            self.setWindowIcon((QtGui.QIcon('../icon1.png')))
 
             # ensure that the widget always stays on top, no matter what
             self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
@@ -2210,16 +2129,16 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.label_6.setStyleSheet(
                 "background-color : white; border-radius: 30px; background: url(./image/default_1366.jpg)", )
             self.label_6.setObjectName("label_6")
-            self.label_6.setPixmap(QtGui.QPixmap("./image/default_1366.jpg"))
+            self.label_6.setPixmap(QtGui.QPixmap("../image/default_1366.jpg"))
 
             self.cam_frame = QtWidgets.QLabel(self.frame)
             self.cam_frame.setGeometry(QtCore.QRect(0, 0, 577, 433))
             self.cam_frame.setStyleSheet("background-color : rgba(0,0,0,0%);")
             self.cam_frame.setObjectName("cam_frame")
             if DARK_MODE:
-                self.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame_dark_1366.png"))
+                self.cam_frame.setPixmap(QtGui.QPixmap("../image/cam_frame_dark_1366.png"))
             else:
-                self.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame_1366.png"))
+                self.cam_frame.setPixmap(QtGui.QPixmap("../image/cam_frame_1366.png"))
 
 
             # self.loading = QtWidgets.QLabel(Form)
@@ -2498,9 +2417,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             if not DARK_MODE: Form.label.setStyleSheet("color : rgb(32, 36, 47);");
             else: Form.label.setStyleSheet("color : rgb(248, 249, 251);");
             if DARK_MODE:
-                Form.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame_dark_1366.png"))
+                Form.cam_frame.setPixmap(QtGui.QPixmap("../image/cam_frame_dark_1366.png"))
             else:
-                Form.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame_1366.png"))
+                Form.cam_frame.setPixmap(QtGui.QPixmap("../image/cam_frame_1366.png"))
             if DARK_MODE:
                 self.pushButton_10.setStyleSheet(
                     '''
@@ -2518,7 +2437,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     QPushButton:hover{image:url(./image/inbody_hover.png); border:0px;}
 
                     ''')
-                self.label_6.setPixmap(QtGui.QPixmap("./image/default_dark_1366.jpg"))
+                self.label_6.setPixmap(QtGui.QPixmap("../image/default_dark_1366.jpg"))
             else:
                 self.pushButton_10.setStyleSheet(
                     '''
@@ -2536,7 +2455,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     QPushButton:hover{image:url(./image/inbody_hover.png); border:0px;}
 
                     ''')
-                self.label_6.setPixmap(QtGui.QPixmap("./image/default_1366.jpg"))
+                self.label_6.setPixmap(QtGui.QPixmap("../image/default_1366.jpg"))
             if language == '한국어(Korean)':
                 if not DARK_MODE:
                     self.pushButton.setStyleSheet(
@@ -2917,14 +2836,14 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         }
                         ''')
 
-            with open('setting.json', 'r', encoding='UTF8') as json_file:
+            with open('../setting.json', 'r', encoding='UTF8') as json_file:
                 json_data = json.load(json_file)
                 new_data = json_data
             new_data['DARK_MODE'] = str(DARK_MODE)
             new_data['LANGUAGE'] = language
             new_data['LEFT'] = left
             print(new_data)
-            with open('setting.json', 'w', encoding='UTF8') as json_file:
+            with open('../setting.json', 'w', encoding='UTF8') as json_file:
                 json.dump(new_data, json_file, indent="\t")
 
         def retranslateUi(self, Form):
@@ -3085,9 +3004,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 "background-color : white; border-radius: 50px;" )
             self.label_6.setObjectName("label_6")
             if DARK_MODE:
-                self.label_6.setPixmap(QtGui.QPixmap("./image/default_dark_1366.jpg"))
+                self.label_6.setPixmap(QtGui.QPixmap("../image/default_dark_1366.jpg"))
             else:
-                self.label_6.setPixmap(QtGui.QPixmap("./image/default_1366.jpg"))
+                self.label_6.setPixmap(QtGui.QPixmap("../image/default_1366.jpg"))
 
             if self.pushButton_5.isChecked():
                 # image = cv2.imread('./image/testtest.jpg')
@@ -3135,7 +3054,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             sound.play()
             path = os.getcwd()
             guide_path = path + "\\guide\\0\\0.html"
-            os.system('''open_guide.bat''')
+            os.system('''../open_guide.bat''')
 
         def exitwindow(self):
             sound = sounds[9]
@@ -3191,8 +3110,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # have been already updated, we can mark the geometries "clean" and then
             # actually apply the mask.
             if self.dirty:
-                # 대본 영역 없앨 것 (1.4.2)
-                self.updateMask()
+                # self.updateMask()
                 self.dirty = False
 
         def Go_to_inbody(self):
@@ -3211,8 +3129,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 if __name__ == '__main__':
     # print("")
 
-    print('Running main_1_4_2.py...')
+    print('Running main_1_4.py...')
 
     # system('ZoomIt.exe')
 
-    system('python main_1_4_2.py')
+    system('python main_1_4.py')

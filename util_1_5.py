@@ -2427,45 +2427,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_4.setCheckable(True)
             self.pushButton_4.setObjectName("pushButton_4")
 
-            # MainWindow.setCentralWidget(self.centralwidget)
-
-            # self.line = QtWidgets.QFrame(Form)
-            # self.line.setGeometry(QtCore.QRect(40, 340, 130, 16))
-            # self.line.setStyleSheet("color : #C4BCB8;")
-            # self.line.setFrameShadow(QtWidgets.QFrame.Plain)
-            # self.line.setLineWidth(10)
-            # self.line.setFrameShape(QtWidgets.QFrame.HLine)
-            # self.line.setObjectName("line")
-            # self.line_2 = QtWidgets.QFrame(Form)
-            # self.line_2.setGeometry(QtCore.QRect(350, 340, 130, 16))
-            # self.line_2.setStyleSheet("color : #C4BCB8;")
-            # self.line_2.setFrameShadow(QtWidgets.QFrame.Plain)
-            # self.line_2.setLineWidth(10)
-            # self.line_2.setFrameShape(QtWidgets.QFrame.HLine)
-            # self.line_2.setObjectName("line_2")
-            # self.line_3 = QtWidgets.QFrame(Form)
-            # self.line_3.setGeometry(QtCore.QRect(250, 220, 20, 100))
-            # self.line_3.setStyleSheet("color : #C4BCB8;")
-            # self.line_3.setFrameShadow(QtWidgets.QFrame.Plain)
-            # self.line_3.setLineWidth(10)
-            # self.line_3.setFrameShape(QtWidgets.QFrame.VLine)
-            # self.line_3.setObjectName("line_3")
-            # self.line_4 = QtWidgets.QFrame(Form)
-            # self.line_4.setGeometry(QtCore.QRect(250, 376, 20, 100))
-            # self.line_4.setStyleSheet("color : #C4BCB8;")
-            # self.line_4.setFrameShadow(QtWidgets.QFrame.Plain)
-            # self.line_4.setLineWidth(10)
-            # self.line_4.setFrameShape(QtWidgets.QFrame.VLine)
-            # self.line_4.setObjectName("line_4")
-            # self.label_4 = QtWidgets.QLabel(Form)
-            # self.label_4.setGeometry(QtCore.QRect(214, 320, 100, 56))
-            # font = QtGui.QFont()
-            # font.setFamily("서울남산 장체B")
-            # font.setPointSize(28)
-            # self.label_4.setFont(font)
-            # self.label_4.setLayoutDirection(QtCore.Qt.LayoutDirectionAuto)
-            # self.label_4.setStyleSheet("color : #ACCCC4;")
-            # self.label_4.setObjectName("label_4")
 
             self.menubar = QtWidgets.QMenuBar(Form)
             self.menubar.setGeometry(QRect(0, 0, 870, 21))
@@ -2480,6 +2441,39 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             #self.pushButton_4.clicked.connect(self.loading.closeEvent)
             self.pushButton_5.toggled.connect(lambda: self.checked(Form))
             self.pushButton_5.toggled.connect(no_guide)
+
+            # 화살표
+            self.frame_arrow = QtWidgets.QFrame(Form)
+            self.frame_arrow.setGeometry(QtCore.QRect(21, 454, 725, 21))
+            self.frame_arrow.setAutoFillBackground(False)
+
+            # self.frame_arrow.setFrameShape(QtWidgets.QFrame.StyledPanel)
+            # self.frame_arrow.setFrameShadow(QtWidgets.QFrame.Raised)
+            self.frame_arrow.setObjectName("frame_arrow")
+
+            self.arrow1 = QtWidgets.QLabel(self.frame_arrow)
+            self.arrow1.setGeometry(QtCore.QRect(0, 0, 174, 21))
+            self.arrow1.setStyleSheet(
+                "background-color : rgba(0, 0, 0, 0%)")
+            self.arrow1.setObjectName("arrow1")
+
+            self.arrow2 = QtWidgets.QLabel(self.frame_arrow)
+            self.arrow2.setGeometry(QtCore.QRect(184, 0, 174, 21))
+            self.arrow2.setStyleSheet(
+                "background-color : rgba(0, 0, 0, 0%);")
+            self.arrow2.setObjectName("arrow2")
+
+            self.arrow3 = QtWidgets.QLabel(self.frame_arrow)
+            self.arrow3.setGeometry(QtCore.QRect(369, 0, 174, 21))
+            self.arrow3.setStyleSheet(
+                "background-color : rgba(0, 0, 0, 0%);")
+            self.arrow3.setObjectName("arrow3")
+
+            self.arrow4 = QtWidgets.QLabel(self.frame_arrow)
+            self.arrow4.setGeometry(QtCore.QRect(553, 0, 174, 21))
+            self.arrow4.setStyleSheet(
+                "background-color : rgba(0, 0, 0, 0%);")
+            self.arrow4.setObjectName("arrow4")
 
 
             self.thread = Opcv()
@@ -2954,19 +2948,35 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
         def setGuiGuide(self, Form):
             global DARK_MODE, mode_global, language_setting
+            self.arrow1.setStyleSheet(
+                "background-color : rgba(0, 0, 0, 0%)")
+            self.arrow2.setStyleSheet(
+                "background-color : rgba(0, 0, 0, 0%)")
+            self.arrow3.setStyleSheet(
+                "background-color : rgba(0, 0, 0, 0%)")
+            self.arrow4.setStyleSheet(
+                "background-color : rgba(0, 0, 0, 0%)")
 
             if language_setting == '한국어(Korean)':
                 if DARK_MODE:
                     if mode_global == 1:
+                        self.arrow1.setStyleSheet(
+                            "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
                         self.frame_guide.setStyleSheet(
                             "background-color : rgb(47, 56, 77); border-radius: 30px; image:url(./image/guide/KOR_1_2.png);")
                     elif mode_global == 2:
+                        self.arrow2.setStyleSheet(
+                            "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
                         self.frame_guide.setStyleSheet(
                             "background-color : rgb(47, 56, 77); border-radius: 30px; image:url(./image/guide/KOR_2_2.png);")
                     elif mode_global == 3:
+                        self.arrow3.setStyleSheet(
+                            "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
                         self.frame_guide.setStyleSheet(
                             "background-color : rgb(47, 56, 77); border-radius: 30px; image:url(./image/guide/KOR_3_2.png);")
                     elif mode_global == 4:
+                        self.arrow4.setStyleSheet(
+                            "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
                         self.frame_guide.setStyleSheet(
                             "background-color : rgb(47, 56, 77); border-radius: 30px; image:url(./image/guide/KOR_4_2.png);")
                     else:
@@ -2975,12 +2985,20 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                 else:
                     if mode_global == 1:
+                        self.arrow1.setStyleSheet(
+                            "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
                         self.frame_guide.setStyleSheet("background-color : rgb(233, 236, 241); border-radius: 30px; image:url(./image/guide/KOR_1_1.png);")
                     elif mode_global == 2:
+                        self.arrow2.setStyleSheet(
+                            "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
                         self.frame_guide.setStyleSheet("background-color : rgb(233, 236, 241); border-radius: 30px; image:url(./image/guide/KOR_2_1.png);")
                     elif mode_global == 3:
+                        self.arrow3.setStyleSheet(
+                            "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
                         self.frame_guide.setStyleSheet("background-color : rgb(233, 236, 241); border-radius: 30px; image:url(./image/guide/KOR_3_1.png);")
                     elif mode_global == 4:
+                        self.arrow4.setStyleSheet(
+                            "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
                         self.frame_guide.setStyleSheet("background-color : rgb(233, 236, 241); border-radius: 30px; image:url(./image/guide/KOR_4_1.png);")
                     else:
                         self.frame_guide.setStyleSheet(
@@ -2988,15 +3006,23 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             else:
                 if DARK_MODE:
                     if mode_global == 1:
+                        self.arrow1.setStyleSheet(
+                            "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
                         self.frame_guide.setStyleSheet(
                             "background-color : rgb(47, 56, 77); border-radius: 30px; image:url(./image/guide/ENG_1_2.png);")
                     elif mode_global == 2:
+                        self.arrow2.setStyleSheet(
+                            "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
                         self.frame_guide.setStyleSheet(
                             "background-color : rgb(47, 56, 77); border-radius: 30px; image:url(./image/guide/ENG_2_2.png);")
                     elif mode_global == 3:
+                        self.arrow3.setStyleSheet(
+                            "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
                         self.frame_guide.setStyleSheet(
                             "background-color : rgb(47, 56, 77); border-radius: 30px; image:url(./image/guide/ENG_3_2.png);")
                     elif mode_global == 4:
+                        self.arrow4.setStyleSheet(
+                            "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
                         self.frame_guide.setStyleSheet(
                             "background-color : rgb(47, 56, 77); border-radius: 30px; image:url(./image/guide/ENG_4_2.png);")
                     else:
@@ -3005,12 +3031,20 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                 else:
                     if mode_global == 1:
+                        self.arrow1.setStyleSheet(
+                            "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
                         self.frame_guide.setStyleSheet("background-color : rgb(233, 236, 241); border-radius: 30px; image:url(./image/guide/ENG_1_1.png);")
                     elif mode_global == 2:
+                        self.arrow2.setStyleSheet(
+                            "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
                         self.frame_guide.setStyleSheet("background-color : rgb(233, 236, 241); border-radius: 30px; image:url(./image/guide/ENG_2_1.png);")
                     elif mode_global == 3:
+                        self.arrow3.setStyleSheet(
+                            "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
                         self.frame_guide.setStyleSheet("background-color : rgb(233, 236, 241); border-radius: 30px; image:url(./image/guide/ENG_3_1.png);")
                     elif mode_global == 4:
+                        self.arrow4.setStyleSheet(
+                            "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
                         self.frame_guide.setStyleSheet("background-color : rgb(233, 236, 241); border-radius: 30px; image:url(./image/guide/ENG_4_1.png);")
                     else:
                         self.frame_guide.setStyleSheet(

@@ -811,6 +811,12 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         else:
             return 0
 
+    def no_guide(self):
+        print('no_guide')
+        global mode_global
+        ui.setGuiGuide(ui)
+        mode_global = 0
+
     class Opcv(QThread):
 
         change_pixmap_signal = pyqtSignal(np.ndarray)
@@ -920,6 +926,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     sound.play()
                     mode_3_interrupt(mode_global)
                     mode_global = mode
+                ui.setGuiGuide(ui)
 
 
 
@@ -1796,6 +1803,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 LEFT = (leftright_setting == "왼손 모드 (Left-hand Mode)")
                 # print("Set Language : ", crnttxt)
                 ui.setupLanguage(ui, language, DARK_MODE, LEFT)
+                ui.setGuiGuide(ui)
 
     class Exit_window(QtWidgets.QDialog):
         def setupUi(self, Dialog):
@@ -2171,6 +2179,14 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton.setGeometry(QtCore.QRect(0, 0, 357, 228))
             self.pushButton.setStyleSheet("background-color : #FFFFFF;")
 
+            self.frame_guide = QtWidgets.QLabel(Form)
+            self.frame_guide.setGeometry(QtCore.QRect(21, 475, 1323, 249))
+            self.frame_guide.setAutoFillBackground(False)
+
+            self.frame_guide.setFrameShape(QtWidgets.QFrame.StyledPanel)
+            self.frame_guide.setFrameShadow(QtWidgets.QFrame.Raised)
+            self.frame_guide.setObjectName("frame_guide")
+
             if DARK_MODE:
                 self.pushButton.setStyleSheet(
                     '''
@@ -2368,9 +2384,32 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # self.pushButton_3.toggled.connect(lambda: self.togglebutton(Form, integer=2))
             # self.pushButton_4.toggled.connect(lambda: self.togglebutton(Form, integer=3))
 
+
             self.pushButton_5.toggled.connect(ui_load.open)
             # self.pushButton_4.clicked.connect(self.loading.closeEvent)
             self.pushButton_5.toggled.connect(lambda: self.checked(Form))
+
+            # 화살표
+            self.frame_arrow = QtWidgets.QFrame(Form)
+            self.frame_arrow.setGeometry(QtCore.QRect(21, 454, 725, 21))
+            self.frame_arrow.setAutoFillBackground(False)
+
+            # self.frame_arrow.setFrameShape(QtWidgets.QFrame.StyledPanel)
+            # self.frame_arrow.setFrameShadow(QtWidgets.QFrame.Raised)
+            self.frame_arrow.setObjectName("frame_arrow")
+
+            self.arrow1 = QtWidgets.QLabel(self.frame_arrow)
+            self.arrow1.setGeometry(QtCore.QRect(0, 0, 358, 21))
+            self.arrow1.setStyleSheet(
+                "background-color : rgba(0, 0, 0, 0%)")
+            self.arrow1.setObjectName("arrow1")
+
+            self.arrow2 = QtWidgets.QLabel(self.frame_arrow)
+            self.arrow2.setGeometry(QtCore.QRect(369, 0, 363, 21))
+            self.arrow2.setStyleSheet(
+                "background-color : rgba(0, 0, 0, 0%);")
+            self.arrow2.setObjectName("arrow2")
+
 
             self.thread = Opcv()
 
@@ -2392,6 +2431,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # thread_load
             # self.thread_load = Load()
             ui.setupLanguage(ui, language_setting, DARK_MODE, LEFT)
+            ui.setGuiGuide(ui)
 
             self.retranslateUi(Form)
             QtCore.QMetaObject.connectSlotsByName(Form)
@@ -2839,9 +2879,74 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             with open('setting.json', 'w', encoding='UTF8') as json_file:
                 json.dump(new_data, json_file, indent="\t")
 
+        def setGuiGuide(self, Form):
+            global DARK_MODE, mode_global, language_setting
+
+            self.arrow1.setStyleSheet(
+                "background-color : rgba(0, 0, 0, 0%)")
+            self.arrow2.setStyleSheet(
+                "background-color : rgba(0, 0, 0, 0%)")
+
+            if language_setting == '한국어(Korean)':
+                if DARK_MODE:
+                    if mode_global == 1:
+                        self.arrow1.setStyleSheet(
+                            "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
+                        self.frame_guide.setStyleSheet(
+                            "background-color : rgb(47, 56, 77); border-radius: 30px; image:url(./image/guide/KOR_1_2.png);")
+                    elif mode_global == 2:
+                        self.arrow2.setStyleSheet(
+                            "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
+                        self.frame_guide.setStyleSheet(
+                            "background-color : rgb(47, 56, 77); border-radius: 30px; image:url(./image/guide/KOR_2_2.png);")
+                    else:
+                        self.frame_guide.setStyleSheet(
+                            "background-color : rgb(47, 56, 77); border-radius: 30px; image:none")
+
+                else:
+                    if mode_global == 1:
+                        self.arrow1.setStyleSheet(
+                            "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
+                        self.frame_guide.setStyleSheet("background-color : rgb(233, 236, 241); border-radius: 30px; image:url(./image/guide/KOR_1_1.png);")
+                    elif mode_global == 2:
+                        self.arrow2.setStyleSheet(
+                            "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
+                        self.frame_guide.setStyleSheet("background-color : rgb(233, 236, 241); border-radius: 30px; image:url(./image/guide/KOR_2_1.png);")
+                    else:
+                        self.frame_guide.setStyleSheet(
+                            "background-color : rgb(233, 236, 241); border-radius: 30px; image:none")
+            else:
+                if DARK_MODE:
+                    if mode_global == 1:
+                        self.arrow1.setStyleSheet(
+                            "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
+                        self.frame_guide.setStyleSheet(
+                            "background-color : rgb(47, 56, 77); border-radius: 30px; image:url(./image/guide/ENG_1_2.png);")
+                    elif mode_global == 2:
+                        self.arrow2.setStyleSheet(
+                            "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
+                        self.frame_guide.setStyleSheet(
+                            "background-color : rgb(47, 56, 77); border-radius: 30px; image:url(./image/guide/ENG_2_2.png);")
+                    else:
+                        self.frame_guide.setStyleSheet(
+                            "background-color : rgb(47, 56, 77); border-radius: 30px;")
+
+                else:
+                    if mode_global == 1:
+                        self.arrow1.setStyleSheet(
+                            "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
+                        self.frame_guide.setStyleSheet("background-color : rgb(233, 236, 241); border-radius: 30px; image:url(./image/guide/ENG_1_1.png);")
+                    elif mode_global == 2:
+                        self.arrow2.setStyleSheet(
+                            "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
+                        self.frame_guide.setStyleSheet("background-color : rgb(233, 236, 241); border-radius: 30px; image:url(./image/guide/ENG_2_1.png);")
+                    else:
+                        self.frame_guide.setStyleSheet(
+                            "background-color : rgb(233, 236, 241); border-radius: 30px;")
+
         def retranslateUi(self, Form):
             _translate = QtCore.QCoreApplication.translate
-            Form.setWindowTitle(_translate("Form", "Motion Presentation V 1.4"))
+            Form.setWindowTitle(_translate("Form", "Motion Presentation V 1.5"))
             # self.label_2.setText(_translate("Form", "Presentation Tool"))
             # self.label_3.setText(_translate("Form", "1.2"))
             # 여기다가
