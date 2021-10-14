@@ -409,7 +409,7 @@ class Gesture_mode:
     """
     전체 MODE 결정하기 위한 Class
     """
-    QUEUE_SIZE = 15
+    QUEUE_SIZE = 10
 
     def __init__(self):
         self.left = [0] * self.QUEUE_SIZE
@@ -465,6 +465,7 @@ class Gesture_mode:
         # for rfv in self.right_finger_vector:
         #     mode_result = mode_result + get_angle(rfv, rfv_mode_1)
 
+
         # 손바닥 펴서 앞에 보여주기
         left_idx_1 = 0
         for left in self.left:
@@ -474,7 +475,7 @@ class Gesture_mode:
         for right in self.right:
             if right == 6:
                 right_idx_1 += 1
-        if mode_result < 20 and right_idx_1 == 15:
+        if mode_result < 20 and right_idx_1 == self.QUEUE_SIZE:
             mode = 1
 
         # 탈모빔 자세
@@ -486,7 +487,7 @@ class Gesture_mode:
         for right in self.right:
             if right == 3:
                 right_idx_1 += 1
-        if mode_result < 23 and right_idx_1 == 15:
+        if mode_result < 23 and right_idx_1 == self.QUEUE_SIZE:
             mode = 2
 
         # 손모양 주먹
@@ -498,7 +499,7 @@ class Gesture_mode:
         for right in self.right:
             if right == 1:
                 right_idx_1 += 1
-        if mode_result < 23 and right_idx_1 == 15:
+        if mode_result < 23 and right_idx_1 == self.QUEUE_SIZE:
             pixel.mousemove(now_click, now_click2)
             mode = 3
 
@@ -511,7 +512,7 @@ class Gesture_mode:
         for right in self.right:
             if right == 7:
                 right_idx_1 += 1
-        if mode_result < 23 and right_idx_1 == 15:
+        if mode_result < 23 and right_idx_1 == self.QUEUE_SIZE:
             mode = 4
         return mode
 
@@ -1552,7 +1553,21 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                     f_p_list = HM.return_18_info()
                                     array_for_static_r[:] = f_p_list
                                     # print(array_for_static)
-                                    static_gesture_num_r = value_for_static_r.value
+                                    palm_vector = HM.get_palm_vector()
+                                    finger_vector = HM.get_finger_vector()
+
+                                    palm_vector_markset = HM.get_palm_vector()
+                                    finger_vector_markset = HM.get_finger_vector()
+                                    # lpv_mode_1 = [-0.39, 0.144, -0.90]
+                                    # lfv_mode_1 = [-0.33, -0.94, 0.]
+                                    rpv_mode_1 = [-0.40, -0.14, -0.9]
+                                    rfv_mode_1 = [-0.33, -0.94, 0.]
+                                    pv_angle = get_angle(palm_vector_markset, rpv_mode_1)
+                                    fv_angle = get_angle(finger_vector_markset, rfv_mode_1)
+                                    # print(f"{pv_angle} /// {fv_angle}")
+
+                                    if pv_angle + fv_angle < 2:
+                                        static_gesture_num_r = value_for_static_r.value
 
                                 # try:
                                 #     static_gesture_drawing(static_gesture_num, mark_p[-1])
@@ -1617,25 +1632,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                                          static_gesture_num_r, board_num)
 
                             pixel_c = mark_p5
-                            # # gesture updating
-                            # if len(mark_p) == 22:
-                            #     # print(HM.p_list[-1])
-                            #     gesture.update(HM, static_gesture_num_r, swipe_signal)
-                            #     # print(static_gesture_num)
-                            #     try:
-                            #         # print(time.time() - gesture_time)
-                            #         # LRUD = gesture.gesture_LRUD()
-                            #         # print(LRUD)
-                            #         # print(gesture.gesture_data)
-                            #         # print(6. in gesture.gesture_data)
-                            #         if time.time() - gesture_time > 0.5 and USE_DYNAMIC == True:
-                            #             # 다이나믹 제스처
-                            #             detect_signal = gesture.detect_gesture()
-                            #         if detect_signal == -1:  # 디텍트했을때!
-                            #             gesture_time = time.time()
-                            #             detect_signal = 0
-                            #     except:
-                            #         pass
+
 
                         if len(mark_p[-1]) == 5:
                             gesture_mode.update_right(static_gesture_num_r, palm_vector, finger_vector)
@@ -1694,7 +1691,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             fv_angle = get_angle(finger_vector_markset, rfv_mode_1)
                             # print(f"{pv_angle} /// {fv_angle}")
 
-                            if pv_angle + fv_angle < 3:
+                            if pv_angle + fv_angle < 2:
                                 mode = gesture_mode.select_mode(pixel_c, now_click, now_click2)
                                 if mode != 4 and mode_before != 4 and mode_global != 4:
                                     self.mode_setting(mode, mode_before)

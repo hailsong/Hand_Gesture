@@ -441,70 +441,64 @@ class Gesture_mode:
         self.right_palm_vector.pop(0)
         self.right_finger_vector.pop(0)
 
-    def select_mode(self, pixel, now_click, now_click2):
-        mode = 0
-        lpv_mode_1 = [-0.39, 0.144, -0.90]
-        lfv_mode_1 = [-0.33, -0.94, 0.]
-        rpv_mode_1 = [-0.40, -0.14, -0.9]
-        rfv_mode_1 = [-0.33, -0.94, 0.]
-        mode_result = 0
-        # print(self.left_palm_vector[0], self.left_finger_vector[0],
-        # self.right_palm_vector[0], self.right_finger_vector[0])
-        for lpv in self.left_palm_vector:
-            mode_result = mode_result + get_angle(lpv, lpv_mode_1)
-        for lfv in self.left_finger_vector:
-            mode_result = mode_result + get_angle(lfv, lfv_mode_1)
-        for rpv in self.right_palm_vector:
-            mode_result = mode_result + get_angle(rpv, rpv_mode_1)
-        for rfv in self.right_finger_vector:
-            mode_result = mode_result + get_angle(rfv, rfv_mode_1)
-
-        # 손바닥 펴서 앞에 보여주기
-        left_idx_1 = 0
-        for left in self.left:
-            if left == 6:
-                left_idx_1 += 1
-        right_idx_1 = 0
-        for right in self.right:
-            if right == 6:
-                right_idx_1 += 1
-        if mode_result < 20 and left_idx_1 == 10 and right_idx_1 == 10:
-            mode = 1
-
-        # 탈모빔 자세
-        left_idx_1 = 0
-        for left in self.left:
-            if left == 3:
-                left_idx_1 += 1
-        right_idx_1 = 0
-        for right in self.right:
-            if right == 3:
-                right_idx_1 += 1
-        if mode_result < 23 and left_idx_1 == 10 and right_idx_1 == 10:
-            mode = 2
-
-        return mode
+    # def select_mode(self, pixel, now_click, now_click2):
+    #     mode = 0
+    #     lpv_mode_1 = [-0.39, 0.144, -0.90]
+    #     lfv_mode_1 = [-0.33, -0.94, 0.]
+    #     rpv_mode_1 = [-0.40, -0.14, -0.9]
+    #     rfv_mode_1 = [-0.33, -0.94, 0.]
+    #     mode_result = 0
+    #     # print(self.left_palm_vector[0], self.left_finger_vector[0],
+    #     # self.right_palm_vector[0], self.right_finger_vector[0])
+    #     for lpv in self.left_palm_vector:
+    #         mode_result = mode_result + get_angle(lpv, lpv_mode_1)
+    #     for lfv in self.left_finger_vector:
+    #         mode_result = mode_result + get_angle(lfv, lfv_mode_1)
+    #     for rpv in self.right_palm_vector:
+    #         mode_result = mode_result + get_angle(rpv, rpv_mode_1)
+    #     for rfv in self.right_finger_vector:
+    #         mode_result = mode_result + get_angle(rfv, rfv_mode_1)
+    #
+    #     # 손바닥 펴서 앞에 보여주기
+    #     left_idx_1 = 0
+    #     for left in self.left:
+    #         if left == 6:
+    #             left_idx_1 += 1
+    #     right_idx_1 = 0
+    #     for right in self.right:
+    #         if right == 6:
+    #             right_idx_1 += 1
+    #     if mode_result < 20 and left_idx_1 == 10 and right_idx_1 == 10:
+    #         mode = 1
+    #
+    #     # 탈모빔 자세
+    #     left_idx_1 = 0
+    #     for left in self.left:
+    #         if left == 3:
+    #             left_idx_1 += 1
+    #     right_idx_1 = 0
+    #     for right in self.right:
+    #         if right == 3:
+    #             right_idx_1 += 1
+    #     if mode_result < 23 and left_idx_1 == 10 and right_idx_1 == 10:
+    #         mode = 2
+    #
+    #     return mode
 
     # 한 손으로 모드 제어
-    def select_mode_one_hand(self, pixel, now_click, now_click2):
+    def select_mode(self, pixel, now_click, now_click2):
         mode = 0
-        lpv_mode_1 = [-0.39, 0.144, -0.90]
-        lfv_mode_1 = [-0.33, -0.94, 0.]
+
         rpv_mode_1 = [-0.40, -0.14, -0.9]
         rfv_mode_1 = [-0.33, -0.94, 0.]
         mode_result = 0
-        # print(self.left_palm_vector[0], self.left_finger_vector[0])
-        # self.right_palm_vector[0], self.right_finger_vector[0])
-        # for lpv in self.left_palm_vector:
-        #     mode_result = mode_result + get_angle(lpv, lpv_mode_1)
-        # for lfv in self.left_finger_vector:
-        #     mode_result = mode_result + get_angle(lfv, lfv_mode_1)
 
-        for rpv in self.right_palm_vector:
-            mode_result = mode_result + get_angle(rpv, rpv_mode_1)
-        for rfv in self.right_finger_vector:
-            mode_result = mode_result + get_angle(rfv, rfv_mode_1)
 
+        # for rpv in self.right_palm_vector:
+        #     mode_result = mode_result + get_angle(rpv, rpv_mode_1)
+        # for rfv in self.right_finger_vector:
+        #     mode_result = mode_result + get_angle(rfv, rfv_mode_1)
+        #
 
 
         # 손바닥 펴서 앞에 보여주기
@@ -1191,6 +1185,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             """
             before_c = Mark_pixel(0, 0, 0)
             pixel_c = Mark_pixel(0, 0, 0)
+            mark_p0 = Mark_2d(0, 0)
+            mark_p5 = Mark_2d(0, 0)
             hm_idx = False
             finger_open_ = [False for _ in range(5)]
             gesture_time = time.time()
@@ -1462,7 +1458,22 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                     f_p_list = HM.return_18_info()
                                     array_for_static_r[:] = f_p_list
                                     # print(array_for_static)
-                                    static_gesture_num_r = value_for_static_r.value
+
+                                    palm_vector = HM.get_palm_vector()
+                                    finger_vector = HM.get_finger_vector()
+
+                                    palm_vector_markset = HM.get_palm_vector()
+                                    finger_vector_markset = HM.get_finger_vector()
+                                    # lpv_mode_1 = [-0.39, 0.144, -0.90]
+                                    # lfv_mode_1 = [-0.33, -0.94, 0.]
+                                    rpv_mode_1 = [-0.40, -0.14, -0.9]
+                                    rfv_mode_1 = [-0.33, -0.94, 0.]
+                                    pv_angle = get_angle(palm_vector_markset, rpv_mode_1)
+                                    fv_angle = get_angle(finger_vector_markset, rfv_mode_1)
+                                    # print(f"{pv_angle} /// {fv_angle}")
+
+                                    if pv_angle + fv_angle < 3:
+                                        static_gesture_num_r = value_for_static_r.value
 
                                 # try:
                                 #     static_gesture_drawing(static_gesture_num, mark_p[-1])
@@ -1475,14 +1486,26 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                 # static_gesture_detect(finger_open_for_ml, mark_p[-1])
                             finger_open_ = HM.return_finger_state()
 
-                        mark_p0 = mark_p[0].to_pixel()
-                        mark_p5 = mark_p[5].to_pixel()
-
                         swipe_signal = False
                         # pixel_c = mark_c.to_pixel()
                         if len(mark_p[-1]) == 5:
                             palm_vector = HM.get_palm_vector()
                             finger_vector = HM.get_finger_vector()
+
+                            palm_vector_markset = HM.get_palm_vector()
+                            finger_vector_markset = HM.get_finger_vector()
+                            # lpv_mode_1 = [-0.39, 0.144, -0.90]
+                            # lfv_mode_1 = [-0.33, -0.94, 0.]
+                            rpv_mode_1 = [-0.40, -0.14, -0.9]
+                            rfv_mode_1 = [-0.33, -0.94, 0.]
+                            pv_angle = get_angle(palm_vector_markset, rpv_mode_1)
+                            fv_angle = get_angle(finger_vector_markset, rfv_mode_1)
+                            # print(f"{pv_angle} /// {fv_angle}")
+
+
+                            if pv_angle + fv_angle < 3:
+                                mark_p0 = mark_p[0].to_pixel()
+                                mark_p5 = mark_p[5].to_pixel()
 
                             if finger_open_[1] == 1 and \
                                     sum(finger_open_[3:]) == 0 and \
@@ -1499,56 +1522,23 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                 laser_hand = np.all(finger_open_ == np.array([1, 1, 1, 0, 0]))
                                 laser_state, laser_num = mode_2_laser(laser_state, laser_num, laser_hand)
 
-                            # MODE 3 CTRL + Z
-                            if mode_global == 3:
-                                ctrl_z_check_number = mode_3_ctrl_z(palm_vector, finger_vector,
-                                                                    static_gesture_num_r, ctrl_z_check_number)
-                                remove_all_number = mode_3_remove_all(palm_vector, finger_vector,
-                                                                      static_gesture_num_r, remove_all_number)
-                                board_num = mode_3_board(palm_vector, finger_vector,
-                                                         static_gesture_num_r, board_num)
 
                             pixel_c = mark_p5
-                            # # gesture updating
-                            # if len(mark_p) == 22:
-                            #     # print(HM.p_list[-1])
-                            #     gesture.update(HM, static_gesture_num_r, swipe_signal)
-                            #     # print(static_gesture_num)
-                            #     try:
-                            #         # print(time.time() - gesture_time)
-                            #         # LRUD = gesture.gesture_LRUD()
-                            #         # print(LRUD)
-                            #         # print(gesture.gesture_data)
-                            #         # print(6. in gesture.gesture_data)
-                            #         if time.time() - gesture_time > 0.5 and USE_DYNAMIC == True:
-                            #             # 다이나믹 제스처
-                            #             detect_signal = gesture.detect_gesture()
-                            #         if detect_signal == -1:  # 디텍트했을때!
-                            #             gesture_time = time.time()
-                            #             detect_signal = 0
-                            #     except:
-                            #         pass
+
 
                         if len(mark_p[-1]) == 5:
-                            gesture_mode.update_right(static_gesture_num_r, palm_vector, finger_vector)
-
-                        # 마우스 움직임, 드래그
-
-                        if mode_global == 3 and len(mark_p[-1]) == 5:
-                            # 왼손 오른손 구분 모델이 잘 작동하지 않는 경우 있어 손바닥, 손가락의 벡터를 이용해 추가 검증
-                            palm_vector_drag = HM.get_palm_vector()
-                            finger_vector_drag = HM.get_finger_vector()
+                            palm_vector_markset = HM.get_palm_vector()
+                            finger_vector_markset = HM.get_finger_vector()
                             # lpv_mode_1 = [-0.39, 0.144, -0.90]
                             # lfv_mode_1 = [-0.33, -0.94, 0.]
                             rpv_mode_1 = [-0.40, -0.14, -0.9]
                             rfv_mode_1 = [-0.33, -0.94, 0.]
-                            pv_angle = get_angle(palm_vector_drag, rpv_mode_1)
-                            fv_angle = get_angle(finger_vector_drag, rfv_mode_1)
+                            pv_angle = get_angle(palm_vector_markset, rpv_mode_1)
+                            fv_angle = get_angle(finger_vector_markset,  rfv_mode_1)
                             print(f"{pv_angle} /// {fv_angle}")
+                            if pv_angle + fv_angle < 2:
+                                gesture_mode.update_right(static_gesture_num_r, palm_vector, finger_vector)
 
-                            if pv_angle + fv_angle < 3:
-                                pixel_c.mousemove(now_click, now_click2)
-                                now_click2 = hand_drag2(mark_p, static_gesture_num_r, now_click2)
 
                         if (get_distance(pixel_c, before_c) < get_distance(mark_p0, mark_p5)) and \
                                 sum(finger_open_[3:]) == 0 and \
@@ -1576,50 +1566,20 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                 pixel_c.wheel(before_c)
 
                         if len(mark_p[-1]) == 5:
-                            mode = gesture_mode.select_mode_one_hand(pixel_c, now_click, now_click2)
-                            self.mode_setting(mode, mode_before)
-                            mode_before = mode
+                            palm_vector_markset = HM.get_palm_vector()
+                            finger_vector_markset = HM.get_finger_vector()
+                            # lpv_mode_1 = [-0.39, 0.144, -0.90]
+                            # lfv_mode_1 = [-0.33, -0.94, 0.]
+                            rpv_mode_1 = [-0.40, -0.14, -0.9]
+                            rfv_mode_1 = [-0.33, -0.94, 0.]
+                            pv_angle = get_angle(palm_vector_markset, rpv_mode_1)
+                            fv_angle = get_angle(finger_vector_markset, rfv_mode_1)
 
-                        # MODE 3 색 변경
-                        if len(mark_p[-1]) == 4:
-                            gesture_mode.update_left(static_gesture_num_l, palm_vector, finger_vector)
-
-                            # MODE CHANGE
-                            palm_vector = HM.get_palm_vector()
-                            finger_vector = HM.get_finger_vector()
-                            # mode = gesture_mode.select_mode(pixel_c, now_click, now_click2)
-
-                            # 입력 모양 모니터링
-                            # print(static_gesture_num_l, straight_line, rectangular, circle)
-
-                            # 직선 그리기
-                            if mode_global == 3 and static_gesture_num_l == 13:
-                                straight_line = True
-                                win32api.keybd_event(0xA0, 0, 0, 0)  # LShift 누르기.
-                            else:
-                                win32api.keybd_event(0xA0, 0, win32con.KEYEVENTF_KEYUP, 0)
-                                straight_line = False
-
-                            # 네모 그리기
-                            if mode_global == 3 and static_gesture_num_l == 11:
-                                rectangular = True
-                                win32api.keybd_event(0xA2, 0, 0, 0)  # LCtrl 누르기.
-                            else:
-                                win32api.keybd_event(0xA2, 0, win32con.KEYEVENTF_KEYUP, 0)
-                                rectangular = False
-
-                            # 원 그리기
-                            if mode_global == 3 and static_gesture_num_l == 1:
-                                circle = True
-                                win32api.keybd_event(0x09, 0, 0, 0)  # TAB 누르기.
-                            else:
-                                win32api.keybd_event(0x09, 0, win32con.KEYEVENTF_KEYUP, 0)
-                                circle = False
-
-                            # 펜 색 변경
-                            if not now_click:
-                                if mode_global == 3 and len(mark_p[-1]) == 4 and static_gesture_num_l == 6:
-                                    image = self.mode_3_pen_color(palm_vector, finger_vector, image)
+                            if pv_angle + fv_angle < 2:
+                                mode = gesture_mode.select_mode(pixel_c, now_click, now_click2)
+                                if mode != 4 and mode_before != 4 and mode_global != 4:
+                                    self.mode_setting(mode, mode_before)
+                                    mode_before = mode
 
                         before_c = pixel_c
                         if multi_hand != 2 and (straight_line + rectangular + circle):
