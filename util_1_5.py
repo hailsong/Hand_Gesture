@@ -1553,21 +1553,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                                     f_p_list = HM.return_18_info()
                                     array_for_static_r[:] = f_p_list
                                     # print(array_for_static)
-                                    palm_vector = HM.get_palm_vector()
-                                    finger_vector = HM.get_finger_vector()
-
-                                    palm_vector_markset = HM.get_palm_vector()
-                                    finger_vector_markset = HM.get_finger_vector()
-                                    # lpv_mode_1 = [-0.39, 0.144, -0.90]
-                                    # lfv_mode_1 = [-0.33, -0.94, 0.]
-                                    rpv_mode_1 = [-0.40, -0.14, -0.9]
-                                    rfv_mode_1 = [-0.33, -0.94, 0.]
-                                    pv_angle = get_angle(palm_vector_markset, rpv_mode_1)
-                                    fv_angle = get_angle(finger_vector_markset, rfv_mode_1)
-                                    # print(f"{pv_angle} /// {fv_angle}")
-
-                                    if pv_angle + fv_angle < 2:
-                                        static_gesture_num_r = value_for_static_r.value
+                                    static_gesture_num_r = value_for_static_r.value
 
                                 # try:
                                 #     static_gesture_drawing(static_gesture_num, mark_p[-1])
