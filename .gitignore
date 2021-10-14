@@ -5,5 +5,7 @@ pyqt/
 .spec
 .mp4
 .avi
+gesture_detection.bat
+gesture_detection_lite.bat
 /video_output/
 /video_input/
