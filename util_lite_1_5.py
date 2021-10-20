@@ -806,10 +806,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             return 0
 
     def no_guide(self):
-        print('no_guide')
         global mode_global
-        ui.setGuiGuide(ui)
-        mode_global = 0
+        if mode_global != 0:
+            print('no_guide')
+            mode_global = 0
+            ui.setGuiGuide(ui)
 
     class Opcv(QThread):
 
@@ -1520,7 +1521,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             rfv_mode_1 = [-0.33, -0.94, 0.]
                             pv_angle = get_angle(palm_vector_markset, rpv_mode_1)
                             fv_angle = get_angle(finger_vector_markset,  rfv_mode_1)
-                            print(f"{pv_angle} /// {fv_angle}")
+                            # print(f"{pv_angle} /// {fv_angle}")
                             if pv_angle + fv_angle < 2:
                                 gesture_mode.update_right(static_gesture_num_r, palm_vector, finger_vector)
 
@@ -2333,6 +2334,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_5.toggled.connect(ui_load.open)
             # self.pushButton_4.clicked.connect(self.loading.closeEvent)
             self.pushButton_5.toggled.connect(lambda: self.checked(Form))
+            self.pushButton_5.toggled.connect(no_guide)
 
             # 화살표
             self.frame_arrow = QtWidgets.QFrame(Form)

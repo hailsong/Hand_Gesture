@@ -580,6 +580,23 @@ def get_distance(p1, p2, mode='3d'):
     elif mode == '2d':
         return math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2)
 
+def triangle_size(image, a : np.array, b : np.array , c : np.array):
+    l1 = a - b
+    l2 = b - c
+
+    warning_image = Image.open('image/warning.png')
+
+    dist = round(1 / np.linalg.norm(np.cross(l1, l2)), 2)
+    if dist > 1150:
+        pill_image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+        pill_image.paste(warning_image, (515, 365), mask=warning_image)
+
+        image = cv2.cvtColor(np.array(pill_image), cv2.COLOR_RGB2BGR)
+
+    return image
+
+TARGET = [0, 5, 17]
+
 
 # TODO 프로세스 함수들
 def process_static_gesture(array_for_static, value_for_static):
@@ -864,10 +881,12 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             return 0
 
     def no_guide(self):
-        print('no_guide')
         global mode_global
-        ui.setGuiGuide(ui)
-        mode_global = 0
+        if mode_global != 0:
+            print('no_guide')
+            mode_global = 0
+            ui.setGuiGuide(ui)
+
 
     class Opcv(QThread):
 
@@ -1506,9 +1525,16 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                         mark_p = []
                         mp_drawing.draw_landmarks(
                             image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+                        points_distance = []
                         for i in range(21):
                             mark_p.append(Mark_pixel(hand_landmarks.landmark[i].x, hand_landmarks.landmark[i].y,
                                                      hand_landmarks.landmark[i].z))
+                            for i in TARGET:
+                                points_distance.append(np.array([hand_landmarks.landmark[i].x,
+                                                        hand_landmarks.landmark[i].y,
+                                                        hand_landmarks.landmark[i].z]))
+                            image = triangle_size(image, points_distance[0], points_distance[1], points_distance[2])
+
                         mark_p_list.append(mark_p)
 
                     for i in range(len(mark_p_list)):  # for 문 한 번 도는게 한 손에 대한 것임
