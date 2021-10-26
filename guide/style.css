@@ -52,6 +52,9 @@ img
 
   box-shadow: 2px 5px 5px #000;
 }
+.mini{
+  width:20%;
+}
 
 
 .footer {
@@ -284,9 +287,10 @@ video{
 }
 
 #index_video{
-  text-align: center;
-  padding-top: 300px;
 
+  padding-top: 250px;
+  text-align: center;
+  padding-bottom: 200px;
 }
 
 h1 > #index_logo {
