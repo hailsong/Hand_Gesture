@@ -1,6 +1,6 @@
 import cv2
 import mediapipe as mp
-import pyautogui
+
 import math
 import win32api
 import win32con
@@ -43,7 +43,6 @@ import os
 # For webcam input:
 # hands = mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5)
 
-# x_size, y_size = pyautogui.size().width, pyautogui.size().height
 x_size, y_size = 1366, 768
 
 mp_drawing = mp.solutions.drawing_utils
@@ -2279,7 +2278,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # self.script_frame.setPixmap(QtGui.QPixmap("./image/script_frame.png"))
 
             self.pushButton_7 = QtWidgets.QPushButton(self.frame)
-            self.pushButton_7.setGeometry(QtCore.QRect(610, 540, 200, 60))
+            self.pushButton_7.setGeometry(QtCore.QRect(434, 382, 142, 43))
             self.pushButton_7.setStyleSheet("border-radius : 55; border : 2px;")
             self.pushButton_7.setStyleSheet("background-color : rgba( 255, 255, 255, 0% );, ")
             self.pushButton_7.setStyleSheet(

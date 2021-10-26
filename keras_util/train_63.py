@@ -66,7 +66,6 @@ print(test_y[5])
 
 
 
-
 fig, loss_ax = plt.subplots()
 
 acc_ax = loss_ax.twinx()
