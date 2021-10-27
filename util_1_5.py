@@ -72,6 +72,7 @@ with open('setting.json', encoding='UTF8') as json_file:
 language_setting = json_data["LANGUAGE"]
 DARK_MODE = True if json_data["DARK_MODE"] == "True" else False
 LEFT = True if json_data["LEFT"] == "True" else False
+exposure_value = int(json_data["EXPOSURE_VALUE"])
 
 MOUSE_USE = False
 CLICK_USE = False
@@ -1037,7 +1038,13 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # Grabber.label_6.setPixmap(image)
             self.capture = cv2.VideoCapture(0, cv2.CAP_DSHOW)
             cap = self.capture
-            cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
+            cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+            cap.set(cv2.CAP_PROP_FPS, 30)
+
+            # cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
+            # cap.set(cv2.CAP_PROP_EXPOSURE, -7)
+            # cap.set(cv2.CAP_PROP_AUTO_WB, 1)
             cap.set(cv2.CAP_PROP_AUTOFOCUS, 0)
             # For webcam input:
             hands = mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.7)
@@ -1304,9 +1311,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             board_num = 0
             p_check_number = 0
 
-            cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-            cap.set(cv2.CAP_PROP_FPS, 30)
+
             before_time = time.time()
 
             click_tr = 0
@@ -2105,6 +2110,22 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # self.loading = Loading()
             # self.loading.setupUi(self)
 
+        # def keyPressEvent(self, e):
+        #     global exposure_value
+        #
+        #     if e.key() == Qt.Key_Escape:
+        #         pass
+        #     elif e.key() == Qt.Key_Plus:
+        #         if exposure_value < -3:
+        #             exposure_value += 1
+        #             print("exposure value is :", exposure_value)
+        #             self.thread.capture.set(cv2.CAP_PROP_EXPOSURE, exposure_value)
+        #
+        #     elif e.key() == Qt.Key_Minus:
+        #         if exposure_value > -13:
+        #             exposure_value -= 1
+        #             print("exposure value is :", exposure_value)
+        #             self.thread.capture.set(cv2.CAP_PROP_EXPOSURE, exposure_value)
 
 
         def setButtonStyle(self, pushButton):
@@ -2976,6 +2997,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             new_data['DARK_MODE'] = str(DARK_MODE)
             new_data['LANGUAGE'] = language
             new_data['LEFT'] = left
+            new_data['EXPOSURE_VALUE'] = exposure_value
             print(new_data)
             with open('setting.json', 'w', encoding='UTF8') as json_file:
                 json.dump(new_data, json_file, indent="\t")
