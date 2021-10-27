@@ -952,6 +952,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # Grabber.label_6.setPixmap(image)
             self.capture = cv2.VideoCapture(0, cv2.CAP_DSHOW)
             cap = self.capture
+            cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
+            cap.set(cv2.CAP_PROP_AUTOFOCUS, 0)
             # For webcam input:
             hands = mp_hands.Hands(min_detection_confidence=0.6, min_tracking_confidence=0.7)
             # pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5, upper_body_only=True)
