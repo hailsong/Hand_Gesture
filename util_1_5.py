@@ -220,7 +220,10 @@ class Handmark:
         else:
             return np.round(self.finger_angle_list, 3), np.round(self.finger_distance_list, 3), np.round(
                 self.hand_angle_list, 3)
-
+    '''
+    자영업자 문재인 소박
+    소문 자자 인박재 영업
+    '''
     def return_finger_info(self):
         self.thumb = [self._p_list[i] for i in range(1, 5)]
         self.index = [self._p_list[i] for i in range(5, 9)]
@@ -1667,9 +1670,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             rfv_mode_1 = [-0.33, -0.94, 0.]
                             pv_angle = get_angle(palm_vector_drag, rpv_mode_1)
                             fv_angle = get_angle(finger_vector_drag, rfv_mode_1)
-                            # print(f"{pv_angle} /// {fv_angle}")
+                            print(f"{pv_angle} /// {fv_angle}")
 
-                            if pv_angle + fv_angle < 3:
+                            if pv_angle + fv_angle < 5:
                                 pixel_c.mousemove(now_click, now_click2)
                                 now_click2 = hand_drag2(mark_p, static_gesture_num_r, now_click2)
 
@@ -1682,7 +1685,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                             pixel_c.mousemove(now_click, now_click2)
 
-                            # print(click_tr[2])
+                                # print(click_tr[2])
 
                             if finger_open_[2] != 1 and click_tr > -1 and DRAG_USE == True:
                                 now_click = hand_drag(mark_p, now_click)
