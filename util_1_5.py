@@ -2329,6 +2329,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton.setGeometry(QtCore.QRect(0, 0, 174, 228))
             self.pushButton.setStyleSheet("background-color : #FFFFFF;")
 
+            # GUI가이드 frame
             self.frame_guide = QtWidgets.QLabel(Form)
             self.frame_guide.setGeometry(QtCore.QRect(21, 475, 1323, 249))
             self.frame_guide.setAutoFillBackground(False)
@@ -3040,7 +3041,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             "background-color : rgb(47, 56, 77); border-radius: 30px; image:url(./image/guide/KOR_4_2.png);")
                     else:
                         self.frame_guide.setStyleSheet(
-                            "background-color : rgb(47, 56, 77); border-radius: 30px; image:none")
+                            "background-color : rgb(47, 56, 77); border-radius: 30px; image:url(./image/guide/KOR_0_2.png);")
 
                 else:
                     if mode_global == 1:
@@ -3060,8 +3061,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
                         self.frame_guide.setStyleSheet("background-color : rgb(233, 236, 241); border-radius: 30px; image:url(./image/guide/KOR_4_1.png);")
                     else:
-                        self.frame_guide.setStyleSheet(
-                            "background-color : rgb(233, 236, 241); border-radius: 30px; image:none")
+                        self.frame_guide.setStyleSheet("background-color : rgb(233, 236, 241); border-radius: 30px; image:url(./image/guide/KOR_0_1.png);")
             else:
                 if DARK_MODE:
                     if mode_global == 1:
@@ -3086,7 +3086,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             "background-color : rgb(47, 56, 77); border-radius: 30px; image:url(./image/guide/ENG_4_2.png);")
                     else:
                         self.frame_guide.setStyleSheet(
-                            "background-color : rgb(47, 56, 77); border-radius: 30px;")
+                            "background-color : rgb(47, 56, 77); border-radius: 30px; image:url(./image/guide/ENG_0_2.png);")
 
                 else:
                     if mode_global == 1:
@@ -3106,12 +3106,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
                         self.frame_guide.setStyleSheet("background-color : rgb(233, 236, 241); border-radius: 30px; image:url(./image/guide/ENG_4_1.png);")
                     else:
-                        self.frame_guide.setStyleSheet(
-                            "background-color : rgb(233, 236, 241); border-radius: 30px;")
+                        self.frame_guide.setStyleSheet("background-color : rgb(233, 236, 241); border-radius: 30px; image:url(./image/guide/ENG_0_1.png);")
 
         def retranslateUi(self, Form):
             _translate = QtCore.QCoreApplication.translate
-            Form.setWindowTitle(_translate("Form", "Motion Presentation V 1.4"))
+            Form.setWindowTitle(_translate("Form", "Motion Presentation V 1.5"))
             # self.label_2.setText(_translate("Form", "Presentation Tool"))
             # self.label_3.setText(_translate("Form", "1.2"))
             # 여기다가

@@ -2877,7 +2877,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             "background-color : rgb(47, 56, 77); border-radius: 30px; image:url(./image/guide/KOR_2_2.png);")
                     else:
                         self.frame_guide.setStyleSheet(
-                            "background-color : rgb(47, 56, 77); border-radius: 30px; image:none")
+                            "background-color : rgb(47, 56, 77); border-radius: 30px; image:url(./image/guide/KOR_0_2.png);")
 
                 else:
                     if mode_global == 1:
@@ -2889,8 +2889,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
                         self.frame_guide.setStyleSheet("background-color : rgb(233, 236, 241); border-radius: 30px; image:url(./image/guide/KOR_2_1.png);")
                     else:
-                        self.frame_guide.setStyleSheet(
-                            "background-color : rgb(233, 236, 241); border-radius: 30px; image:none")
+                        self.frame_guide.setStyleSheet("background-color : rgb(233, 236, 241); border-radius: 30px; image:url(./image/guide/KOR_0_1.png);")
             else:
                 if DARK_MODE:
                     if mode_global == 1:
@@ -2905,7 +2904,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             "background-color : rgb(47, 56, 77); border-radius: 30px; image:url(./image/guide/ENG_2_2.png);")
                     else:
                         self.frame_guide.setStyleSheet(
-                            "background-color : rgb(47, 56, 77); border-radius: 30px;")
+                            "background-color : rgb(47, 56, 77); border-radius: 30px; image:url(./image/guide/ENG_0_2.png);")
 
                 else:
                     if mode_global == 1:
@@ -2917,8 +2916,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                             "background-color : rgba(0, 0, 0, 0%); image:url(./image/arrow.png);")
                         self.frame_guide.setStyleSheet("background-color : rgb(233, 236, 241); border-radius: 30px; image:url(./image/guide/ENG_2_1.png);")
                     else:
-                        self.frame_guide.setStyleSheet(
-                            "background-color : rgb(233, 236, 241); border-radius: 30px;")
+                        self.frame_guide.setStyleSheet("background-color : rgb(233, 236, 241); border-radius: 30px; image:url(./image/guide/ENG_0_1.png);")
 
         def retranslateUi(self, Form):
             _translate = QtCore.QCoreApplication.translate
