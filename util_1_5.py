@@ -961,9 +961,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         def mode_setting(self, mode, mode_before):  # 1
             global MOUSE_USE, CLICK_USE, DRAG_USE, WHEEL_USE, mode_global, laser_state
 
-            if mode != mode_before:
+            if mode != mode_before or mode == 4 or mode_global == 4:
                 self.mode_signal.emit(int(mode - 1))  # 2 / #2-4
-
 
                 if mode == 1 and mode_global != mode:
                     MOUSE_USE = False
