@@ -2159,8 +2159,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             ui_load.close()
 
-            self.label = QtWidgets.QLabel('Motion Presentation', Form)
-            self.label.setGeometry(QtCore.QRect(198, 49, 213, 34)) #
+            self.label = QtWidgets.QLabel('Contact : hail2141@gmail.com', Form)
+            self.label.setGeometry(QtCore.QRect(450, 88, 250, 34)) #
 
             if not DARK_MODE: self.label.setStyleSheet("color : rgb(32, 36, 47);");
             else: self.label.setStyleSheet("color : rgb(248, 249, 251);");
@@ -2251,11 +2251,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # Button 9 : inbody website
             self.pushButton_9 = QtWidgets.QPushButton(Form)
-            self.pushButton_9.setGeometry(QtCore.QRect(30, 50, 230, 60))
+            self.pushButton_9.setGeometry(QtCore.QRect(20, 50, 400, 100))
             self.pushButton_9.setStyleSheet(
                 '''
-                QPushButton{image:url(./image/inbody.png); border:0px;}
-                QPushButton:hover{image:url(./image/inbody_hover.png); border:0px;}
+                QPushButton{image:url(./image/logo2.png); border:0px;}
+                QPushButton:hover{image:url(./image/logo2_hover.png); border:0px;}
                 ''')
 
             self.pushButton_9.setObjectName("pushButton_9")
@@ -2600,8 +2600,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     ''')
                 self.pushButton_9.setStyleSheet(
                     '''
-                    QPushButton{image:url(./image/inbody_dark.png); border:0px;}
-                    QPushButton:hover{image:url(./image/inbody_hover.png); border:0px;}
+                    QPushButton{image:url(./image/logo2_dark.png); border:0px;}
+                    QPushButton:hover{image:url(./image/logo2_hover.png); border:0px;}
 
                     ''')
                 self.label_6.setPixmap(QtGui.QPixmap("./image/default_dark.jpg"))
@@ -2618,8 +2618,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     ''')
                 self.pushButton_9.setStyleSheet(
                     '''
-                    QPushButton{image:url(./image/inbody.png); border:0px;}
-                    QPushButton:hover{image:url(./image/inbody_hover.png); border:0px;}
+                    QPushButton{image:url(./image/logo2.png); border:0px;}
+                    QPushButton:hover{image:url(./image/logo2_hover.png); border:0px;}
 
                     ''')
                 self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
@@ -3385,7 +3385,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 self.dirty = False
 
         def Go_to_inbody(self):
-            os.system('explorer https://www.inbody.com/kr/')
+            os.system('explorer https://hailsong.github.io/')
 
 
     ui = Grabber()

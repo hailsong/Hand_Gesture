@@ -583,6 +583,7 @@ def get_distance(p1, p2, mode='3d'):
     elif mode == '2d':
         return math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2)
 
+
 def triangle_size(image, a : np.array, b : np.array , c : np.array):
     l1 = a - b
     l2 = b - c
@@ -597,6 +598,7 @@ def triangle_size(image, a : np.array, b : np.array , c : np.array):
         image = cv2.cvtColor(np.array(pill_image), cv2.COLOR_RGB2BGR)
 
     return image
+
 
 TARGET = [0, 5, 17]
 
@@ -691,6 +693,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         else:
             return 0
 
+
     def mode_2_laser(state, num, right):
         LASER_CHANGE_TIME = 6
         # print(state, num, right)
@@ -716,6 +719,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             state = False
             return state, num
         return state, num
+
 
     def mode_3_interrupt(mode_global):
         global now_click
@@ -751,6 +755,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             win32api.keybd_event(0x4C, 0, win32con.KEYEVENTF_KEYUP, 0)
             return False
 
+
     def mode_3_ctrl_z(palm, finger, left, ctrl_z_check):
         palm_th = np.array([-0.41607399, -0.20192736, 0.88662719])
         finger_th = np.array([-0.08736683, -0.96164491, -0.26001175])
@@ -772,6 +777,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             return ctrl_z_check - 1
         else:
             return 0
+
 
     # def mode_3_ctrl_z2(palm, finger, right, ctrl_z_check):
     #     palm_th = np.array([-0.41607399, -0.20192736, 0.88662719])
@@ -795,6 +801,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     #     else:
     #         return 0
 
+
     def mode_3_ctrl_z2(palm, finger, right, p_check):
         palm_th = np.array([-0.41607399, -0.20192736, 0.88662719])
         finger_th = np.array([-0.08736683, -0.96164491, -0.26001175])
@@ -817,6 +824,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         else:
             return 0
 
+
     def mode_3_remove_all(palm, finger, left, remove_check):
         # 60 means 60 frames to trigger 'REMOVE ALL'
         REMOVE_THRESHOLD = 60
@@ -836,6 +844,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         else:
             return max(0, remove_check - 1)
 
+
     def mode_3_remove_all2(palm, finger, right, remove_check):
         # 60 means 60 frames to trigger 'REMOVE ALL'
         REMOVE_THRESHOLD = 60
@@ -854,6 +863,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             return 0
         else:
             return max(0, remove_check - 1)
+
 
     def mode_3_board(palm, finger, left, remove_check):
         # 60 means 60 frames to trigger 'REMOVE ALL'
@@ -882,6 +892,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 return 0
         else:
             return 0
+
 
     def no_guide(self):
         global mode_global
@@ -1786,6 +1797,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             hands.close()
             self.capture.release()
 
+
     class Setting_window(QtWidgets.QDialog):
         def setupUi(self, Dialog):
             self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
@@ -1938,6 +1950,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 ui.setupLanguage(ui, language, DARK_MODE, LEFT)
                 ui.setGuiGuide(ui)
 
+
     class Exit_window(QtWidgets.QDialog):
         def setupUi(self, Dialog):
             self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
@@ -2035,6 +2048,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 os.system('''open_survey.bat''')
 
             sys.exit()
+
 
     class Grabber(QtWidgets.QMainWindow):
         click_mode = pyqtSignal(int, int)
