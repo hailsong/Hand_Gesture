@@ -44,6 +44,7 @@ import os
 # hands = mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5)
 
 x_size, y_size = 1366, 768
+ONE_MONITOR = True
 
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
@@ -583,7 +584,6 @@ def get_distance(p1, p2, mode='3d'):
     elif mode == '2d':
         return math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2)
 
-
 def triangle_size(image, a : np.array, b : np.array , c : np.array):
     l1 = a - b
     l2 = b - c
@@ -598,7 +598,6 @@ def triangle_size(image, a : np.array, b : np.array , c : np.array):
         image = cv2.cvtColor(np.array(pill_image), cv2.COLOR_RGB2BGR)
 
     return image
-
 
 TARGET = [0, 5, 17]
 
@@ -693,7 +692,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         else:
             return 0
 
-
     def mode_2_laser(state, num, right):
         LASER_CHANGE_TIME = 6
         # print(state, num, right)
@@ -719,7 +717,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             state = False
             return state, num
         return state, num
-
 
     def mode_3_interrupt(mode_global):
         global now_click
@@ -755,7 +752,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             win32api.keybd_event(0x4C, 0, win32con.KEYEVENTF_KEYUP, 0)
             return False
 
-
     def mode_3_ctrl_z(palm, finger, left, ctrl_z_check):
         palm_th = np.array([-0.41607399, -0.20192736, 0.88662719])
         finger_th = np.array([-0.08736683, -0.96164491, -0.26001175])
@@ -777,7 +773,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             return ctrl_z_check - 1
         else:
             return 0
-
 
     # def mode_3_ctrl_z2(palm, finger, right, ctrl_z_check):
     #     palm_th = np.array([-0.41607399, -0.20192736, 0.88662719])
@@ -801,7 +796,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
     #     else:
     #         return 0
 
-
     def mode_3_ctrl_z2(palm, finger, right, p_check):
         palm_th = np.array([-0.41607399, -0.20192736, 0.88662719])
         finger_th = np.array([-0.08736683, -0.96164491, -0.26001175])
@@ -824,7 +818,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         else:
             return 0
 
-
     def mode_3_remove_all(palm, finger, left, remove_check):
         # 60 means 60 frames to trigger 'REMOVE ALL'
         REMOVE_THRESHOLD = 60
@@ -844,7 +837,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
         else:
             return max(0, remove_check - 1)
 
-
     def mode_3_remove_all2(palm, finger, right, remove_check):
         # 60 means 60 frames to trigger 'REMOVE ALL'
         REMOVE_THRESHOLD = 60
@@ -863,7 +855,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             return 0
         else:
             return max(0, remove_check - 1)
-
 
     def mode_3_board(palm, finger, left, remove_check):
         # 60 means 60 frames to trigger 'REMOVE ALL'
@@ -892,7 +883,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 return 0
         else:
             return 0
-
 
     def no_guide(self):
         global mode_global
@@ -1014,7 +1004,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     WHEEL_USE = False
                     laser_state = mode_2_off(mode_global, laser_state)
                     # print(mod_cursor_position(200, 200))
-                    win32api.SetCursorPos((-1920 + 200, 200))
+                    if ONE_MONITOR:
+                        win32api.SetCursorPos((200, 200))
+                    else:
+                        win32api.SetCursorPos((200 - 1920, 200))
                     time.sleep(0.1)
 
                     win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
@@ -1119,11 +1112,16 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     # print(f"{x, y}  >>>  {mod_x, mod_y}")
                     # print(mod_x, mod_y)
                     # 모니터 수, 화면 갯수별로 다르게 Return 해야함
-
-                    if LEFT:
-                        return (int(1920 - mod_x) - 1919), int(mod_y)
+                    if ONE_MONITOR:
+                        if LEFT:
+                            return (int(1920 - mod_x) + 1), int(mod_y)
+                        else:
+                            return int(mod_x) + 1, int(mod_y)
                     else:
-                        return int(mod_x) - 1919, int(mod_y)
+                        if LEFT:
+                            return (int(1920 - mod_x) - 1919), int(mod_y)
+                        else:
+                            return int(mod_x) - 1919, int(mod_y)
 
                 def mousemove(self, now_click, now_click2):
 
@@ -1782,7 +1780,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
                 before_time = time.time()
 
-                image = cv2.resize(image, (577, 433))
+                image = cv2.resize(image, (811, 608))
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
                 if LEFT:
                     image = cv2.flip(image, 1)
@@ -1796,7 +1794,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             hands.close()
             self.capture.release()
-
 
     class Setting_window(QtWidgets.QDialog):
         def setupUi(self, Dialog):
@@ -1950,7 +1947,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 ui.setupLanguage(ui, language, DARK_MODE, LEFT)
                 ui.setGuiGuide(ui)
 
-
     class Exit_window(QtWidgets.QDialog):
         def setupUi(self, Dialog):
             self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)  # | QtCore.Qt.WindowStaysOnTopHint)
@@ -2048,7 +2044,6 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 os.system('''open_survey.bat''')
 
             sys.exit()
-
 
     class Grabber(QtWidgets.QMainWindow):
         click_mode = pyqtSignal(int, int)
@@ -2164,8 +2159,8 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             ui_load.close()
 
-            self.label = QtWidgets.QLabel('Motion Presentation', Form)
-            self.label.setGeometry(QtCore.QRect(198, 49, 213, 34)) #
+            self.label = QtWidgets.QLabel('Contact : hail2141@gmail.com', Form)
+            self.label.setGeometry(QtCore.QRect(450, 88, 250, 34)) #
 
             if not DARK_MODE: self.label.setStyleSheet("color : rgb(32, 36, 47);");
             else: self.label.setStyleSheet("color : rgb(248, 249, 251);");
@@ -2199,7 +2194,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # Button 5 : Power
             self.pushButton_5 = QtWidgets.QPushButton(Form)
-            self.pushButton_5.setGeometry(QtCore.QRect(21, 134, 357, 71))
+            self.pushButton_5.setGeometry(QtCore.QRect(30, 188, 502, 100))
             self.pushButton_5.setStyleSheet(
                 '''
                 QPushButton{
@@ -2224,7 +2219,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # Button 6 : Guide Open
             self.pushButton_6 = QtWidgets.QPushButton(Form)
-            self.pushButton_6.setGeometry(QtCore.QRect(389, 134, 357, 71))
+            self.pushButton_6.setGeometry(QtCore.QRect(547, 188, 502, 100))
             self.pushButton_6.setStyleSheet(
                 '''
                 QPushButton{
@@ -2244,7 +2239,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # Button 8 : Language Setting
             self.pushButton_8 = QtWidgets.QPushButton(Form)
-            self.pushButton_8.setGeometry(QtCore.QRect(665, 39, 36, 36))
+            self.pushButton_8.setGeometry(QtCore.QRect(935,55,50,50))
             self.pushButton_8.setStyleSheet("border-radius : 20;")
             self.pushButton_8.setStyleSheet(
                 '''
@@ -2256,11 +2251,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # Button 9 : inbody website
             self.pushButton_9 = QtWidgets.QPushButton(Form)
-            self.pushButton_9.setGeometry(QtCore.QRect(21, 36, 164, 43))
+            self.pushButton_9.setGeometry(QtCore.QRect(20, 50, 400, 100))
             self.pushButton_9.setStyleSheet(
                 '''
-                QPushButton{image:url(./image/inbody.png); border:0px;}
-                QPushButton:hover{image:url(./image/inbody_hover.png); border:0px;}
+                QPushButton{image:url(./image/logo2.png); border:0px;}
+                QPushButton:hover{image:url(./image/logo2_hover.png); border:0px;}
                 ''')
 
             self.pushButton_9.setObjectName("pushButton_9")
@@ -2269,7 +2264,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # Button 10 : Exit Button
             self.pushButton_10 = QtWidgets.QPushButton(Form)
-            self.pushButton_10.setGeometry(QtCore.QRect(711, 39, 36, 36))
+            self.pushButton_10.setGeometry(QtCore.QRect(1000,55,50,50))
             self.pushButton_10.setStyleSheet("border-radius : 20;")
             self.pushButton_10.setStyleSheet(
                 '''
@@ -2281,7 +2276,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # 카메라 모니터링
             self.frame = QtWidgets.QFrame(Form)
-            self.frame.setGeometry(QtCore.QRect(768, 21, 577, 433))
+            self.frame.setGeometry(QtCore.QRect(1079, 30, 811, 608))
             self.frame.setAutoFillBackground(False)
             self.frame.setStyleSheet("background-color : rgba(0, 0, 0, 0%); border-radius: 30px;")
             self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -2289,20 +2284,20 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.frame.setObjectName("frame")
 
             self.label_6 = QtWidgets.QLabel(self.frame)
-            self.label_6.setGeometry(QtCore.QRect(0, 0, 577, 433))
+            self.label_6.setGeometry(QtCore.QRect(0, 0, 811, 608))
             self.label_6.setStyleSheet(
-                "background-color : white; border-radius: 30px; background: url(./image/default_1366.jpg)", )
+                "background-color : white; border-radius: 30px; background: url(./image/default.jpg)", )
             self.label_6.setObjectName("label_6")
-            self.label_6.setPixmap(QtGui.QPixmap("./image/default_1366.jpg"))
+            self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
 
             self.cam_frame = QtWidgets.QLabel(self.frame)
-            self.cam_frame.setGeometry(QtCore.QRect(0, 0, 577, 433))
+            self.cam_frame.setGeometry(QtCore.QRect(0, 0, 811, 608))
             self.cam_frame.setStyleSheet("background-color : rgba(0,0,0,0%);")
             self.cam_frame.setObjectName("cam_frame")
             if DARK_MODE:
-                self.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame_dark_1366.png"))
+                self.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame_dark.png"))
             else:
-                self.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame_1366.png"))
+                self.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame.png"))
 
 
             # self.loading = QtWidgets.QLabel(Form)
@@ -2317,7 +2312,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # self.script_frame.setPixmap(QtGui.QPixmap("./image/script_frame.png"))
 
             self.pushButton_7 = QtWidgets.QPushButton(self.frame)
-            self.pushButton_7.setGeometry(QtCore.QRect(434, 382, 142, 43))
+            self.pushButton_7.setGeometry(QtCore.QRect(610, 537, 200, 60))
             self.pushButton_7.setStyleSheet("border-radius : 55; border : 2px;")
             self.pushButton_7.setStyleSheet("background-color : rgba( 255, 255, 255, 0% );, ")
             self.pushButton_7.setStyleSheet(
@@ -2331,7 +2326,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # 모드제어 프레임
             self.frame_mode = QtWidgets.QFrame(Form)
-            self.frame_mode.setGeometry(QtCore.QRect(21, 226, 725, 228))
+            self.frame_mode.setGeometry(QtCore.QRect(30, 318, 1019, 320))
             self.frame_mode.setAutoFillBackground(False)
             self.frame_mode.setStyleSheet("background-color : rgba(0, 0, 0, 0%)")
             self.frame_mode.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -2339,12 +2334,12 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.frame_mode.setObjectName("frame_mode")
 
             self.pushButton = QtWidgets.QPushButton(self.frame_mode)
-            self.pushButton.setGeometry(QtCore.QRect(0, 0, 174, 228))
+            self.pushButton.setGeometry(QtCore.QRect(0, 0, 244, 325))
             self.pushButton.setStyleSheet("background-color : #FFFFFF;")
 
             # GUI가이드 frame
             self.frame_guide = QtWidgets.QLabel(Form)
-            self.frame_guide.setGeometry(QtCore.QRect(21, 475, 1323, 249))
+            self.frame_guide.setGeometry(QtCore.QRect(30, 668, 1860, 350))
             self.frame_guide.setAutoFillBackground(False)
 
             self.frame_guide.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -2396,7 +2391,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # self.pushButton.setObjectName("pushButton_image")
 
             self.pushButton_2 = QtWidgets.QPushButton(self.frame_mode)
-            self.pushButton_2.setGeometry(QtCore.QRect(184, 0, 174, 228))
+            self.pushButton_2.setGeometry(QtCore.QRect(259, 0, 244, 325))
             self.pushButton_2.setStyleSheet("background-color : #FFFFFF;")
             if DARK_MODE:
                 self.pushButton_2.setStyleSheet(
@@ -2431,7 +2426,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_2.setObjectName("pushButton_2")
             self.pushButton_2.setCheckable(True)
             self.pushButton_3 = QtWidgets.QPushButton(self.frame_mode)
-            self.pushButton_3.setGeometry(QtCore.QRect(369, 0, 174, 228))
+            self.pushButton_3.setGeometry(QtCore.QRect(518, 0, 244, 325))
             if DARK_MODE:
                 self.pushButton_3.setStyleSheet(
                     '''
@@ -2465,7 +2460,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.pushButton_3.setCheckable(True)
             self.pushButton_3.setObjectName("pushButton_3")
             self.pushButton_4 = QtWidgets.QPushButton(self.frame_mode)
-            self.pushButton_4.setGeometry(QtCore.QRect(553, 0, 174, 228))
+            self.pushButton_4.setGeometry(QtCore.QRect(777, 0, 244, 325))
             if DARK_MODE:
                 self.pushButton_4.setStyleSheet(
                     '''
@@ -2516,7 +2511,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             # 화살표
             self.frame_arrow = QtWidgets.QFrame(Form)
-            self.frame_arrow.setGeometry(QtCore.QRect(21, 454, 725, 21))
+            self.frame_arrow.setGeometry(QtCore.QRect(30, 638, 1019, 30))
             self.frame_arrow.setAutoFillBackground(False)
 
             # self.frame_arrow.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -2524,25 +2519,25 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             self.frame_arrow.setObjectName("frame_arrow")
 
             self.arrow1 = QtWidgets.QLabel(self.frame_arrow)
-            self.arrow1.setGeometry(QtCore.QRect(0, 0, 174, 21))
+            self.arrow1.setGeometry(QtCore.QRect(0, 0, 245, 30))
             self.arrow1.setStyleSheet(
                 "background-color : rgba(0, 0, 0, 0%)")
             self.arrow1.setObjectName("arrow1")
 
             self.arrow2 = QtWidgets.QLabel(self.frame_arrow)
-            self.arrow2.setGeometry(QtCore.QRect(184, 0, 174, 21))
+            self.arrow2.setGeometry(QtCore.QRect(259, 0, 245, 30))
             self.arrow2.setStyleSheet(
                 "background-color : rgba(0, 0, 0, 0%);")
             self.arrow2.setObjectName("arrow2")
 
             self.arrow3 = QtWidgets.QLabel(self.frame_arrow)
-            self.arrow3.setGeometry(QtCore.QRect(369, 0, 174, 21))
+            self.arrow3.setGeometry(QtCore.QRect(518, 0, 245, 30))
             self.arrow3.setStyleSheet(
                 "background-color : rgba(0, 0, 0, 0%);")
             self.arrow3.setObjectName("arrow3")
 
             self.arrow4 = QtWidgets.QLabel(self.frame_arrow)
-            self.arrow4.setGeometry(QtCore.QRect(553, 0, 174, 21))
+            self.arrow4.setGeometry(QtCore.QRect(777, 0, 245, 30))
             self.arrow4.setStyleSheet(
                 "background-color : rgba(0, 0, 0, 0%);")
             self.arrow4.setObjectName("arrow4")
@@ -2589,9 +2584,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
 
             else: Form.label.setStyleSheet("color : rgb(248, 249, 251);");
             if DARK_MODE:
-                Form.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame_dark_1366.png"))
+                Form.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame_dark.png"))
             else:
-                Form.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame_1366.png"))
+                Form.cam_frame.setPixmap(QtGui.QPixmap("./image/cam_frame.png"))
             if DARK_MODE:
                 self.pushButton_10.setStyleSheet(
                     '''
@@ -2605,11 +2600,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     ''')
                 self.pushButton_9.setStyleSheet(
                     '''
-                    QPushButton{image:url(./image/inbody_dark.png); border:0px;}
-                    QPushButton:hover{image:url(./image/inbody_hover.png); border:0px;}
+                    QPushButton{image:url(./image/logo2_dark.png); border:0px;}
+                    QPushButton:hover{image:url(./image/logo2_hover.png); border:0px;}
 
                     ''')
-                self.label_6.setPixmap(QtGui.QPixmap("./image/default_dark_1366.jpg"))
+                self.label_6.setPixmap(QtGui.QPixmap("./image/default_dark.jpg"))
             else:
                 self.pushButton_10.setStyleSheet(
                     '''
@@ -2623,11 +2618,11 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     ''')
                 self.pushButton_9.setStyleSheet(
                     '''
-                    QPushButton{image:url(./image/inbody.png); border:0px;}
-                    QPushButton:hover{image:url(./image/inbody_hover.png); border:0px;}
+                    QPushButton{image:url(./image/logo2.png); border:0px;}
+                    QPushButton:hover{image:url(./image/logo2_hover.png); border:0px;}
 
                     ''')
-                self.label_6.setPixmap(QtGui.QPixmap("./image/default_1366.jpg"))
+                self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
             if language == '한국어(Korean)':
                 if not DARK_MODE:
                     self.pushButton.setStyleSheet(
@@ -3251,13 +3246,13 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
             # print(image.size())
             image.save(filename)
 
-        def cvt_qt(self, img, size=(577, 433)):
+        def cvt_qt(self, img, size=(811, 608)):
             # rgb_image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # cv 이미지 파일 rgb 색계열로 바꿔주기
             h, w, ch = img.shape  # image 쉐입 알기
             bytes_per_line = ch * w  # 차원?
             convert_to_Qt_format = QtGui.QImage(img.data, w, h, bytes_per_line,
                                                 QtGui.QImage.Format_RGB888)  # qt 포맷으로 바꾸기
-            p = convert_to_Qt_format.scaled(577, 433, QtCore.Qt.KeepAspectRatio)  # 디스클레이 크기로 바꿔주기.
+            p = convert_to_Qt_format.scaled(811, 608, QtCore.Qt.KeepAspectRatio)  # 디스클레이 크기로 바꿔주기.
 
             return QtGui.QPixmap.fromImage(p)  # 진정한 qt 이미지 생성
 
@@ -3279,9 +3274,9 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 "background-color : white; border-radius: 50px;" )
             self.label_6.setObjectName("label_6")
             if DARK_MODE:
-                self.label_6.setPixmap(QtGui.QPixmap("./image/default_dark_1366.jpg"))
+                self.label_6.setPixmap(QtGui.QPixmap("./image/default_dark.jpg"))
             else:
-                self.label_6.setPixmap(QtGui.QPixmap("./image/default_1366.jpg"))
+                self.label_6.setPixmap(QtGui.QPixmap("./image/default.jpg"))
 
             if self.pushButton_5.isChecked():
                 # image = cv2.imread('./image/testtest.jpg')
@@ -3390,7 +3385,7 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                 self.dirty = False
 
         def Go_to_inbody(self):
-            os.system('explorer https://www.inbody.com/kr/')
+            os.system('explorer https://hailsong.github.io/')
 
 
     ui = Grabber()
@@ -3409,4 +3404,4 @@ if __name__ == '__main__':
 
     # system('ZoomIt.exe')
 
-    system('python main_1_5.py')
+    system('python main_1_5_onemonitor.py')
