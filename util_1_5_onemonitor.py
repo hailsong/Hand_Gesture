@@ -44,6 +44,7 @@ import os
 # hands = mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5)
 
 x_size, y_size = 1366, 768
+ONE_MONITOR = True
 
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
@@ -1003,7 +1004,10 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     WHEEL_USE = False
                     laser_state = mode_2_off(mode_global, laser_state)
                     # print(mod_cursor_position(200, 200))
-                    win32api.SetCursorPos((200, 200))
+                    if ONE_MONITOR:
+                        win32api.SetCursorPos((200, 200))
+                    else:
+                        win32api.SetCursorPos((200 - 1920, 200))
                     time.sleep(0.1)
 
                     win32api.keybd_event(0xa2, 0, 0, 0)  # LEFT CTRL 누르기.
@@ -1108,11 +1112,16 @@ def initialize(array_for_static_l, value_for_static_l, array_for_static_r, value
                     # print(f"{x, y}  >>>  {mod_x, mod_y}")
                     # print(mod_x, mod_y)
                     # 모니터 수, 화면 갯수별로 다르게 Return 해야함
-
-                    if LEFT:
-                        return (int(1920 - mod_x) + 1), int(mod_y)
+                    if ONE_MONITOR:
+                        if LEFT:
+                            return (int(1920 - mod_x) + 1), int(mod_y)
+                        else:
+                            return int(mod_x) + 1, int(mod_y)
                     else:
-                        return int(mod_x) + 1 , int(mod_y)
+                        if LEFT:
+                            return (int(1920 - mod_x) - 1919), int(mod_y)
+                        else:
+                            return int(mod_x) - 1919, int(mod_y)
 
                 def mousemove(self, now_click, now_click2):
 
