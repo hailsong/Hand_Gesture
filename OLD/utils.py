@@ -87,6 +87,7 @@ class Handmark():
 
     def get_palm_vector(self):
         l1 = self._p_list[17] - self._p_list[0]
+        l1 = self._p_list[17] - self._p_list[0]
         l2 = self._p_list[5] - self._p_list[0]
         l1_ = np.array([l1[0], l1[1], l1[2]])
         l2_ = np.array([l2[0], l2[1], l2[2]])

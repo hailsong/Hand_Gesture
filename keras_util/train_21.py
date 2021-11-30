@@ -20,6 +20,7 @@ test_num = int(size - size * test_ratio)
 train = df[:test_num]
 test = df[test_num:]
 
+
 col_name = [str(i) for i in range(0, 21)]
 print(col_name)
 
@@ -42,8 +43,10 @@ print(len(train_y), len(test_y)) #1에서 14사이 정수 label
 
 model = keras.Sequential([
     keras.layers.Dense(21, activation = 'relu'),
-    keras.layers.Dense(70, activation = 'relu'),
-    keras.layers.Dense(60, activation='relu'),
+    keras.layers.Dropout(0.4),
+    keras.layers.Dense(50, activation = 'relu'),
+    keras.layers.Dropout(0.4),
+    keras.layers.Dense(50, activation='relu'),
     #keras.layers.Dense(30, activation = 'relu'),
     keras.layers.Dense(32, activation='softmax')
 ])
@@ -81,5 +84,5 @@ acc_ax.legend(loc='lower left')
 
 plt.show()
 
-model.save('model_save/my_model_21.h5')
+model.save('model_save/my_model_21_KSL.h5')
 print('new model saved')
