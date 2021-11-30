@@ -299,7 +299,7 @@ if __name__ == "__main__":
             # print(df_sum)
             # print(experiment_df)
             df_sum = pd.concat([df_sum, experiment_df])
-            df_sum.to_csv('../video_output/' + new_name + 'output_21.csv')
+            df_sum.to_csv('../video_output/' + new_name + 'output_21.csv', index=False)
             print('Saved dataframe to : ', '../video_output/' + new_name + 'output_21.csv')
             exit()
 
